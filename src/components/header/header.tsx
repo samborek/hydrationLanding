@@ -144,7 +144,7 @@ export default function Header({ className }: HeaderProps) {
                 key={item.href}
                 href={item.href}
                 target={item.target}
-                className="transition group-hover:opacity-50 hover:!opacity-100 text-xs font-medium font-geist leading-4 text-purple pointer-events-auto"
+                className="transition group-hover:opacity-50 hover:!opacity-100 text-sm font-medium font-geist leading-5 text-purple pointer-events-auto"
                 onClick={(e) => {
                   if (item.target === "_blank") return;
                   e.preventDefault();

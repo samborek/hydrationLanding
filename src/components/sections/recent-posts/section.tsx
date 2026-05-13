@@ -2,6 +2,7 @@
 
 import AnimateOnView from "@/animation/motion-section";
 import ScrollAnchor from "@/components/scroll-anchor";
+import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
 import Image, { StaticImageData } from "next/image";
@@ -108,9 +109,9 @@ export default function RecentPostsSection() {
         <div className="max-w-2xl lg:max-w-none">
           <SectionLabel>From the blog</SectionLabel>
           <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-            <h2 className="min-w-0 font-gazpacho text-[2.75rem] lg:text-[4rem] leading-[0.95] text-purple">
+            <Heading size="large" className="min-w-0 text-purple">
               Recent notes
-            </h2>
+            </Heading>
             <Link
               href="https://hydration.substack.com/"
               target="_blank"
@@ -175,7 +176,7 @@ function PostCard({ post }: { post: Post }) {
             <span>{post.date}</span>
             <span className="h-px flex-1 bg-purple/10" />
           </div>
-          <h3 className="font-gazpacho text-[1.5rem] leading-[1.2] text-purple transition group-hover:text-pink lg:text-[1.6rem]">
+          <h3 className="font-gazpacho text-[1.275rem] font-medium leading-[1.2] text-purple transition group-hover:text-pink lg:text-[1.36rem]">
             {post.title}
           </h3>
           <p className="text-sm leading-6 text-purple-dim">{post.preview}</p>
