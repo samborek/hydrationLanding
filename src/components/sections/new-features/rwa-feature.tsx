@@ -1,11 +1,13 @@
 "use client";
 
 import AnimateOnView from "@/animation/motion-section";
+import { fadeUp, staggerChildren } from "@/animation/variants";
 import ScrollAnchor from "@/components/scroll-anchor";
 import Button from "@/components/ui/buttons/button";
 import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
+import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 
 function GlobeIcon() {
@@ -175,11 +177,14 @@ export default function RwaFeature() {
           </Button>
         </div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-3 lg:gap-8">
+        <motion.div
+          className="mt-16 grid gap-8 lg:grid-cols-3 lg:gap-8"
+          variants={staggerChildren(0.14)}
+        >
           {rwaCards.map((card) => (
             <RwaArchCard key={card.title} {...card} />
           ))}
-        </div>
+        </motion.div>
       </section>
     </AnimateOnView>
   );
@@ -218,9 +223,10 @@ function RwaArchCard({
   } satisfies CSSProperties;
 
   return (
-    <article
+    <motion.article
       className="relative mx-auto flex min-h-[31rem] w-full max-w-[30rem] flex-col items-center overflow-hidden rounded-t-full bg-white px-8 pb-14 pt-16 text-center shadow-[0_18px_60px_rgba(36,14,50,0.08)] lg:min-h-[37rem] lg:px-12 lg:pt-20"
       style={cardMaskStyle}
+      variants={fadeUp(28)}
     >
       <div className="relative z-10 grid w-full justify-items-center">
         <div
@@ -243,6 +249,6 @@ function RwaArchCard({
           {description}
         </Paragraph>
       </div>
-    </article>
+    </motion.article>
   );
 }

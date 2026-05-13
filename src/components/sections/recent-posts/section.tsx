@@ -1,10 +1,12 @@
 "use client";
 
 import AnimateOnView from "@/animation/motion-section";
+import { fadeUp, staggerChildren } from "@/animation/variants";
 import ScrollAnchor from "@/components/scroll-anchor";
 import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
+import { motion } from "framer-motion";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -127,14 +129,15 @@ export default function RecentPostsSection() {
           </Paragraph>
         </div>
 
-        <div
+        <motion.div
           ref={postsRef}
           className="-mx-4 mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pl-5 pr-4 pb-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden"
+          variants={staggerChildren(0.12)}
         >
           {posts.map((post) => (
             <PostCard key={post.title} post={post} />
           ))}
-        </div>
+        </motion.div>
 
         <div className="mt-1 flex justify-center gap-1.5 md:hidden">
           {posts.map((post, index) => (
@@ -153,11 +156,15 @@ export default function RecentPostsSection() {
 
 function PostCard({ post }: { post: Post }) {
   return (
+    <motion.div
+      className="flex h-full w-[82vw] max-w-[22rem] shrink-0 snap-start md:w-auto md:max-w-none"
+      variants={fadeUp(24)}
+    >
     <Link
       href={post.href}
       target="_blank"
       rel="noreferrer noopener"
-      className="group flex h-full w-[82vw] max-w-[22rem] shrink-0 snap-start flex-col overflow-hidden rounded-[2rem] bg-white transition duration-300 md:w-auto md:max-w-none"
+      className="group flex h-full w-full flex-col overflow-hidden rounded-[2rem] bg-white transition duration-300"
     >
       <div className="flex flex-1 flex-col p-5 md:p-6">
         <div className="relative aspect-[16/10] shrink-0 overflow-hidden rounded-[1.35rem] bg-purple">
@@ -187,5 +194,6 @@ function PostCard({ post }: { post: Post }) {
         </div>
       </div>
     </Link>
+    </motion.div>
   );
 }
