@@ -2,9 +2,14 @@
   "name": "hydration",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20 <21"
+  },
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "rm -rf .next && next dev",
     "build": "next build",
+    "build:check": "NEXT_DIST_DIR=.next-build next build",
     "start": "next start",
     "lint": "next lint",
     "storybook": "storybook dev -p 6006",

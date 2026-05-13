@@ -7,7 +7,8 @@ import EffectiveTradingSection from "@/components/sections/efficient-trading/sec
 import EmpoweringDaosSection from "@/components/sections/empowering-daos/section";
 import HeroSection from "@/components/sections/hero/section";
 import LiquidityIncentivesSection from "@/components/sections/liquidity-incentives/section";
-import ReferralsSection from "@/components/sections/referrals/section";
+import NewFeaturesSection from "@/components/sections/new-features/section";
+import RecentPostsSection from "@/components/sections/recent-posts/section";
 import Stats from "@/components/stats/stats";
 import { Metadata } from "next";
 
@@ -91,13 +92,14 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main className="bg-white-100 overflow-x-hidden">
-      <Header className="fixed top-0 lg:top-4 left-1/2 transform -translate-x-1/2 " />
+      <Header className="fixed top-0 left-0 right-0 lg:top-4" />
       <HeroSection />
       <Stats />
+      <RecentPostsSection />
+      <NewFeaturesSection />
       <BringYourOwnGasSection />
       <EffectiveTradingSection />
       <LiquidityIncentivesSection />
-      <ReferralsSection />
       <BuiltToBeUnstoppableSection />
       <EmpoweringDaosSection />
       <DevsAndSecuritySection />
