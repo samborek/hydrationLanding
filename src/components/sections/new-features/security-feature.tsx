@@ -245,7 +245,7 @@ export default function SecurityFeature() {
           </Button>
         </div>
 
-        <div className="flex w-full flex-col gap-4 lg:grid lg:min-h-[60rem] lg:grid-cols-3 lg:items-stretch lg:gap-5">
+        <div className="flex w-full flex-col gap-4 lg:grid lg:min-h-[48rem] lg:grid-cols-3 lg:items-stretch lg:gap-5">
           {securityBentoColumns.map((column, columnIndex) => (
             <div
               key={columnIndex}
@@ -315,7 +315,7 @@ function SecurityBentoCard({
 
         <Paragraph
           size="medium"
-          className="mt-auto max-w-[26ch] text-[1rem] leading-[1.35] text-purple-dim lg:max-w-[28ch] lg:text-[1.05rem]"
+          className="max-w-[26ch] text-[1rem] leading-[1.35] text-purple-dim lg:max-w-[28ch] lg:text-[1.05rem]"
         >
           {description}
         </Paragraph>
