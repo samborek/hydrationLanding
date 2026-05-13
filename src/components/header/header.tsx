@@ -15,6 +15,18 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
   {
+    label: "Blog",
+    href: "#blog",
+  },
+  {
+    label: "Security",
+    href: "#assume-breach",
+  },
+  {
+    label: "Strategy",
+    href: "#hydrated-strategy",
+  },
+  {
     label: "Trade",
     href: "#trade",
   },
@@ -33,18 +45,6 @@ const menuItems: MenuItem[] = [
   {
     label: "Devs",
     href: "#devs",
-  },
-  {
-    label: "Security",
-    href: "#assume-breach",
-  },
-  {
-    label: "Strategy",
-    href: "#hydrated-strategy",
-  },
-  {
-    label: "Blog",
-    href: "#blog",
   },
   {
     label: "Docs",
@@ -138,13 +138,13 @@ export default function Header({ className }: HeaderProps) {
           >
             <Logo size="small" />
           </button>
-          <nav className="group hidden xl:flex gap-10 justify-center pointer-events-none">
+          <nav className="group hidden xl:flex gap-8 justify-center pointer-events-none">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 target={item.target}
-                className="transition group-hover:opacity-50 hover:!opacity-100 text-base font-medium font-geist leading-5 text-purple pointer-events-auto"
+                className="transition group-hover:opacity-50 hover:!opacity-100 text-xs font-medium font-geist leading-4 text-purple pointer-events-auto"
                 onClick={(e) => {
                   if (item.target === "_blank") return;
                   e.preventDefault();

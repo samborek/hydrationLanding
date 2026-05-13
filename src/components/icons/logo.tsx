@@ -15,7 +15,7 @@ export default function Logo({ size, className }: Props) {
       className={twMerge(
         "shrink-0",
         isSmall &&
-          "h-[20.2px] w-[101.4px] xl:h-[33.66px] xl:w-[169px]",
+          "h-[14px] w-[70px] xl:h-[17px] xl:w-[84.5px]",
         !isSmall && "h-[50px] w-[252px]",
         className
       )}
