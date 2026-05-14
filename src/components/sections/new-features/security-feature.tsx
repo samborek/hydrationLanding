@@ -187,9 +187,9 @@ const securityBentoColumns: readonly (readonly SecurityBentoCardConfig[])[] = [
       layoutClass: "lg:flex-[0.78] lg:basis-0",
     },
     {
-      title: "Slow the blast radius",
+      title: "Rate limiters",
       description:
-        "Rate limiters and circuit breakers cap how quickly value can move when something goes wrong.",
+        "Per-block flow limits, withdrawal caps, and circuit breakers slow exploit paths and cap how much value can move at once.",
       accent: "lavender",
       Icon: LimitIcon,
       layoutClass: "lg:flex-[1.62] lg:basis-0",
@@ -205,9 +205,9 @@ const securityBentoColumns: readonly (readonly SecurityBentoCardConfig[])[] = [
       layoutClass: "lg:flex-[1.35] lg:basis-0",
     },
     {
-      title: "Recover precisely",
+      title: "Targeted pauses",
       description:
-        "Granular pauses and targeted restrictions slow the bleeding without freezing the whole system.",
+        "Specific protocol functions can be paused when needed, containing incidents without freezing the whole system.",
       accent: "green",
       Icon: SirenIcon,
       layoutClass: "lg:flex-[1.05] lg:basis-0",
