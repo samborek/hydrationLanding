@@ -43,7 +43,7 @@ export default function HeroSection() {
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[8] h-[52%] bg-gradient-to-t from-purple/45 via-purple/15 to-transparent backdrop-blur-[6px] [mask-image:linear-gradient(to_top,black_0%,black_35%,rgba(0,0,0,0.72)_64%,transparent_100%)]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[8] h-[52%] bg-gradient-to-t from-[#E7E4D4]/90 via-[#E7E4D4]/42 to-transparent backdrop-blur-[6px] [mask-image:linear-gradient(to_top,black_0%,black_35%,rgba(0,0,0,0.72)_64%,transparent_100%)]"
         aria-hidden="true"
       />
       <div className="relative z-20 lg:min-h-[820px]">
