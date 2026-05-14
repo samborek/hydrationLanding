@@ -92,7 +92,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main className="bg-white-100 overflow-x-hidden">
-      <Header className="fixed top-0 left-0 right-0 lg:top-4" />
+      <Header className="fixed top-0 left-0 right-0 xl:top-4" />
       <HeroSection />
       <Stats />
       <RecentPostsSection />

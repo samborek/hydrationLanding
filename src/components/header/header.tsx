@@ -125,9 +125,9 @@ export default function Header({ className }: HeaderProps) {
     >
       <div
         ref={shellRef}
-        className="relative py-2 xl:py-1 bg-beige px-4 xl:pr-1 xl:rounded-xl xl:mx-10 xl:max-w-[1352px] w-full"
+        className="relative bg-beige px-3 pb-0 pt-0 sm:px-4 xl:py-1 xl:pr-1 xl:rounded-xl xl:mx-10 xl:max-w-[1352px] w-full"
       >
-        <div className="relative z-[60] flex items-center justify-between xl:max-w-[none]">
+        <div className="relative z-[60] flex items-center justify-between py-2.5 sm:py-3 xl:max-w-[none] xl:py-0">
           <button
             type="button"
             onClick={() => {
@@ -155,7 +155,7 @@ export default function Header({ className }: HeaderProps) {
               </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <button
               type="button"
               className="xl:hidden flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-purple/15 bg-white/80 text-purple shadow-sm backdrop-blur-sm transition hover:border-purple/25 hover:bg-white"
