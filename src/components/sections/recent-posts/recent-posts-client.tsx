@@ -68,8 +68,8 @@ export default function RecentPostsClient({ posts }: { posts: Post[] }) {
   }, []);
 
   return (
-    <AnimateOnView className="bg-beige py-16 lg:py-20">
-      <section className="container mx-auto relative">
+    <AnimateOnView className="bg-beige px-6 py-16 md:px-[50px] xl:px-0 lg:py-20">
+      <section className="container relative mx-auto max-xl:!px-0">
         <ScrollAnchor id="blog" />
         <div className="max-w-2xl lg:max-w-none">
           <SectionLabel>From the blog</SectionLabel>
@@ -77,14 +77,16 @@ export default function RecentPostsClient({ posts }: { posts: Post[] }) {
             <Heading size="large" className="min-w-0 text-purple">
               Recent notes
             </Heading>
-            <Link
-              href="https://hydration.substack.com/"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex w-fit shrink-0 items-center justify-center rounded-full bg-pink px-5 py-3 text-sm lg:text-base text-white transition hover:bg-purple"
-            >
-              Visit Substack
-            </Link>
+            <motion.div variants={fadeUp(10)}>
+              <Link
+                href="https://hydration.substack.com/"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex w-fit shrink-0 items-center justify-center rounded-full bg-pink px-5 py-3 text-sm lg:text-base text-white transition hover:bg-purple"
+              >
+                Visit Substack
+              </Link>
+            </motion.div>
           </div>
           <Paragraph size="large" className="mt-4 max-w-xl text-purple-dim">
             Short reads on security, strategy, and product updates from the
@@ -94,7 +96,7 @@ export default function RecentPostsClient({ posts }: { posts: Post[] }) {
 
         <motion.div
           ref={postsRef}
-          className="-mx-4 mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pl-5 pr-4 pb-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden"
+          className="-mx-4 mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pl-6 pr-6 pb-4 [scrollbar-width:none] [scroll-padding-left:1.5rem] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0 md:[scroll-padding-left:0] [&::-webkit-scrollbar]:hidden"
           variants={staggerChildren(0.12)}
         >
           {posts.map((post) => (
@@ -120,7 +122,7 @@ export default function RecentPostsClient({ posts }: { posts: Post[] }) {
 function PostCard({ post }: { post: Post }) {
   return (
     <motion.div
-      className="flex h-full w-[82vw] max-w-[22rem] shrink-0 snap-start md:w-auto md:max-w-none"
+      className="flex h-full w-[82vw] max-w-[22rem] shrink-0 snap-start first:ml-0 md:w-auto md:max-w-none"
       variants={fadeUp(24)}
     >
       <Link
@@ -150,10 +152,13 @@ function PostCard({ post }: { post: Post }) {
               {post.title}
             </h3>
             <p className="text-sm leading-6 text-purple-dim">{post.preview}</p>
-            <div className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-pink transition group-hover:translate-x-0.5">
+            <motion.div
+              className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-pink transition group-hover:translate-x-0.5"
+              variants={fadeUp(10)}
+            >
               Read on Substack
               <span aria-hidden="true">→</span>
-            </div>
+            </motion.div>
           </div>
         </div>
       </Link>

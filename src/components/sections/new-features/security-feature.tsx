@@ -218,7 +218,7 @@ const securityBentoColumns: readonly (readonly SecurityBentoCardConfig[])[] = [
 export default function SecurityFeature() {
   return (
     <AnimateOnView
-      className="bg-beige px-6 py-20 md:px-[50px] xl:px-0 lg:py-28"
+      className="bg-beige px-6 py-16 md:px-[50px] xl:px-0 lg:py-24"
       threshold={0.05}
     >
       <section className="container relative mx-auto flex w-full max-xl:!px-0 flex-col gap-14">

@@ -144,7 +144,7 @@ const rwaSvgIconClass = "h-[68px] w-[68px] shrink-0";
 export default function RwaFeature() {
   return (
     <AnimateOnView
-      className="bg-beige bg-[url('/square.svg')] bg-repeat px-6 py-20 md:px-[50px] xl:px-0 lg:py-28"
+      className="bg-beige bg-[url('/square.svg')] bg-repeat px-6 py-16 md:px-[50px] xl:px-0 lg:py-24"
       threshold={0.05}
       style={{
         backgroundSize: "clamp(4.375rem, 0.804rem + 8.929vi, 9.375rem)",
@@ -225,13 +225,13 @@ function RwaArchCard({
 
   return (
     <motion.article
-      className="relative mx-auto flex min-h-[31rem] w-full max-w-[30rem] flex-col items-center overflow-hidden rounded-t-full bg-white px-8 pb-14 pt-16 text-center shadow-[0_18px_60px_rgba(36,14,50,0.08)] lg:min-h-[37rem] lg:px-12 lg:pt-20"
+      className="relative mx-auto flex min-h-[25rem] w-[80vw] max-w-[24rem] flex-col items-center overflow-hidden rounded-t-full bg-white px-7 pb-11 pt-[3.25rem] text-center shadow-[0_18px_60px_rgba(36,14,50,0.08)] lg:min-h-[37rem] lg:w-full lg:max-w-[30rem] lg:px-12 lg:pb-14 lg:pt-20"
       style={cardMaskStyle}
       variants={fadeUp(28)}
     >
-      <div className="relative z-10 grid w-full justify-items-center">
+      <div className="relative z-10 mt-1 grid w-full justify-items-center lg:mt-0">
         <div
-          className={`grid h-28 w-28 place-items-center rounded-full lg:h-32 lg:w-32 ${accentClasses[accent]}`}
+          className={`grid h-24 w-24 place-items-center rounded-full lg:h-32 lg:w-32 ${accentClasses[accent]}`}
         >
           <span className={rwaIconSlotClass}>
             <Icon />
@@ -239,13 +239,13 @@ function RwaArchCard({
         </div>
       </div>
 
-      <div className="relative z-10 mt-16 flex max-w-[24rem] flex-col items-center lg:mt-20">
-        <h3 className="font-gazpacho text-[clamp(1.425rem,2.2125vw,2.4rem)] font-medium leading-[1] text-purple">
+      <div className="relative z-10 mt-12 flex max-w-[22rem] flex-col items-center lg:mt-20 lg:max-w-[24rem]">
+        <h3 className="font-gazpacho text-[clamp(1.3rem,2.2125vw,2.4rem)] font-medium leading-[1] text-purple">
           {title}
         </h3>
         <Paragraph
           size="large"
-          className="mt-6 max-w-[21rem] text-purple-dim lg:mt-8"
+          className="mt-5 max-w-[19.5rem] text-purple-dim lg:mt-8 lg:max-w-[21rem]"
         >
           {description}
         </Paragraph>
