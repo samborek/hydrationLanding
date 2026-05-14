@@ -5,23 +5,15 @@ import Button from "@/components/ui/buttons/button";
 import Socials from "@/components/footer/socials";
 import SupportingBadge from "@/components/badges/supportingBadge";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import LetterByLetter from "@/components/animation/LetterByLetter";
 import { delayChildren, staggerChildren } from "@/animation/variants";
 import AnimateOnView from "@/animation/motion-section";
-import useProgressiveImage from "@/hooks/useProgressiveImage";
 import useScreenSize from "@/hooks/useScreenSize";
 
 export default function HeroSection() {
-  const sectionRef = useRef(null);
-  const bgImage = useProgressiveImage({
-    src: "/hero-hq.jpg",
-    placeholderSrc: "/hero-placeholder-hq.jpg",
-    sectionRef,
-  });
-
   return (
-    <AnimateOnView className="relative lg:min-h-[820px]">
+    <AnimateOnView className="relative overflow-hidden lg:min-h-[820px]">
       <div
         style={{
           inset: 0,
@@ -29,20 +21,33 @@ export default function HeroSection() {
           backgroundRepeat: "repeat",
           backgroundImage: "url(/noise.svg)",
           position: "absolute",
-          zIndex: 10,
+          zIndex: 6,
           mixBlendMode: "multiply",
-          opacity: 0.6,
+          opacity: 1,
           filter: "grayscale(1)",
         }}
       ></div>
       <div
-        ref={sectionRef}
-        className="bg-cover bg-[center_bottom]  bg-no-repeat lg:min-h-[820px] brightness-110"
-        style={{
-          backgroundImage: `url(${bgImage})`,
-        }}
-      >
-        <div className="container mx-auto flex justify-between relative z-10 lg:min-h-[820px]">
+        className="absolute inset-0 z-[7] pointer-events-none bg-[url('/noise.svg')] bg-repeat opacity-45 mix-blend-overlay"
+        aria-hidden="true"
+      />
+      <video
+        className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-center brightness-105 blur-[2px]"
+        src="/hero-bg.mp4"
+        poster="/hero-hq.jpg"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[8] h-[52%] bg-gradient-to-t from-purple/45 via-purple/15 to-transparent backdrop-blur-[6px] [mask-image:linear-gradient(to_top,black_0%,black_35%,rgba(0,0,0,0.72)_64%,transparent_100%)]"
+        aria-hidden="true"
+      />
+      <div className="relative z-20 lg:min-h-[820px]">
+        <div className="container mx-auto flex justify-between relative lg:min-h-[820px]">
           <HeroSectionContent />
           <motion.div
             className="absolute left-0 right-0 mx-auto container bottom-4 lg:bottom-[2.375rem] gap-[3.25rem] lg:gap-0 flex flex-col items-center lg:flex-row justify-between"
