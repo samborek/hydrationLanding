@@ -144,7 +144,8 @@ const rwaSvgIconClass = "h-[68px] w-[68px] shrink-0";
 export default function RwaFeature() {
   return (
     <AnimateOnView
-      className="bg-beige bg-[url('/square.svg')] bg-repeat px-[50px] py-20 xl:px-0 lg:py-28"
+      className="bg-beige bg-[url('/square.svg')] bg-repeat px-6 py-20 md:px-[50px] xl:px-0 lg:py-28"
+      threshold={0.05}
       style={{
         backgroundSize: "clamp(4.375rem, 0.804rem + 8.929vi, 9.375rem)",
       }}
