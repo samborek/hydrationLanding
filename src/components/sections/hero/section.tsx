@@ -5,34 +5,25 @@ import Button from "@/components/ui/buttons/button";
 import Socials from "@/components/footer/socials";
 import SupportingBadge from "@/components/badges/supportingBadge";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import LetterByLetter from "@/components/animation/LetterByLetter";
-import { delayChildren, staggerChildren } from "@/animation/variants";
+import { useEffect, useMemo, useState } from "react";
+import { delayChildren } from "@/animation/variants";
 import AnimateOnView from "@/animation/motion-section";
 import useScreenSize from "@/hooks/useScreenSize";
+
+const headlineEase = [0.2, 0.65, 0.3, 0.9] as const;
+const firstAnimatedWordDelayMs = 830;
+const wordRotationDelayMs = 1650;
 
 export default function HeroSection() {
   return (
     <AnimateOnView className="relative overflow-hidden lg:min-h-[820px]">
       <div
-        style={{
-          inset: 0,
-          pointerEvents: "none",
-          backgroundRepeat: "repeat",
-          backgroundImage: "url(/noise.svg)",
-          position: "absolute",
-          zIndex: 6,
-          mixBlendMode: "multiply",
-          opacity: 1,
-          filter: "grayscale(1)",
-        }}
-      ></div>
-      <div
-        className="absolute inset-0 z-[7] pointer-events-none bg-[url('/noise.svg')] bg-repeat opacity-45 mix-blend-overlay"
+        className="absolute inset-0 z-[7] pointer-events-none bg-[url('/noise.svg')] bg-repeat opacity-50 mix-blend-multiply grayscale"
+        style={{ backgroundSize: "640px 640px" }}
         aria-hidden="true"
       />
       <video
-        className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-center brightness-105 blur-[2px]"
+        className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-center brightness-105 blur-[3.5px]"
         src="/hero-bg.mp4"
         poster="/hero-hq.jpg"
         autoPlay
@@ -43,14 +34,14 @@ export default function HeroSection() {
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[8] h-[52%] bg-gradient-to-t from-[#E7E4D4]/90 via-[#E7E4D4]/42 to-transparent backdrop-blur-[6px] [mask-image:linear-gradient(to_top,black_0%,black_35%,rgba(0,0,0,0.72)_64%,transparent_100%)]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[8] h-[72%] bg-gradient-to-t from-beige/90 via-beige/42 to-transparent backdrop-blur-[6px] [mask-image:linear-gradient(to_top,black_0%,black_35%,rgba(0,0,0,0.72)_64%,transparent_100%)]"
         aria-hidden="true"
       />
       <div className="relative z-20 lg:min-h-[820px]">
-        <div className="container mx-auto flex justify-between relative lg:min-h-[820px]">
+        <div className="container relative mx-auto flex justify-between px-6 md:px-[50px] xl:px-16 lg:min-h-[820px]">
           <HeroSectionContent />
           <motion.div
-            className="absolute left-0 right-0 mx-auto container bottom-4 lg:bottom-[2.375rem] gap-[3.25rem] lg:gap-0 flex flex-col items-center lg:flex-row justify-between"
+            className="absolute inset-x-0 bottom-4 mx-auto flex flex-col items-center gap-[3.25rem] px-6 md:px-[50px] lg:bottom-[2.375rem] lg:flex-row lg:justify-between lg:gap-0 xl:px-16"
             variants={delayChildren(0.75)}
           >
             <Socials />
@@ -64,88 +55,85 @@ export default function HeroSection() {
 
 function HeroSectionContent() {
   const [index, setIndex] = useState(0);
-  const [intervalStarted, setIntervalStarted] = useState(false);
-
+  const [showAnimatedWord, setShowAnimatedWord] = useState(false);
+  const [canRotateWords, setCanRotateWords] = useState(false);
   const { width: screenWidth } = useScreenSize();
 
   const texts = useMemo(() => {
     if (screenWidth < 1024) {
       return [
-        { value: "efficient", translateX: 0, waitAfter: 4000 },
-        { value: "simple", translateX: 0, waitAfter: 4000 },
+        { value: "efficient", waitAfter: 4000 },
+        { value: "simple", waitAfter: 4000 },
       ];
     }
+
     return [
-      { value: "efficient", translateX: 0, waitAfter: 3000 },
-      { value: "simple", translateX: 0, waitAfter: 3000 },
-      { value: "unstoppable.", translateX: 0, waitAfter: 5000 },
+      { value: "efficient", waitAfter: 3000 },
+      { value: "simple", waitAfter: 3000 },
+      { value: "unstoppable.", waitAfter: 5000 },
     ];
   }, [screenWidth]);
 
   useEffect(() => {
-    if (!intervalStarted) return;
+    const showWordTimeoutId = setTimeout(
+      () => setShowAnimatedWord(true),
+      firstAnimatedWordDelayMs
+    );
+    const rotateWordsTimeoutId = setTimeout(
+      () => setCanRotateWords(true),
+      wordRotationDelayMs
+    );
+
+    return () => {
+      clearTimeout(showWordTimeoutId);
+      clearTimeout(rotateWordsTimeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!canRotateWords) return;
+
     const { waitAfter } = texts[index % texts.length];
     const intervalId = setInterval(
-      () => setIndex((index) => index + 1),
+      () => setIndex((currentIndex) => currentIndex + 1),
       waitAfter
     );
-    return () => clearTimeout(intervalId);
-  }, [intervalStarted, index, texts]);
 
-  const LastWord = useCallback(() => {
-    const current = texts[index % texts.length];
-    return (
-      <motion.div
-        exit={{ opacity: 0 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        style={{ translateX: current.translateX }}
-        className=" w-full justify-end font-gazpacho absolute inset-0 overflow-hidden"
-      >
-        {current.value.split("").map((char, index) => (
-          <motion.span key={index} className="inline-block">
-            {char}
-          </motion.span>
-        ))}
-      </motion.div>
-    );
-  }, [index, texts]);
+    return () => clearInterval(intervalId);
+  }, [canRotateWords, index, texts]);
+
+  const currentText = texts[index % texts.length].value;
 
   return (
-    <div className="flex flex-col justify-center items-center mx-auto ~pt-[10.5rem]/[15.938rem] pb-[13.438rem] lg:pb-[11.625rem] gap-8 w-full">
+    <div className="flex w-full flex-col items-center gap-8 pb-[13.438rem] pt-[10.5rem] lg:items-start lg:pb-[11.625rem] lg:pt-[17rem]">
       <motion.section
-        className="font-gazpacho w-full"
-        variants={staggerChildren()}
-        onAnimationComplete={() => {
-          setIntervalStarted(true);
-          //  setTimeout(() => setIndex(1), 500);
-        }}
+        className="w-full font-gazpacho text-center text-[54px] font-medium leading-[50px] text-purple sm:text-[78px] sm:leading-[70px] lg:text-left lg:text-[85px] lg:leading-[76px]"
       >
-        <div className="block mx-auto ~text-[4.375rem]/[5.315rem] text-purple text-center font-medium ~leading-[3.969rem]/[4.76rem] lg:w-[430px]">
-          <LetterByLetter>Finance</LetterByLetter>
+        <div className="block lg:whitespace-nowrap">
+          <AnimatedHeadlineText text="Onchain markets" />
         </div>
-        <span className="block mx-auto ~text-[2.5rem]/[3rem] text-purple text-center italic ~leading-[3.969rem]/[4.76rem] lg:w-[430px]">
-          <LetterByLetter>made</LetterByLetter>
+        <span className="inline-block">
+          <AnimatedHeadlineText delay={0.28} text="made" />
         </span>
-        <span className="block ~text-[4.375rem]/[5.315rem] text-purple text-center  font-medium justify-self-end ~leading-[3.969rem]/[4.76rem] relative h-[1em] w-full">
-          {intervalStarted ? (
-            <AnimatePresence initial={false} mode="sync">
-              <LastWord key={index} />
-            </AnimatePresence>
-          ) : (
-            <div
-              style={{
-                translate: screenWidth < 1024 ? 0 : 0,
-              }}
-            >
-              <LetterByLetter>{texts[0].value}</LetterByLetter>
-            </div>
-          )}
+        <span className="relative ml-[0.18em] inline-block h-[1em] min-w-[4.25em] overflow-hidden align-top font-normal lg:min-w-[6.35em]">
+          <AnimatePresence initial={false} mode="wait">
+            {showAnimatedWord ? (
+              <AnimatedHeadlineText
+                key={currentText}
+                animateExit
+                className="absolute left-0 top-0 whitespace-nowrap"
+                exitY={-14}
+                letterDelay={0.018}
+                text={currentText}
+                y={14}
+              />
+            ) : null}
+          </AnimatePresence>
         </span>
       </motion.section>
       <Paragraph
         size="large"
-        className="text-purple text-center max-w-[430px] lg:w-[430px]"
+        className="max-w-[43rem] text-center text-[20px] leading-[1.2] text-purple lg:text-left lg:text-[24px]"
       >
         Hydration unites swaps, lending and the Hollar stablecoin under the roof
         of a scalable appchain.
@@ -154,9 +142,64 @@ function HeroSectionContent() {
         role="primary"
         decoration="arrow"
         action={{ href: "https://app.hydration.net", target: "_blank" }}
+        className="w-[257px] rounded-[32px] [&>div]:w-full [&>div]:justify-between"
       >
-        Launch App
+        Launch app
       </Button>
     </div>
+  );
+}
+
+function AnimatedHeadlineText({
+  animateExit = false,
+  className,
+  delay = 0,
+  exitY = -18,
+  letterDelay = 0.032,
+  text,
+  y = 18,
+}: {
+  animateExit?: boolean;
+  className?: string;
+  delay?: number;
+  exitY?: number;
+  letterDelay?: number;
+  text: string;
+  y?: number;
+}) {
+  return (
+    <motion.span aria-label={text} className={className}>
+      {Array.from(text).map((letter, letterIndex) => (
+        <motion.span
+          aria-hidden="true"
+          className="inline-block"
+          initial={{ opacity: 0, y }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            transition: {
+              delay: delay + letterIndex * letterDelay,
+              duration: 0.45,
+              ease: headlineEase,
+            },
+          }}
+          exit={
+            animateExit
+              ? {
+                  opacity: 0,
+                  y: exitY,
+                  transition: {
+                    duration: 0.2,
+                    ease: headlineEase,
+                  },
+                }
+              : undefined
+          }
+          key={`${letter}-${letterIndex}`}
+        >
+          {letter === " " ? "\u00A0" : letter}
+        </motion.span>
+      ))}
+    </motion.span>
   );
 }
