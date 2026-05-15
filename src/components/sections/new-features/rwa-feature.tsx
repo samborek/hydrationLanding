@@ -121,9 +121,9 @@ const rwaCards = [
     Icon: GlobeIcon,
   },
   {
-    title: "Routed through HOLLAR.",
+    title: "Stablecoin liquidity.",
     description:
-      "These markets can feed collateral, liquidity, and borrowing demand into HOLLAR instead of sitting as isolated yield products.",
+      "RWA markets can feed collateral and borrowing demand into HOLLAR, Hydration's native stablecoin, instead of remaining isolated yield products.",
     accent: "blue",
     Icon: NetworkIcon,
   },
