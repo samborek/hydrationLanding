@@ -7,6 +7,7 @@ import Socials from "@/components/footer/socials";
 import SupportingBadge from "@/components/badges/supportingBadge";
 import {
   motion,
+  useMotionTemplate,
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
@@ -39,28 +40,22 @@ export default function HeroSection({ stats }: { stats: StatsData }) {
       "inset(0vh 0vw 0vh 0vw round 0rem 0rem 0rem 0rem)",
     ]
   );
+  const sceneMaskTop = useTransform(
+    scrollYProgress,
+    [0, 0.18],
+    ["66vh", "0vh"]
+  );
+  const sceneMaskSide = useTransform(
+    scrollYProgress,
+    [0, 0.18],
+    ["7vw", "0vw"]
+  );
+  const sceneFeatherMask = useMotionTemplate`linear-gradient(to bottom, transparent ${sceneMaskTop}, black calc(${sceneMaskTop} + 26px), black calc(100% - 20px), transparent 100%), linear-gradient(to right, transparent ${sceneMaskSide}, black calc(${sceneMaskSide} + 22px), black calc(100% - ${sceneMaskSide} - 22px), transparent calc(100% - ${sceneMaskSide}))`;
   const sceneFillOpacity = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
   const sceneTransitionHeight = useTransform(
     scrollYProgress,
     [0, 0.16, 0.26],
     [0, 0, 72]
-  );
-  const blurBandHeight = 150;
-  const blurBandOverlap = 28;
-  const blurViewportHeight = Math.max(viewportHeight, 720);
-  const sceneEdgePosition = useTransform(
-    scrollYProgress,
-    [0, 0.18],
-    [blurViewportHeight * 0.66, 0]
-  );
-  const sceneEdgeBlurTop = useTransform(
-    sceneEdgePosition,
-    (position) => position - blurBandOverlap
-  );
-  const sceneEdgeBlurOpacity = useTransform(
-    scrollYProgress,
-    [0, 0.035, 0.16, 0.26],
-    [0.34, 0.7, 0.56, 0]
   );
   const sceneScale = useTransform(scrollYProgress, [0, 1], [1, 1.13]);
   const heroContentShift = Math.min(
@@ -120,6 +115,10 @@ export default function HeroSection({ stats }: { stats: StatsData }) {
             clipPath: reducedMotion
               ? "inset(66vh 7vw 0 7vw round 2.75rem 2.75rem 0 0)"
               : sceneClip,
+            maskImage: reducedMotion ? undefined : sceneFeatherMask,
+            WebkitMaskImage: reducedMotion ? undefined : sceneFeatherMask,
+            maskComposite: "intersect",
+            WebkitMaskComposite: "source-in",
           }}
         >
           <motion.div
@@ -195,25 +194,6 @@ export default function HeroSection({ stats }: { stats: StatsData }) {
             }}
           />
         </motion.div>
-
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 z-[12]"
-          style={{
-            top: reducedMotion ? -blurBandHeight : sceneEdgeBlurTop,
-            height: blurBandHeight,
-            opacity: reducedMotion ? 0 : sceneEdgeBlurOpacity,
-            backgroundImage: "url('/assets/hero-arches-sunrise.png')",
-            backgroundPosition: "54% center",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "auto 100vh",
-            maskImage:
-              "linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%)",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%)",
-            filter: "blur(20px)",
-          }}
-        />
 
         <motion.div
           className="pointer-events-none absolute inset-x-0 top-0 z-20 flex h-[66vh] min-h-[34rem] items-center px-6 pt-16 md:px-[50px] md:pt-20 xl:px-16"
