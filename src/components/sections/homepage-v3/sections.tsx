@@ -162,7 +162,8 @@ export function ProductiveYieldSection() {
       style={{
         backgroundSize: "clamp(4.375rem, 0.804rem + 8.929vi, 9.375rem)",
       }}
-      threshold={0.05}
+      threshold={0.12}
+      viewportMargin="0px 0px -10% 0px"
     >
       <section
         id="productive-yield"
@@ -190,7 +191,10 @@ export function ProductiveYieldSection() {
 
         <motion.div
           className="mt-14 grid gap-6 lg:mt-20 lg:grid-cols-3 lg:gap-8"
-          variants={staggerChildren(0.13)}
+          initial="initial"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.16, margin: "0px 0px -8% 0px" }}
+          variants={revealStagger(0.13, 28)}
         >
           {yieldPillars.map((pillar) => (
             <ArchFeatureCard
@@ -212,7 +216,8 @@ export function StrategiesSection() {
     <AnimateOnView
       className="bg-white px-6 py-16 md:px-[50px] lg:py-28 xl:px-0"
       variants={revealStagger(0.1, 18)}
-      threshold={0.05}
+      threshold={0.12}
+      viewportMargin="0px 0px -10% 0px"
     >
       <section
         id="strategies"
@@ -241,7 +246,10 @@ export function StrategiesSection() {
 
         <motion.div
           className="mt-12 grid gap-6 lg:mt-16 lg:grid-cols-2 lg:gap-8"
-          variants={staggerChildren(0.14)}
+          initial="initial"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.14, margin: "0px 0px -8% 0px" }}
+          variants={revealStagger(0.14, 30)}
         >
           <StrategyCard
             eyebrow="Lower volatility"
@@ -358,7 +366,8 @@ export function IntegratedSystemSection() {
     <AnimateOnView
       className="bg-purple px-6 py-16 md:px-[50px] lg:py-28 xl:px-0"
       variants={revealStagger(0.1, 20)}
-      threshold={0.04}
+      threshold={0.1}
+      viewportMargin="0px 0px -10% 0px"
     >
       <section
         id="why-hydration"
@@ -395,7 +404,13 @@ export function IntegratedSystemSection() {
           </div>
         </motion.div>
 
-        <motion.div className="mt-14 lg:mt-20" variants={fadeUp(20)}>
+        <motion.div
+          className="mt-14 lg:mt-20"
+          initial="initial"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.12, margin: "0px 0px -8% 0px" }}
+          variants={revealStagger(0.08, 30)}
+        >
           <AppchainConvergence />
         </motion.div>
       </section>
@@ -421,7 +436,8 @@ export function HdxSection() {
       element="div"
       className="bg-lavender px-6 py-16 md:px-[50px] lg:py-28 xl:px-0"
       variants={revealStagger(0.08, 24)}
-      threshold={0.12}
+      threshold={0.1}
+      viewportMargin="0px 0px -10% 0px"
     >
       <section
         id="hdx"
@@ -451,7 +467,13 @@ export function HdxSection() {
           </Paragraph>
         </motion.div>
 
-        <div className="relative mx-auto mt-16 hidden max-w-[80rem] lg:block lg:mt-24">
+        <motion.div
+          className="relative mx-auto mt-16 hidden max-w-[80rem] lg:block lg:mt-24"
+          initial="initial"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.16, margin: "0px 0px -8% 0px" }}
+          variants={revealStagger(0.1, 26)}
+        >
           <div className="absolute left-[12.5%] right-[calc(50%+6.7rem)] top-0 h-px bg-pink" />
           <div className="absolute left-[calc(50%+6.7rem)] right-[12.5%] top-0 h-px bg-pink" />
           <div className="absolute left-1/2 top-0 z-10 h-[4.5rem] w-[7.5rem] -translate-x-[6.7rem] -translate-y-1/2 rounded-full border border-pink" />
@@ -504,9 +526,15 @@ export function HdxSection() {
               </motion.article>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mx-auto mt-14 max-w-[34rem] lg:hidden">
+        <motion.div
+          className="mx-auto mt-14 max-w-[34rem] lg:hidden"
+          initial="initial"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1, margin: "0px 0px -8% 0px" }}
+          variants={revealStagger(0.1, 24)}
+        >
           <div className="ml-px flex items-center gap-4">
             <Image
               src={HdxFlowLogo}
@@ -540,7 +568,7 @@ export function HdxSection() {
               </motion.article>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
     </AnimateOnView>
   );
@@ -552,7 +580,8 @@ export function CommunityBuildSection() {
       element="div"
       className="overflow-hidden border-y border-white/10 bg-purple text-white"
       variants={revealStagger(0.1, 24)}
-      threshold={0.12}
+      threshold={0.08}
+      viewportMargin="0px 0px -10% 0px"
     >
       <section
         id="community"
@@ -588,7 +617,10 @@ export function CommunityBuildSection() {
               value, and build a more secure and productive home for onchain
               capital.
             </Paragraph>
-            <div className="mt-12 grid gap-2 sm:grid-cols-3">
+            <motion.div
+              className="mt-12 grid gap-2 sm:grid-cols-3"
+              variants={staggerChildren(0.09)}
+            >
               <CommunityLink
                 href="https://x.com/hydration_net"
                 name="Twitter"
@@ -607,7 +639,7 @@ export function CommunityBuildSection() {
                 icon={TelegramLogo}
                 className="bg-green"
               />
-            </div>
+            </motion.div>
           </motion.div>
         </motion.div>
 
@@ -652,23 +684,25 @@ function CommunityLink({
   className: string;
 }) {
   return (
-    <Link
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={`Open Hydration on ${name}`}
-      className={`${className} group flex min-h-[4.25rem] items-center justify-center rounded-full px-5 py-3 text-purple transition-transform duration-200 ease-out hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white`}
-    >
-      <span className="flex items-center gap-3">
-        <Image
-          src={icon}
-          alt=""
-          width={28}
-          height={28}
-          className="h-7 w-auto"
-        />
-        <span className="font-geist text-base font-medium">{name}</span>
-      </span>
-    </Link>
+    <motion.div variants={fadeUp(14)}>
+      <Link
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`Open Hydration on ${name}`}
+        className={`${className} group flex min-h-[4.25rem] items-center justify-center rounded-full px-5 py-3 text-purple transition-transform duration-200 ease-out hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white`}
+      >
+        <span className="flex items-center gap-3">
+          <Image
+            src={icon}
+            alt=""
+            width={28}
+            height={28}
+            className="h-7 w-auto"
+          />
+          <span className="font-geist text-base font-medium">{name}</span>
+        </span>
+      </Link>
+    </motion.div>
   );
 }

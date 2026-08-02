@@ -244,7 +244,8 @@ export default function SecurityFeature() {
     <AnimateOnView
       className="bg-beige px-6 py-16 md:px-[50px] xl:px-0 lg:py-24"
       variants={revealStagger(0.1, 20)}
-      threshold={0.05}
+      threshold={0.08}
+      viewportMargin="0px 0px -10% 0px"
     >
       <section className="container relative mx-auto flex w-full max-xl:!px-0 flex-col gap-14">
         <ScrollAnchor id="security" />
@@ -330,6 +331,8 @@ function SecurityBentoCard({
         className
       )}
       variants={fadeUp()}
+      threshold={0.16}
+      viewportMargin="0px 0px -8% 0px"
     >
       <motion.article className="flex min-h-0 flex-1 flex-col gap-4" variants={fadeUp()}>
         <div

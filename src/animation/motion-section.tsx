@@ -1,5 +1,9 @@
-import { ReactNode } from "react";
-import { Variants, motion } from "framer-motion";
+import type { ComponentProps, ReactNode } from "react";
+import { Variants, motion, useReducedMotion } from "framer-motion";
+
+type MotionViewport = NonNullable<
+  ComponentProps<typeof motion.section>["viewport"]
+>;
 
 export type MotionSectionProps = {
   children: ReactNode;
@@ -9,6 +13,7 @@ export type MotionSectionProps = {
   variants?: Variants;
   style?: React.CSSProperties;
   threshold?: number;
+  viewportMargin?: MotionViewport["margin"];
 };
 
 export default function AnimateOnView({
@@ -19,13 +24,16 @@ export default function AnimateOnView({
   variants,
   style,
   threshold = 0.5,
+  viewportMargin = "0px",
 }: MotionSectionProps) {
+  const reducedMotion = useReducedMotion();
+  const showImmediately = alwaysVisible || reducedMotion;
   const props = {
     className,
-    initial: alwaysVisible ? "visible" : "initial",
-    animate: alwaysVisible ? "visible" : undefined,
-    whileInView: alwaysVisible ? undefined : "visible",
-    viewport: { once: true, amount: threshold },
+    initial: showImmediately ? "visible" : "initial",
+    animate: showImmediately ? "visible" : undefined,
+    whileInView: showImmediately ? undefined : "visible",
+    viewport: { once: true, amount: threshold, margin: viewportMargin },
     variants,
     style,
   };
