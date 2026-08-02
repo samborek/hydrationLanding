@@ -43,9 +43,10 @@ const socials = [
 
 type Props = {
   className?: string;
+  dark?: boolean;
 };
 
-export default function Socials({ className }: Props) {
+export default function Socials({ className, dark = false }: Props) {
   return (
     <motion.div
       className={twMerge("flex gap-8 items-center", className)}
@@ -58,7 +59,13 @@ export default function Socials({ className }: Props) {
           target="_blank"
           className="cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out"
         >
-          <Image src={social.logo} alt={social.name} width={28} height={28} />
+          <Image
+            src={social.logo}
+            alt={social.name}
+            width={28}
+            height={28}
+            className={dark ? "brightness-0 invert opacity-75" : undefined}
+          />
         </Link>
       ))}
     </motion.div>

@@ -9,9 +9,10 @@ import PrivacyPolicy from "./privacy-policy";
 
 type LegalProps = {
   className?: string;
+  dark?: boolean;
 };
 
-export default function Legal({ className }: LegalProps) {
+export default function Legal({ className, dark = false }: LegalProps) {
   const [tosOpen, setTosOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
 
@@ -22,7 +23,13 @@ export default function Legal({ className }: LegalProps) {
           onClick={() => setPrivacyOpen(true)}
           className="font-inter font-medium cursor-pointer"
         >
-          <Paragraph size="small" className="text-purple-dim lg:text-purple">
+          <Paragraph
+            size="small"
+            className={twMerge(
+              "text-purple-dim lg:text-purple",
+              dark && "text-white/50 transition-colors hover:text-white lg:text-white/50"
+            )}
+          >
             Privacy Policy
           </Paragraph>
         </button>
@@ -30,7 +37,13 @@ export default function Legal({ className }: LegalProps) {
           onClick={() => setTosOpen(true)}
           className="font-inter font-medium cursor-pointer"
         >
-          <Paragraph size="small" className="text-purple-dim lg:text-purple">
+          <Paragraph
+            size="small"
+            className={twMerge(
+              "text-purple-dim lg:text-purple",
+              dark && "text-white/50 transition-colors hover:text-white lg:text-white/50"
+            )}
+          >
             Terms of Service
           </Paragraph>
         </button>
@@ -54,4 +67,3 @@ export default function Legal({ className }: LegalProps) {
     </>
   );
 }
-

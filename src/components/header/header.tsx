@@ -13,38 +13,30 @@ type MenuItem = {
   target?: "_blank";
 };
 
-const menuItems: MenuItem[] = [
+const currentMenuItems: MenuItem[] = [
   {
-    label: "Blog",
-    href: "#blog",
+    label: "Productive yield",
+    href: "#productive-yield",
+  },
+  {
+    label: "Strategies",
+    href: "#strategies",
+  },
+  {
+    label: "Why Hydration",
+    href: "#why-hydration",
   },
   {
     label: "Security",
-    href: "#assume-breach",
+    href: "#security",
   },
   {
-    label: "Strategy",
-    href: "#hydrated-strategy",
+    label: "HDX",
+    href: "#hdx",
   },
   {
-    label: "Trade",
-    href: "#trade",
-  },
-  {
-    label: "Lend & Borrow",
-    href: "#lend-borrow",
-  },
-  {
-    label: "HOLLAR",
-    href: "#hollar",
-  },
-  {
-    label: "Governance",
-    href: "#governance",
-  },
-  {
-    label: "Devs",
-    href: "#devs",
+    label: "Community",
+    href: "#community",
   },
   {
     label: "Docs",
@@ -52,6 +44,24 @@ const menuItems: MenuItem[] = [
     target: "_blank",
   },
 ];
+
+const previousMenuItems: MenuItem[] = [
+  { label: "Blog", href: "#blog" },
+  { label: "Security", href: "#security" },
+  { label: "Strategy", href: "#hydrated-strategy" },
+  { label: "Trade", href: "#trade" },
+  { label: "Lend & Borrow", href: "#lend-borrow" },
+  { label: "HOLLAR", href: "#hollar" },
+  { label: "Governance", href: "#governance" },
+  { label: "Devs", href: "#devs" },
+  {
+    label: "Docs",
+    href: "https://docs.hydration.net",
+    target: "_blank",
+  },
+];
+
+const sectionScrollOffset = -88;
 
 function HamburgerIcon({ open }: { open: boolean }) {
   const bar =
@@ -76,14 +86,50 @@ function HamburgerIcon({ open }: { open: boolean }) {
 
 export type HeaderProps = {
   className?: string;
+  version?: "current" | "previous";
 };
 
-export default function Header({ className }: HeaderProps) {
+export default function Header({
+  className,
+  version = "current",
+}: HeaderProps) {
   const lenis = useLenis();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuTopPx, setMenuTopPx] = useState(96);
+  const [pastHero, setPastHero] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
+  const menuItems =
+    version === "previous" ? previousMenuItems : currentMenuItems;
+  const scrollOffset = version === "previous" ? 0 : sectionScrollOffset;
+
+  useEffect(() => {
+    if (version !== "current") {
+      setPastHero(false);
+      return;
+    }
+
+    const hero = document.querySelector<HTMLElement>("[data-homepage-hero]");
+    if (!hero) return;
+
+    let frameId = 0;
+    const updateHeaderSurface = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        setPastHero(hero.getBoundingClientRect().bottom <= 0);
+      });
+    };
+
+    updateHeaderSurface();
+    window.addEventListener("scroll", updateHeaderSurface, { passive: true });
+    window.addEventListener("resize", updateHeaderSurface);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("scroll", updateHeaderSurface);
+      window.removeEventListener("resize", updateHeaderSurface);
+    };
+  }, [version]);
 
   useLayoutEffect(() => {
     if (!menuOpen) return;
@@ -116,7 +162,7 @@ export default function Header({ className }: HeaderProps) {
   function navigateTo(item: MenuItem) {
     setMenuOpen(false);
     if (item.target === "_blank") return;
-    lenis?.scrollTo(item.href);
+    lenis?.scrollTo(item.href, { offset: scrollOffset });
   }
 
   return (
@@ -125,7 +171,10 @@ export default function Header({ className }: HeaderProps) {
     >
       <div
         ref={shellRef}
-        className="relative bg-beige px-3 pb-0 pt-0 sm:px-4 xl:py-1 xl:pr-1 xl:rounded-xl xl:mx-10 xl:max-w-[1352px] w-full"
+        className={twMerge(
+          "relative w-full bg-beige px-3 pb-0 pt-0 transition-colors duration-300 sm:px-4 xl:mx-10 xl:max-w-[1352px] xl:rounded-xl xl:py-1 xl:pr-1",
+          pastHero && "bg-white"
+        )}
       >
         <div className="relative z-[60] flex items-center justify-between py-2.5 sm:py-3 xl:max-w-[none] xl:py-0">
           <button
@@ -138,7 +187,7 @@ export default function Header({ className }: HeaderProps) {
           >
             <Logo size="small" />
           </button>
-          <nav className="group hidden xl:flex gap-8 justify-center pointer-events-none">
+          <nav className="group hidden xl:flex gap-6 justify-center pointer-events-none">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
@@ -148,7 +197,7 @@ export default function Header({ className }: HeaderProps) {
                 onClick={(e) => {
                   if (item.target === "_blank") return;
                   e.preventDefault();
-                  lenis?.scrollTo(item.href);
+                  lenis?.scrollTo(item.href, { offset: scrollOffset });
                 }}
               >
                 {item.label}

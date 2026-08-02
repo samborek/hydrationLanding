@@ -1,7 +1,7 @@
 "use client";
 
 import AnimateOnView from "@/animation/motion-section";
-import { fadeUp, staggerChildren } from "@/animation/variants";
+import { fadeUp, revealStagger, staggerChildren } from "@/animation/variants";
 import ScrollAnchor from "@/components/scroll-anchor";
 import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
@@ -68,10 +68,13 @@ export default function RecentPostsClient({ posts }: { posts: Post[] }) {
   }, []);
 
   return (
-    <AnimateOnView className="bg-beige px-6 py-16 md:px-[50px] xl:px-0 lg:py-20">
+    <AnimateOnView
+      className="bg-beige px-6 py-16 md:px-[50px] xl:px-0 lg:py-20"
+      variants={revealStagger(0.1, 18)}
+    >
       <section className="container relative mx-auto max-xl:!px-0">
         <ScrollAnchor id="blog" />
-        <div className="max-w-2xl lg:max-w-none">
+        <motion.div className="max-w-2xl lg:max-w-none" variants={fadeUp(14)}>
           <SectionLabel>From the blog</SectionLabel>
           <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
             <Heading size="large" className="min-w-0 text-purple">
@@ -92,7 +95,7 @@ export default function RecentPostsClient({ posts }: { posts: Post[] }) {
             Short reads on security, strategy, and product updates from the
             Hydration team.
           </Paragraph>
-        </div>
+        </motion.div>
 
         <motion.div
           ref={postsRef}

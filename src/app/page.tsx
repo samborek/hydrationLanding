@@ -1,21 +1,22 @@
 import Footer from "@/components/footer/footer";
 import Header from "@/components/header/header";
-import BringYourOwnGasSection from "@/components/sections/bring-your-own-gas/section";
-import BuiltToBeUnstoppableSection from "@/components/sections/built-to-be-unstoppable/section";
-import DevsAndSecuritySection from "@/components/sections/devs-and-security/section";
-import EffectiveTradingSection from "@/components/sections/efficient-trading/section";
-import EmpoweringDaosSection from "@/components/sections/empowering-daos/section";
+import { fetchStats } from "@/api/stats";
+import HomepageVersionTabs from "@/components/homepage-version-tabs";
 import HeroSection from "@/components/sections/hero/section";
-import LiquidityIncentivesSection from "@/components/sections/liquidity-incentives/section";
-import NewFeaturesSection from "@/components/sections/new-features/section";
-import RecentPostsSection from "@/components/sections/recent-posts/section";
-import Stats from "@/components/stats/stats";
+import SecurityFeature from "@/components/sections/new-features/security-feature";
+import {
+  CommunityBuildSection,
+  HdxSection,
+  IntegratedSystemSection,
+  ProductiveYieldSection,
+  StrategiesSection,
+} from "@/components/sections/homepage-v3/sections";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Hydration | Finance made efficient",
+  title: "Hydration | A secure home for onchain capital",
   description:
-    "Hydration unites swaps, lending and the Hollar stablecoin under the roof of a scalable appchain.",
+    "Earn sustainable yield through productive onchain assets, curated DeFi strategies, and appchain-native security.",
   icons: [
     {
       rel: "apple-touch-icon",
@@ -71,7 +72,7 @@ export const metadata: Metadata = {
         hostname: "hydration.net",
         width: 1200,
         height: 627,
-        alt: "Hydration | Finance made efficient",
+        alt: "Hydration | A secure home for onchain capital",
       },
     ],
   },
@@ -83,27 +84,27 @@ export const metadata: Metadata = {
         hostname: "hydration.net",
         width: 1200,
         height: 627,
-        alt: "Hydration | Finance made efficient",
+        alt: "Hydration | A secure home for onchain capital",
       },
     ],
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const stats = await fetchStats();
+
   return (
-    <main className="bg-white-100 overflow-x-hidden">
+    <main className="bg-white-100 overflow-x-clip">
       <Header className="fixed top-0 left-0 right-0 xl:top-4" />
-      <HeroSection />
-      <Stats />
-      <RecentPostsSection />
-      <NewFeaturesSection />
-      <BringYourOwnGasSection />
-      <EffectiveTradingSection />
-      <LiquidityIncentivesSection />
-      <BuiltToBeUnstoppableSection />
-      <EmpoweringDaosSection />
-      <DevsAndSecuritySection />
+      <HeroSection stats={stats} />
+      <ProductiveYieldSection />
+      <StrategiesSection />
+      <IntegratedSystemSection />
+      <SecurityFeature />
+      <HdxSection />
+      <CommunityBuildSection />
       <Footer />
+      <HomepageVersionTabs active="current" />
     </main>
   );
 }

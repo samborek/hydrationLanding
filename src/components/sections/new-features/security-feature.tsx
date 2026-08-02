@@ -1,7 +1,7 @@
 "use client";
 
 import AnimateOnView from "@/animation/motion-section";
-import { fadeUp } from "@/animation/variants";
+import { fadeUp, revealStagger } from "@/animation/variants";
 import ScrollAnchor from "@/components/scroll-anchor";
 import Button from "@/components/ui/buttons/button";
 import Heading from "@/components/ui/typography/heading";
@@ -163,10 +163,10 @@ const securityBentoColumns: readonly (readonly SecurityBentoCardConfig[])[] = [
     {
       title: "Assume breach",
       description:
-        "Hydration starts from the assumption that some layer will fail, so the stack is built to absorb the layer before it.",
+        "Hydration starts from the assumption that every layer can fail, so the stack is built to absorb failure before it spreads.",
       accent: "lavender",
       Icon: OnionShieldIcon,
-      layoutClass: "lg:flex-[1.55] lg:basis-0",
+      layoutClass: "lg:flex-[1.4] lg:basis-0",
     },
     {
       title: "Bound the edges",
@@ -174,43 +174,67 @@ const securityBentoColumns: readonly (readonly SecurityBentoCardConfig[])[] = [
         "XCM, the EVM, and flash-loan paths are tightly constrained so edge risk stays at the edge.",
       accent: "blue",
       Icon: BoundaryIcon,
-      layoutClass: "lg:flex-[0.85] lg:basis-0",
+      layoutClass: "lg:flex-[0.9] lg:basis-0",
+    },
+    {
+      title: "Whitelisted by design",
+      description:
+        "Asset and contract whitelisting restricts which assets and contracts can enter the protocol.",
+      accent: "blue",
+      Icon: LockKeyIcon,
+      layoutClass: "lg:flex-[0.9] lg:basis-0",
     },
   ],
   [
     {
       title: "Test adversarially",
       description:
-        "Strict review, property-based testing, invariant checks, continuous fuzzing, and active bug bounties keep constant pressure on the system.",
+        "Independent audits, invariant checks, continuous fuzzing, AI-assisted analysis, and a top-10 Immunefi bug bounty keep constant pressure on the system.",
       accent: "blue",
       Icon: TestRigIcon,
-      layoutClass: "lg:flex-[0.78] lg:basis-0",
+      layoutClass: "lg:flex-[1.2] lg:basis-0",
     },
     {
       title: "Rate limiters",
       description:
-        "Per-block flow limits, withdrawal caps, and circuit breakers slow exploit paths and cap how much value can move at once.",
+        "Per-asset deposit, withdrawal, borrowing, and exposure limits—plus automated circuit breakers—cap risk as it moves.",
       accent: "lavender",
       Icon: LimitIcon,
-      layoutClass: "lg:flex-[1.62] lg:basis-0",
+      layoutClass: "lg:flex-[1.12] lg:basis-0",
+    },
+    {
+      title: "Liquidation controls",
+      description:
+        "Prioritized and partial liquidations keep risk resolution orderly instead of forcing all-or-nothing outcomes.",
+      accent: "lavender",
+      Icon: LimitIcon,
+      layoutClass: "lg:flex-[0.9] lg:basis-0",
     },
   ],
   [
     {
       title: "No admin keys",
       description:
-        "Privileged actions flow through OpenGov and scoped permissions, removing single points of failure from the control plane.",
+        "OpenGov, fine-grained permissions, and appchain-native controls remove single points of failure from the control plane.",
       accent: "green",
       Icon: LockKeyIcon,
-      layoutClass: "lg:flex-[1.35] lg:basis-0",
+      layoutClass: "lg:flex-[1.14] lg:basis-0",
     },
     {
       title: "Targeted pauses",
       description:
-        "Specific protocol functions can be paused when needed, containing incidents without freezing the whole system.",
+        "Per-asset transaction pausing contains incidents without freezing the whole system.",
       accent: "green",
       Icon: SirenIcon,
-      layoutClass: "lg:flex-[1.05] lg:basis-0",
+      layoutClass: "lg:flex-[0.92] lg:basis-0",
+    },
+    {
+      title: "Onchain oracle updates",
+      description:
+        "Oracle updates are handled onchain, keeping market inputs inside Hydration's execution environment.",
+      accent: "green",
+      Icon: TestRigIcon,
+      layoutClass: "lg:flex-[0.94] lg:basis-0",
     },
   ],
 ] as const;
@@ -219,16 +243,20 @@ export default function SecurityFeature() {
   return (
     <AnimateOnView
       className="bg-beige px-6 py-16 md:px-[50px] xl:px-0 lg:py-24"
+      variants={revealStagger(0.1, 20)}
       threshold={0.05}
     >
       <section className="container relative mx-auto flex w-full max-xl:!px-0 flex-col gap-14">
-        <ScrollAnchor id="assume-breach" />
-        <div className="mx-auto flex w-full max-w-[900px] shrink-0 flex-col gap-5">
+        <ScrollAnchor id="security" />
+        <motion.div
+          className="mx-auto flex w-full max-w-[900px] shrink-0 flex-col gap-5"
+          variants={fadeUp(14)}
+        >
           <SectionLabel captionClassName="text-pink" iconClassName="bg-pink">
-            Security
+            Security without compromise
           </SectionLabel>
           <Heading size="large" className="text-purple">
-            Defense in depth.
+            Defense in depth
           </Heading>
           <Paragraph size="large" className="max-w-[60ch] text-purple-dim">
             Hydration is built for adversarial markets. Every layer is designed
@@ -246,9 +274,9 @@ export default function SecurityFeature() {
           >
             Read the security post
           </Button>
-        </div>
+        </motion.div>
 
-        <div className="flex w-full flex-col gap-4 lg:grid lg:min-h-[48rem] lg:grid-cols-3 lg:items-stretch lg:gap-5">
+        <div className="flex w-full flex-col gap-4 lg:grid lg:min-h-[64rem] lg:grid-cols-3 lg:items-stretch lg:gap-5">
           {securityBentoColumns.map((column, columnIndex) => (
             <div
               key={columnIndex}

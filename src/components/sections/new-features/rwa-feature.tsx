@@ -1,16 +1,16 @@
 "use client";
 
 import AnimateOnView from "@/animation/motion-section";
-import { fadeUp, staggerChildren } from "@/animation/variants";
+import { staggerChildren } from "@/animation/variants";
 import ScrollAnchor from "@/components/scroll-anchor";
+import ArchFeatureCard from "@/components/sections/arch-feature-card";
 import Button from "@/components/ui/buttons/button";
 import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
 import { motion } from "framer-motion";
-import type { CSSProperties } from "react";
 
-function GlobeIcon() {
+export function ProductiveAssetsIcon() {
   return (
     <svg
       className={rwaSvgIconClass}
@@ -59,7 +59,7 @@ function GlobeIcon() {
   );
 }
 
-function NetworkIcon() {
+export function StrategyNetworkIcon() {
   return (
     <svg
       className={rwaSvgIconClass}
@@ -118,14 +118,14 @@ const rwaCards = [
     description:
       "Today that starts with PRIME tokenized US HELOC exposure, Decentral invoice financing, and Sigil stablecoin yield.",
     accent: "lavender",
-    Icon: GlobeIcon,
+    Icon: ProductiveAssetsIcon,
   },
   {
     title: "Stablecoin liquidity.",
     description:
       "RWA markets can feed collateral and borrowing demand into HOLLAR, Hydration's native stablecoin, instead of remaining isolated yield products.",
     accent: "blue",
-    Icon: NetworkIcon,
+    Icon: StrategyNetworkIcon,
   },
   {
     title: "Built for growth.",
@@ -135,9 +135,6 @@ const rwaCards = [
     Icon: GrowthIcon,
   },
 ] as const;
-
-const rwaIconSlotClass =
-  "flex h-[68px] w-[68px] shrink-0 items-center justify-center [&>svg]:block";
 
 const rwaSvgIconClass = "h-[68px] w-[68px] shrink-0";
 
@@ -183,73 +180,16 @@ export default function RwaFeature() {
           variants={staggerChildren(0.14)}
         >
           {rwaCards.map((card) => (
-            <RwaArchCard key={card.title} {...card} />
+            <ArchFeatureCard
+              key={card.title}
+              title={card.title}
+              description={card.description}
+              accent={card.accent}
+              icon={<card.Icon />}
+            />
           ))}
         </motion.div>
       </section>
     </AnimateOnView>
-  );
-}
-
-function RwaArchCard({
-  title,
-  description,
-  accent,
-  Icon,
-}: {
-  title: string;
-  description: string;
-  accent: "lavender" | "blue" | "green";
-  Icon: () => JSX.Element;
-}) {
-  const accentClasses = {
-    lavender:
-      "bg-lavender/40 text-purple shadow-[0_0_0_18px_rgba(223,177,243,0.28)]",
-    blue:
-      "bg-blue/45 text-purple shadow-[0_0_0_18px_rgba(179,215,250,0.3)]",
-    green:
-      "bg-green/55 text-purple shadow-[0_0_0_18px_rgba(179,207,146,0.3)]",
-  };
-  const cardMaskStyle = {
-    WebkitMaskImage:
-      "radial-gradient(circle 2rem at 0 100%, transparent 0 1.98rem, #000 2rem), radial-gradient(circle 2rem at 100% 100%, transparent 0 1.98rem, #000 2rem)",
-    WebkitMaskPosition: "left top, right top",
-    WebkitMaskRepeat: "no-repeat, no-repeat",
-    WebkitMaskSize: "50.1% 100%, 50.1% 100%",
-    maskImage:
-      "radial-gradient(circle 2rem at 0 100%, transparent 0 1.98rem, #000 2rem), radial-gradient(circle 2rem at 100% 100%, transparent 0 1.98rem, #000 2rem)",
-    maskPosition: "left top, right top",
-    maskRepeat: "no-repeat, no-repeat",
-    maskSize: "50.1% 100%, 50.1% 100%",
-  } satisfies CSSProperties;
-
-  return (
-    <motion.article
-      className="relative mx-auto flex min-h-[25rem] w-[80vw] max-w-[24rem] flex-col items-center overflow-hidden rounded-t-full bg-white px-7 pb-11 pt-[3.25rem] text-center shadow-[0_18px_60px_rgba(36,14,50,0.08)] lg:min-h-[37rem] lg:w-full lg:max-w-[30rem] lg:px-12 lg:pb-14 lg:pt-20"
-      style={cardMaskStyle}
-      variants={fadeUp(28)}
-    >
-      <div className="relative z-10 mt-1 grid w-full justify-items-center lg:mt-0">
-        <div
-          className={`grid h-24 w-24 place-items-center rounded-full lg:h-32 lg:w-32 ${accentClasses[accent]}`}
-        >
-          <span className={rwaIconSlotClass}>
-            <Icon />
-          </span>
-        </div>
-      </div>
-
-      <div className="relative z-10 mt-12 flex max-w-[22rem] flex-col items-center lg:mt-20 lg:max-w-[24rem]">
-        <h3 className="font-gazpacho text-[clamp(1.3rem,2.2125vw,2.4rem)] font-medium leading-[1] text-purple">
-          {title}
-        </h3>
-        <Paragraph
-          size="large"
-          className="mt-5 max-w-[19.5rem] text-purple-dim lg:mt-8 lg:max-w-[21rem]"
-        >
-          {description}
-        </Paragraph>
-      </div>
-    </motion.article>
   );
 }
