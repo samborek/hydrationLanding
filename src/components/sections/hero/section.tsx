@@ -22,6 +22,9 @@ import { useRef, useState } from "react";
 const headlineEase = [0.2, 0.65, 0.3, 0.9] as const;
 const beigeShaderColor = [246 / 255, 246 / 255, 236 / 255] as const;
 const metricRevealEase = (value: number) => 1 - Math.pow(1 - value, 3);
+// Preserved for another pass: progressively feathers the real scene container
+// while it expands, without introducing a duplicate blurred background.
+const sceneEdgeFeatherEnabled = false;
 
 export default function HeroSection({ stats }: { stats: StatsData }) {
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -50,7 +53,12 @@ export default function HeroSection({ stats }: { stats: StatsData }) {
     [0, 0.18],
     ["7vw", "0vw"]
   );
-  const sceneFeatherMask = useMotionTemplate`linear-gradient(to bottom, transparent ${sceneMaskTop}, black calc(${sceneMaskTop} + 26px), black calc(100% - 20px), transparent 100%), linear-gradient(to right, transparent ${sceneMaskSide}, black calc(${sceneMaskSide} + 22px), black calc(100% - ${sceneMaskSide} - 22px), transparent calc(100% - ${sceneMaskSide}))`;
+  const sceneMaskEdgeAlpha = useTransform(
+    scrollYProgress,
+    [0, 0.035, 0.13, 0.18],
+    [1, 0, 0, 1]
+  );
+  const sceneFeatherMask = useMotionTemplate`linear-gradient(to bottom, rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) ${sceneMaskTop}, black calc(${sceneMaskTop} + 26px), black calc(100% - 20px), rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) 100%), linear-gradient(to right, rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) ${sceneMaskSide}, black calc(${sceneMaskSide} + 22px), black calc(100% - ${sceneMaskSide} - 22px), rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) calc(100% - ${sceneMaskSide}))`;
   const sceneFillOpacity = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
   const sceneTransitionHeight = useTransform(
     scrollYProgress,
@@ -115,8 +123,14 @@ export default function HeroSection({ stats }: { stats: StatsData }) {
             clipPath: reducedMotion
               ? "inset(66vh 7vw 0 7vw round 2.75rem 2.75rem 0 0)"
               : sceneClip,
-            maskImage: reducedMotion ? undefined : sceneFeatherMask,
-            WebkitMaskImage: reducedMotion ? undefined : sceneFeatherMask,
+            maskImage:
+              sceneEdgeFeatherEnabled && !reducedMotion
+                ? sceneFeatherMask
+                : undefined,
+            WebkitMaskImage:
+              sceneEdgeFeatherEnabled && !reducedMotion
+                ? sceneFeatherMask
+                : undefined,
             maskComposite: "intersect",
             WebkitMaskComposite: "source-in",
           }}
