@@ -1,7 +1,6 @@
 import Footer from "@/components/footer/footer";
 import Header from "@/components/header/header";
 import { fetchStats } from "@/api/stats";
-import HomepageVersionTabs from "@/components/homepage-version-tabs";
 import HeroSection from "@/components/sections/hero/section";
 import SecurityFeature from "@/components/sections/new-features/security-feature";
 import {
@@ -104,7 +103,6 @@ export default async function Home() {
       <HdxSection />
       <CommunityBuildSection />
       <Footer />
-      <HomepageVersionTabs active="current" />
     </main>
   );
 }

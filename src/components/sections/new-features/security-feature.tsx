@@ -3,12 +3,10 @@
 import AnimateOnView from "@/animation/motion-section";
 import { fadeUp, revealStagger } from "@/animation/variants";
 import ScrollAnchor from "@/components/scroll-anchor";
-import Button from "@/components/ui/buttons/button";
 import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
 import { motion } from "framer-motion";
-import { twMerge } from "tailwind-merge";
 
 function OnionShieldIcon() {
   return (
@@ -149,94 +147,56 @@ function SirenIcon() {
   );
 }
 
-type SecurityBentoCardConfig = {
+type SecurityGroup = {
   title: string;
-  description: string;
-  accent: "lavender" | "blue" | "green";
+  accentClassName: string;
   Icon: () => JSX.Element;
-  /** Flex grow weights at lg; columns share one min-height so ratios create bento silhouette */
-  layoutClass: string;
+  mechanisms: readonly string[];
 };
 
-const securityBentoColumns: readonly (readonly SecurityBentoCardConfig[])[] = [
-  [
-    {
-      title: "Assume breach",
-      description:
-        "Hydration starts from the assumption that every layer can fail, so the stack is built to absorb failure before it spreads.",
-      accent: "lavender",
-      Icon: OnionShieldIcon,
-      layoutClass: "lg:flex-[1.4] lg:basis-0",
-    },
-    {
-      title: "Bound the edges",
-      description:
-        "XCM, the EVM, and flash-loan paths are tightly constrained so edge risk stays at the edge.",
-      accent: "blue",
-      Icon: BoundaryIcon,
-      layoutClass: "lg:flex-[0.9] lg:basis-0",
-    },
-    {
-      title: "Whitelisted by design",
-      description:
-        "Asset and contract whitelisting restricts which assets and contracts can enter the protocol.",
-      accent: "blue",
-      Icon: LockKeyIcon,
-      layoutClass: "lg:flex-[0.9] lg:basis-0",
-    },
-  ],
-  [
-    {
-      title: "Test adversarially",
-      description:
-        "Independent audits, invariant checks, continuous fuzzing, AI-assisted analysis, and a top-10 Immunefi bug bounty keep constant pressure on the system.",
-      accent: "blue",
-      Icon: TestRigIcon,
-      layoutClass: "lg:flex-[1.2] lg:basis-0",
-    },
-    {
-      title: "Rate limiters",
-      description:
-        "Per-asset deposit, withdrawal, borrowing, and exposure limits—plus automated circuit breakers—cap risk as it moves.",
-      accent: "lavender",
-      Icon: LimitIcon,
-      layoutClass: "lg:flex-[1.12] lg:basis-0",
-    },
-    {
-      title: "Liquidation controls",
-      description:
-        "Prioritized and partial liquidations keep risk resolution orderly instead of forcing all-or-nothing outcomes.",
-      accent: "lavender",
-      Icon: LimitIcon,
-      layoutClass: "lg:flex-[0.9] lg:basis-0",
-    },
-  ],
-  [
-    {
-      title: "No admin keys",
-      description:
-        "OpenGov, fine-grained permissions, and appchain-native controls remove single points of failure from the control plane.",
-      accent: "green",
-      Icon: LockKeyIcon,
-      layoutClass: "lg:flex-[1.14] lg:basis-0",
-    },
-    {
-      title: "Targeted pauses",
-      description:
-        "Per-asset transaction pausing contains incidents without freezing the whole system.",
-      accent: "green",
-      Icon: SirenIcon,
-      layoutClass: "lg:flex-[0.92] lg:basis-0",
-    },
-    {
-      title: "Onchain oracle updates",
-      description:
-        "Oracle updates are handled onchain, keeping market inputs inside Hydration's execution environment.",
-      accent: "green",
-      Icon: TestRigIcon,
-      layoutClass: "lg:flex-[0.94] lg:basis-0",
-    },
-  ],
+const securityGroups: readonly SecurityGroup[] = [
+  {
+    title: "Authority & access",
+    accentClassName: "text-[#B66BD6]",
+    Icon: LockKeyIcon,
+    mechanisms: [
+      "Onchain governance as the ultimate decision-making and authorization layer",
+      "Fine-grained protocol permissions",
+      "Appchain-native security controls",
+    ],
+  },
+  {
+    title: "Exposure boundaries",
+    accentClassName: "text-[#4B8FD3]",
+    Icon: LimitIcon,
+    mechanisms: [
+      "Per-asset transaction pausing",
+      "Per-asset deposit, withdrawal, borrowing, and exposure limits",
+      "Asset and contract whitelisting",
+    ],
+  },
+  {
+    title: "Runtime safeguards",
+    accentClassName: "text-[#6F8F48]",
+    Icon: SirenIcon,
+    mechanisms: [
+      "Invariant enforcement",
+      "Automated circuit breakers",
+      "Prioritized and partial liquidations",
+      "Onchain oracle updates",
+    ],
+  },
+  {
+    title: "Continuous assurance",
+    accentClassName: "text-pink",
+    Icon: TestRigIcon,
+    mechanisms: [
+      "Independent security audits",
+      "Continuous fuzzing",
+      "AI-assisted security analysis",
+      "A top-10 Immunefi bug bounty program",
+    ],
+  },
 ] as const;
 
 export default function SecurityFeature() {
@@ -247,7 +207,7 @@ export default function SecurityFeature() {
       threshold={0.08}
       viewportMargin="0px 0px -10% 0px"
     >
-      <section className="container relative mx-auto flex w-full max-xl:!px-0 flex-col gap-14">
+      <section className="container relative mx-auto flex w-full max-xl:!px-0 flex-col gap-10 lg:gap-12">
         <ScrollAnchor id="security" />
         <motion.div
           className="mx-auto flex w-full max-w-[900px] shrink-0 flex-col gap-5"
@@ -260,100 +220,73 @@ export default function SecurityFeature() {
             Defense in depth
           </Heading>
           <Paragraph size="large" className="max-w-[60ch] text-purple-dim">
-            Hydration is built for adversarial markets. Every layer is designed
-            around the idea that failures can happen, so the protocol focuses
-            on slowing attacks, limiting damage, and keeping recovery
-            controlled.
+            Hydration is built around a simple principle: assume that every
+            layer can fail. Instead of relying on a single line of defense, the
+            protocol uses multiple independent protections across governance,
+            infrastructure, execution, and product design.
           </Paragraph>
-          <Button
-            role="primary"
-            action={{
-              href: "https://hydration.substack.com/p/assume-breach-hydrations-paranoid",
-              target: "_blank",
-            }}
-            decoration="arrow"
-          >
-            Read the security post
-          </Button>
         </motion.div>
 
-        <div className="flex w-full flex-col gap-4 lg:grid lg:min-h-[64rem] lg:grid-cols-3 lg:items-stretch lg:gap-5">
-          {securityBentoColumns.map((column, columnIndex) => (
-            <div
-              key={columnIndex}
-              className="flex min-h-0 flex-col gap-4 lg:h-full lg:min-h-0"
-            >
-              {column.map((card) => (
-                <SecurityBentoCard key={card.title} {...card} />
-              ))}
-            </div>
+        <motion.div
+          className="relative grid w-full md:grid-cols-2 md:before:absolute md:before:inset-y-0 md:before:left-1/2 md:before:w-px md:before:bg-purple/15 md:after:absolute md:after:inset-x-0 md:after:top-1/2 md:after:h-px md:after:bg-purple/15"
+          initial="initial"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.08, margin: "0px 0px -8% 0px" }}
+          variants={revealStagger(0.045, 18)}
+        >
+          {securityGroups.map((group) => (
+            <SecurityGroupCard key={group.title} {...group} />
           ))}
-        </div>
+        </motion.div>
       </section>
     </AnimateOnView>
   );
 }
 
-function SecurityBentoCard({
+function SecurityGroupCard({
   title,
-  description,
-  accent,
+  accentClassName,
   Icon,
-  layoutClass,
-  className = "",
+  mechanisms,
 }: {
   title: string;
-  description: string;
-  accent: "lavender" | "blue" | "green";
+  accentClassName: string;
   Icon: () => JSX.Element;
-  layoutClass: string;
-  className?: string;
+  mechanisms: readonly string[];
 }) {
-  const accentClasses = {
-    lavender: "bg-lavender/70 text-purple",
-    blue: "bg-blue/55 text-purple",
-    green: "bg-green/70 text-purple",
-  };
-
-  const iconChipClasses = {
-    lavender: "bg-lavender/60 text-purple",
-    blue: "bg-blue/60 text-purple",
-    green: "bg-green/65 text-purple",
-  };
-
   return (
-    <AnimateOnView
-      element="div"
-      className={twMerge(
-        "relative flex h-full min-h-0 max-lg:flex-none flex-col overflow-hidden rounded-[2rem] p-6 shadow-none lg:min-h-0 lg:p-7",
-        accentClasses[accent],
-        layoutClass,
-        className
-      )}
-      variants={fadeUp()}
-      threshold={0.16}
-      viewportMargin="0px 0px -8% 0px"
+    <motion.article
+      className="relative border-b border-purple/15 py-8 last:border-b-0 md:min-h-[22rem] md:border-0 md:p-9 lg:min-h-[21rem] lg:p-11"
+      variants={fadeUp(12)}
     >
-      <motion.article className="flex min-h-0 flex-1 flex-col gap-4" variants={fadeUp()}>
+      <div className="flex items-center gap-4 md:gap-5">
         <div
-          className={twMerge(
-            "grid h-12 w-12 shrink-0 place-items-center rounded-full self-start lg:h-14 lg:w-14",
-            iconChipClasses[accent]
-          )}
+          className={`grid h-12 w-12 shrink-0 place-items-center [&_svg]:h-11 [&_svg]:w-11 ${accentClassName}`}
         >
           <Icon />
         </div>
-        <h3 className="max-w-[20ch] font-gazpacho text-[clamp(1.3rem,1.9vw,2.15rem)] font-medium leading-[0.95] text-purple lg:max-w-none">
+        <h3 className="font-geist text-[0.8rem] font-semibold uppercase leading-none tracking-[0.14em] text-purple md:text-[0.85rem]">
           {title}
         </h3>
-
-        <Paragraph
-          size="medium"
-          className="max-w-[26ch] text-[1rem] leading-[1.35] text-purple-dim lg:max-w-[28ch] lg:text-[1.05rem]"
-        >
-          {description}
-        </Paragraph>
-      </motion.article>
-    </AnimateOnView>
+      </div>
+      <ul className="mt-6 divide-y divide-purple/10 border-y border-purple/10 md:mt-7">
+        {mechanisms.map((mechanism, index) => (
+          <li
+            key={mechanism}
+            className="flex max-w-[31rem] items-start gap-4 py-3.5 md:gap-5 md:py-4"
+          >
+            <span
+              className={`mt-[0.32em] w-5 shrink-0 font-geist text-[0.68rem] font-semibold leading-none tracking-[0.12em] ${accentClassName}`}
+              aria-hidden="true"
+            >
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="font-gazpacho text-[1.12rem] font-medium leading-[1.12] text-purple md:text-[1.22rem]">
+              {mechanism}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </motion.article>
   );
 }

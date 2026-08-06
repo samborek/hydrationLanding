@@ -19,7 +19,7 @@ import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
 import DiamondIcon from "@/components/ui/labels/icons/diamond";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 
@@ -214,60 +214,58 @@ export function ProductiveYieldSection() {
 export function StrategiesSection() {
   return (
     <AnimateOnView
-      className="bg-white px-6 py-16 md:px-[50px] lg:py-28 xl:px-0"
+      className="bg-white py-16 lg:py-28"
       variants={revealStagger(0.1, 18)}
       threshold={0.12}
       viewportMargin="0px 0px -10% 0px"
     >
-      <section
-        id="strategies"
-        className="container mx-auto scroll-mt-24 max-xl:!px-0 lg:scroll-mt-28"
-      >
+      <section id="strategies" className="scroll-mt-24 lg:scroll-mt-28">
         <motion.div
-          className="grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end lg:gap-16"
+          className="container mx-auto px-6 md:px-[50px] xl:px-16"
           variants={fadeUp(14)}
         >
-          <div>
+          <div className="max-w-[44rem]">
             <SectionLabel captionClassName="text-pink" iconClassName="bg-pink">
               Strategies
             </SectionLabel>
             <Heading size="large" className="mt-5 max-w-[13ch] text-purple">
               Built for different risk profiles
             </Heading>
+            <p className="mt-6 max-w-[42rem] font-geist text-[1.1rem] font-normal leading-[1.55] text-purple-dim">
+              Put your capital to work through strategies designed around
+              transparent yield sources and clearly defined risk.
+            </p>
           </div>
-          <Paragraph
-            size="large"
-            className="max-w-[42rem] text-purple-dim lg:pb-1"
-          >
-            Put your capital to work through strategies designed around
-            transparent yield sources and clearly defined risk.
-          </Paragraph>
         </motion.div>
 
         <motion.div
-          className="mt-12 grid gap-6 lg:mt-16 lg:grid-cols-2 lg:gap-8"
+          className="mt-12 grid border-t border-purple/10 lg:mt-16 lg:grid-cols-2"
           initial="initial"
           whileInView="visible"
           viewport={{ once: true, amount: 0.14, margin: "0px 0px -8% 0px" }}
           variants={revealStagger(0.14, 30)}
         >
-          <StrategyCard
+          <StrategyTile
             eyebrow="Lower volatility"
             title="Stable Yield"
             description="Earn sustainable returns through strategies focused on stable assets, conservative positioning, and durable sources of yield."
-            tags={["Stable assets", "Conservative", "Durable yield"]}
-            className="bg-lavender"
-            buttonRole="primary"
+            riskLabel="Lower risk"
+            riskIconSrc="/strategy-risk-low.svg"
+            riskNeedleAngle={-137}
+            titleClassName="text-[#45AC1F]"
+            side="left"
             cta="Explore Stable-yield strategies"
           />
-          <StrategyCard
+          <StrategyTile
             eyebrow="Higher potential"
             title="Enhanced Yield"
             description="Increase potential returns through actively optimized strategies that combine productive assets, borrowing, liquidity, and DeFi incentives."
-            tags={["Actively optimized", "Borrowing", "DeFi incentives"]}
-            className="bg-purple text-white"
-            inverse
-            buttonRole="secondary"
+            riskLabel="Elevated risk"
+            riskIconSrc="/strategy-risk-high.svg"
+            riskNeedleAngle={-54}
+            titleClassName="text-pink"
+            className="border-t border-purple/10 lg:border-l lg:border-t-0"
+            side="right"
             cta="Explore Enhanced-yield strategies"
           />
         </motion.div>
@@ -276,88 +274,180 @@ export function StrategiesSection() {
   );
 }
 
-function StrategyCard({
+function StrategyTile({
   eyebrow,
   title,
   description,
-  tags,
   cta,
-  className,
-  inverse = false,
-  buttonRole,
+  className = "",
+  titleClassName,
+  riskLabel,
+  riskIconSrc,
+  riskNeedleAngle,
+  side,
 }: {
   eyebrow: string;
   title: string;
   description: string;
-  tags: readonly string[];
   cta: string;
-  className: string;
-  inverse?: boolean;
-  buttonRole: "primary" | "secondary";
+  className?: string;
+  titleClassName: string;
+  riskLabel: string;
+  riskIconSrc: string;
+  riskNeedleAngle: number;
+  side: "left" | "right";
 }) {
+  const gridPadding =
+    side === "left"
+      ? "lg:pl-[50px] lg:pr-8 xl:pl-[max(4rem,calc((100vw-83rem)/2+4rem))] xl:pr-8"
+      : "lg:pl-8 lg:pr-[50px] xl:pl-8 xl:pr-[max(4rem,calc((100vw-83rem)/2+4rem))]";
+
   return (
     <motion.article
-      className={`relative flex min-h-[34rem] flex-col overflow-hidden rounded-[2rem] p-7 lg:min-h-[40rem] lg:p-10 ${className}`}
-      variants={revealStagger(0.08, 24)}
+      className={`flex min-h-[31rem] flex-col px-6 py-8 md:px-[50px] md:py-10 lg:min-h-[38rem] lg:py-12 ${gridPadding} ${className}`}
+      variants={revealStagger(0.12, 24)}
     >
-      <div
-        aria-hidden="true"
-        className={`absolute -right-24 -top-24 h-64 w-64 rounded-full border-[3rem] lg:h-80 lg:w-80 ${
-          inverse ? "border-lavender/15" : "border-white/30"
-        }`}
-      />
-      <motion.div className="relative z-10" variants={fadeUp(12)}>
-        <span
-          className={`inline-flex rounded-full border px-3 py-1.5 font-geist text-xs font-medium uppercase tracking-[0.14em] ${
-            inverse
-              ? "border-white/20 text-lavender"
-              : "border-purple/15 text-purple/60"
-          }`}
-        >
-          {eyebrow}
-        </span>
-        <h3
-          className={`mt-8 font-gazpacho text-[3.15rem] font-medium leading-[0.9] lg:text-[4.35rem] ${
-            inverse ? "text-white" : "text-purple"
-          }`}
-        >
-          {title}
-        </h3>
-        <Paragraph
-          size="large"
-          className={`mt-6 max-w-[36rem] text-[1.08rem] leading-[1.45] ${
-            inverse ? "text-white/65" : "text-purple-dim"
-          }`}
-        >
-          {description}
-        </Paragraph>
+      <motion.div
+        className="flex items-start justify-between gap-6"
+        variants={revealStagger(0.12, 14)}
+      >
+        <motion.div variants={fadeUp(12)}>
+          <span className="font-geist text-xs font-medium uppercase tracking-[0.14em] text-purple/55">
+            Strategy profile
+          </span>
+          <h3
+            className={`mt-3 font-gazpacho text-[2.1rem] font-medium leading-none md:text-[2.6rem] ${titleClassName}`}
+          >
+            {title}
+          </h3>
+        </motion.div>
+        <RiskGauge
+          label={riskLabel}
+          iconSrc={riskIconSrc}
+          needleAngle={riskNeedleAngle}
+        />
       </motion.div>
 
-      <motion.div className="relative z-10 mt-auto pt-16" variants={fadeUp(18)}>
-        <div className="mb-7 flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className={`rounded-full px-3 py-2 font-geist text-xs ${
-                inverse
-                  ? "bg-white/10 text-white/75"
-                  : "bg-white/45 text-purple/65"
-              }`}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+      <motion.div
+        className="mt-auto pt-20 lg:pt-28"
+        variants={revealStagger(0.08, 10)}
+      >
+        <motion.p
+          className="max-w-[31rem] font-geist text-[1.45rem] leading-[1.28] tracking-[-0.025em] md:text-[1.75rem] lg:text-[2rem]"
+          variants={fadeUp(14)}
+        >
+          <span className="font-medium text-purple">{eyebrow}. </span>
+          <span className="text-purple/50">{description}</span>
+        </motion.p>
         <Button
-          role={buttonRole}
-          decoration="arrow"
+          role="primary"
+          fill="solid"
           action={{ href: "https://app.hydration.net", target: "_blank" }}
-          className="w-full rounded-[2rem] [&>div]:w-full [&>div]:justify-between"
+          className="mt-8 rounded-full bg-purple px-6 py-3 text-white hover:bg-pink md:mt-10"
         >
           {cta}
         </Button>
       </motion.div>
     </motion.article>
+  );
+}
+
+function RiskGauge({
+  label,
+  iconSrc,
+  needleAngle,
+}: {
+  label: string;
+  iconSrc: string;
+  needleAngle: number;
+}) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className="shrink-0 text-purple"
+      role="img"
+      aria-label={`${label} strategy profile`}
+      variants={{
+        initial: { opacity: 0, y: reduceMotion ? 0 : 8 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: {
+            duration: reduceMotion ? 0 : 0.42,
+            ease: [0.2, 0.65, 0.3, 0.9],
+          },
+        },
+      }}
+    >
+      <span className="mb-1 block text-right font-geist text-[0.65rem] font-medium uppercase tracking-[0.12em] text-purple/55">
+        {label}
+      </span>
+      <div className="relative h-[38px] w-[72px]">
+        <motion.div
+          className="absolute inset-0"
+          variants={{
+            initial: {
+              opacity: reduceMotion ? 1 : 0,
+              clipPath: reduceMotion
+                ? "inset(0% 0% 0% 0%)"
+                : "inset(0% 100% 0% 0%)",
+            },
+            visible: {
+              opacity: 1,
+              clipPath: "inset(0% 0% 0% 0%)",
+              transition: {
+                delay: reduceMotion ? 0 : 0.48,
+                duration: reduceMotion ? 0 : 1.1,
+                ease: [0.2, 0.65, 0.3, 0.9],
+              },
+            },
+          }}
+        >
+          <Image
+            src={iconSrc}
+            alt=""
+            width={72}
+            height={38}
+            className="h-[38px] w-[72px]"
+          />
+        </motion.div>
+        <span className="absolute left-1/2 top-[31px] -translate-y-1/2">
+          <motion.span
+            className="block h-[2px] w-[19px] origin-left rounded-full bg-purple"
+            variants={{
+              initial: { rotate: reduceMotion ? needleAngle : -180 },
+              visible: {
+                rotate: needleAngle,
+                transition: reduceMotion
+                  ? { duration: 0 }
+                  : {
+                      delay: 1.18,
+                      type: "spring",
+                      stiffness: 38,
+                      damping: 10,
+                      mass: 1.05,
+                    },
+              },
+            }}
+          />
+          <motion.span
+            className="absolute -left-[3px] -top-[2px] h-[6px] w-[6px] rounded-full bg-purple"
+            variants={{
+              initial: { opacity: reduceMotion ? 1 : 0, scale: 0.5 },
+              visible: {
+                opacity: 1,
+                scale: 1,
+                transition: {
+                  delay: reduceMotion ? 0 : 1.1,
+                  duration: reduceMotion ? 0 : 0.42,
+                },
+              },
+            }}
+          />
+        </span>
+      </div>
+    </motion.div>
   );
 }
 
