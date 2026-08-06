@@ -1380,7 +1380,161 @@ html.lenis body {
   transform: none;
 }
 
+/* Appchain integrated-system illustration */
+.appchain-system {
+  margin-right: max(-1.5rem, calc((100vw - 100%) / -2));
+  margin-left: max(-1.5rem, calc((100vw - 100%) / -2));
+}
+
+.appchain-system__visual {
+  position: relative;
+  overflow: visible;
+  aspect-ratio: 80 / 49;
+  isolation: isolate;
+  background: #240e32;
+}
+
+.appchain-system__image {
+  z-index: 0;
+  object-fit: contain;
+}
+
+.appchain-system__routes {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  color: rgb(255 255 255 / 0.94);
+  pointer-events: none;
+}
+
+.appchain-route__base,
+.appchain-route__flow {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.appchain-route__base {
+  stroke: rgb(255 255 255 / 0.18);
+  stroke-width: 4;
+}
+
+.appchain-route__flow {
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 10 13;
+  animation: appchain-route-flow 9s linear infinite;
+  animation-delay: calc(var(--route-index) * -0.75s);
+}
+
+.appchain-route--pink { color: #ffdeec; }
+.appchain-route--cyan { color: #aaeefc; }
+.appchain-route--lime { color: #bfff98; }
+.appchain-route--lavender { color: #dfb1f3; }
+
+@keyframes appchain-route-flow {
+  to { stroke-dashoffset: -92; }
+}
+
+.appchain-system__product-labels,
+.appchain-system__execution-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.appchain-system__product,
+.appchain-system__execution {
+  position: absolute;
+  font-family: "Geist", sans-serif;
+  line-height: 1.12;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.appchain-system__product {
+  width: 11.5rem;
+  color: white;
+  font-size: clamp(0.82rem, 1.25vw, 1.1rem);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  text-shadow: 0 1px 8px rgb(16 3 28 / 0.3);
+}
+
+.appchain-system__product--strategies { top: 54%; left: 13%; }
+.appchain-system__product--borrowing { top: 73%; left: 37%; }
+.appchain-system__product--liquidity { top: 59%; left: 61%; }
+.appchain-system__product--hollar { top: 49%; left: 84%; }
+
+.appchain-system__execution {
+  max-width: 14rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.26);
+  border-radius: 999px;
+  background: rgb(36 14 50 / 0.7);
+  box-shadow: 0 0.4rem 1.4rem rgb(15 3 24 / 0.18);
+  color: rgb(255 255 255 / 0.83);
+  font-size: clamp(0.6rem, 0.8vw, 0.72rem);
+  font-weight: 520;
+  backdrop-filter: blur(9px);
+}
+
+.appchain-system__execution--oracle { top: 12%; left: 54%; }
+.appchain-system__execution--priority { top: 24%; left: 78%; }
+.appchain-system__execution--liquidations { top: 87%; left: 65%; }
+.appchain-system__execution--risk { top: 18%; left: 19%; }
+.appchain-system__execution--runtime { top: 86%; left: 87%; }
+
+@media (max-width: 767px) {
+  .appchain-system {
+    margin-right: -1.5rem;
+    margin-left: -1.5rem;
+  }
+
+  .appchain-system__visual {
+    aspect-ratio: 80 / 49;
+  }
+
+  .appchain-system__image {
+    object-position: 49% center;
+  }
+
+  .appchain-system__routes {
+    object-position: 49% center;
+  }
+
+  .appchain-system__product {
+    width: 6.5rem;
+    font-size: 0.72rem;
+  }
+
+  .appchain-system__product--strategies { top: 49%; left: 12%; }
+  .appchain-system__product--borrowing { top: 68%; left: 33%; }
+  .appchain-system__product--liquidity { top: 57%; left: 62%; }
+  .appchain-system__product--hollar { top: 45%; left: 89%; }
+
+  .appchain-system__execution {
+    max-width: 8.8rem;
+    padding: 0.42rem 0.55rem;
+    font-size: 0.56rem;
+  }
+
+  .appchain-system__execution--oracle { top: 10%; left: 54%; }
+  .appchain-system__execution--priority { top: 21%; left: 78%; }
+  .appchain-system__execution--liquidations { top: 91%; left: 55%; }
+  .appchain-system__execution--risk { top: 15%; left: 19%; }
+  .appchain-system__execution--runtime { top: 82%; left: 82%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .appchain-route__flow {
+    animation: none;
+  }
+
   .reveal-on-view,
   .reveal-on-view.is-revealed {
     opacity: 1;

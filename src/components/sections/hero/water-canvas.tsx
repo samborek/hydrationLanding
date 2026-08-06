@@ -334,6 +334,7 @@ export default function HeroWaterCanvas({
     let hasRipplePosition = false;
     let imageWidth = 1;
     let imageHeight = 1;
+    let surfaceHeight = 1;
     let pointerInsideSurface = false;
 
     const image = new Image();
@@ -358,7 +359,12 @@ export default function HeroWaterCanvas({
 
     function resize() {
       const rect = drawingCanvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      surfaceHeight = Math.max(1, rect.height);
+      const dpr = Math.min(
+        window.devicePixelRatio || 1,
+        2,
+        2048 / Math.max(1, rect.width)
+      );
       const width = Math.max(1, Math.round(rect.width * dpr));
       const height = Math.max(1, Math.round(rect.height * dpr));
       if (drawingCanvas.width !== width || drawingCanvas.height !== height) {
@@ -419,7 +425,6 @@ export default function HeroWaterCanvas({
     }
 
     function render(now: number) {
-      resize();
       const hoverEase = 0.08 / HERO_RIPPLE_SETTINGS.cursorLag;
       const pointerEase = 0.12 / HERO_RIPPLE_SETTINGS.cursorLag;
       pointerX += (targetPointerX - pointerX) * pointerEase;
@@ -482,7 +487,7 @@ export default function HeroWaterCanvas({
               (typeof transitionHeightPx === "number"
                 ? transitionHeightPx
                 : transitionHeightPx?.get() ?? 0) /
-                Math.max(1, drawingCanvas.getBoundingClientRect().height)
+                surfaceHeight
             )
           : -1
       );
@@ -537,6 +542,7 @@ export default function HeroWaterCanvas({
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(interactiveSurface);
+    resize();
 
     const intersectionObserver = new IntersectionObserver(
       ([entry]) => {

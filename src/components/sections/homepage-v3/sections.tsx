@@ -19,9 +19,14 @@ import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
 import DiamondIcon from "@/components/ui/labels/icons/diamond";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useAnimationControls,
+  useReducedMotion,
+} from "framer-motion";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
+import { useId, useRef } from "react";
 
 const yieldPillars = [
   {
@@ -214,7 +219,7 @@ export function ProductiveYieldSection() {
 export function StrategiesSection() {
   return (
     <AnimateOnView
-      className="bg-white py-16 lg:py-28"
+      className="bg-white pt-16 lg:pt-28"
       variants={revealStagger(0.1, 18)}
       threshold={0.12}
       viewportMargin="0px 0px -10% 0px"
@@ -224,14 +229,22 @@ export function StrategiesSection() {
           className="container mx-auto px-6 md:px-[50px] xl:px-16"
           variants={fadeUp(14)}
         >
-          <div className="max-w-[44rem]">
-            <SectionLabel captionClassName="text-pink" iconClassName="bg-pink">
-              Strategies
-            </SectionLabel>
-            <Heading size="large" className="mt-5 max-w-[13ch] text-purple">
-              Built for different risk profiles
-            </Heading>
-            <p className="mt-6 max-w-[42rem] font-geist text-[1.1rem] font-normal leading-[1.55] text-purple-dim">
+          <div className="max-w-[50rem]">
+            <div className="max-w-[27.69rem]">
+              <SectionLabel
+                captionClassName="text-pink"
+                iconClassName="bg-pink"
+              >
+                Strategies
+              </SectionLabel>
+              <Heading
+                size="large"
+                className="mt-5 max-w-[13ch] text-purple lg:text-[2.922rem] lg:leading-[1.2]"
+              >
+                Built for different risk profiles
+              </Heading>
+            </div>
+            <p className="mt-6 max-w-[42rem] font-geist text-[1.1rem] font-normal leading-[1.55] text-purple-dim lg:text-[1.114rem]">
               Put your capital to work through strategies designed around
               transparent yield sources and clearly defined risk.
             </p>
@@ -329,11 +342,11 @@ function StrategyTile({
       </motion.div>
 
       <motion.div
-        className="mt-auto pt-20 lg:pt-28"
+        className="mt-auto pt-20 lg:mt-[6.8125rem] lg:min-h-[15.0625rem] lg:pt-0"
         variants={revealStagger(0.08, 10)}
       >
         <motion.p
-          className="max-w-[31rem] font-geist text-[1.45rem] leading-[1.28] tracking-[-0.025em] md:text-[1.75rem] lg:text-[2rem]"
+          className="max-w-[31rem] font-geist text-[1.45rem] leading-[1.5] tracking-[-0.0333em] md:text-[1.5rem]"
           variants={fadeUp(14)}
         >
           <span className="font-medium text-purple">{eyebrow}. </span>
@@ -343,7 +356,7 @@ function StrategyTile({
           role="primary"
           fill="solid"
           action={{ href: "https://app.hydration.net", target: "_blank" }}
-          className="mt-8 rounded-full bg-purple px-6 py-3 text-white hover:bg-pink md:mt-10"
+          className="mt-8 rounded-full bg-purple px-6 py-3 text-white hover:bg-pink md:mt-12"
         >
           {cta}
         </Button>
@@ -362,12 +375,112 @@ function RiskGauge({
   needleAngle: number;
 }) {
   const reduceMotion = useReducedMotion();
+  const fillControls = useAnimationControls();
+  const needleControls = useAnimationControls();
+  const hubControls = useAnimationControls();
+  const hasEntered = useRef(false);
+  const isGaugeAnimating = useRef(false);
+  const isLowerRisk = iconSrc.includes("low");
+  const riskProgress = isLowerRisk ? 0.24 : 0.7;
+  const revealMaskId = `risk-gauge-${useId().replace(/:/g, "")}`;
+  const fillPath = isLowerRisk
+    ? "M17.7695 31.406C17.7695 29.0981 18.2241 26.8128 19.1073 24.6806C19.9905 22.5484 21.285 20.6111 22.9169 18.9792L35.3438 31.406L17.7695 31.406Z"
+    : "M17.582 31.406C17.582 28.0985 18.5154 24.858 20.2749 22.0573C22.0344 19.2566 24.5485 17.0092 27.5282 15.5736C30.508 14.1379 33.8324 13.5723 37.1192 13.9418C40.4061 14.3112 43.522 15.6007 46.1087 17.662L35.1562 31.406L17.582 31.406Z";
+
+  const showFinalState = () => {
+    fillControls.set({ opacity: 1, pathLength: riskProgress });
+    needleControls.set({ rotate: needleAngle });
+    hubControls.set({ opacity: 1, scale: 1 });
+  };
+
+  const playEntrance = () => {
+    if (hasEntered.current) return;
+    hasEntered.current = true;
+
+    if (reduceMotion) {
+      showFinalState();
+      return;
+    }
+
+    isGaugeAnimating.current = true;
+    fillControls.set({ opacity: 0, pathLength: 0 });
+    needleControls.set({ rotate: -180 });
+    hubControls.set({ opacity: 0, scale: 0.5 });
+    void Promise.all([
+      fillControls.start({
+        opacity: 1,
+        pathLength: riskProgress,
+        transition: {
+          delay: 0.08,
+          duration: 1.1,
+          ease: [0.2, 0.65, 0.3, 0.9],
+        },
+      }),
+      needleControls.start({
+        rotate: needleAngle,
+        transition: {
+          delay: 0.55,
+          type: "spring",
+          stiffness: 38,
+          damping: 10,
+          mass: 1.05,
+        },
+      }),
+      hubControls.start({
+        opacity: 1,
+        scale: 1,
+        transition: { delay: 0.5, duration: 0.42 },
+      }),
+    ]).finally(() => {
+      isGaugeAnimating.current = false;
+    });
+  };
+
+  const replayGauge = () => {
+    if (reduceMotion || !hasEntered.current || isGaugeAnimating.current) return;
+
+    isGaugeAnimating.current = true;
+    void Promise.all([
+      fillControls.start({
+        opacity: 1,
+        pathLength: [riskProgress, 0, riskProgress],
+        transition: {
+          duration: 1.45,
+          times: [0, 0.42, 1],
+          ease: [0.2, 0.65, 0.3, 0.9],
+        },
+      }),
+      needleControls.start({
+        rotate: [needleAngle, -180, needleAngle],
+        transition: {
+          duration: 1.45,
+          times: [0, 0.42, 1],
+          ease: [0.2, 0.65, 0.3, 0.9],
+        },
+      }),
+      hubControls.start({
+        opacity: [1, 0.6, 1],
+        scale: [1, 0.72, 1],
+        transition: {
+          duration: 1.45,
+          times: [0, 0.42, 1],
+          ease: [0.2, 0.65, 0.3, 0.9],
+        },
+      }),
+    ]).finally(() => {
+      isGaugeAnimating.current = false;
+    });
+  };
 
   return (
     <motion.div
       className="shrink-0 text-purple"
       role="img"
       aria-label={`${label} strategy profile`}
+      onHoverStart={replayGauge}
+      onAnimationStart={(definition) => {
+        if (definition === "visible") playEntrance();
+      }}
       variants={{
         initial: { opacity: 0, y: reduceMotion ? 0 : 8 },
         visible: {
@@ -380,73 +493,57 @@ function RiskGauge({
         },
       }}
     >
-      <span className="mb-1 block text-right font-geist text-[0.65rem] font-medium uppercase tracking-[0.12em] text-purple/55">
-        {label}
-      </span>
-      <div className="relative h-[38px] w-[72px]">
-        <motion.div
-          className="absolute inset-0"
-          variants={{
-            initial: {
-              opacity: reduceMotion ? 1 : 0,
-              clipPath: reduceMotion
-                ? "inset(0% 0% 0% 0%)"
-                : "inset(0% 100% 0% 0%)",
-            },
-            visible: {
-              opacity: 1,
-              clipPath: "inset(0% 0% 0% 0%)",
-              transition: {
-                delay: reduceMotion ? 0 : 0.48,
-                duration: reduceMotion ? 0 : 1.1,
-                ease: [0.2, 0.65, 0.3, 0.9],
-              },
-            },
-          }}
-        >
+      <motion.div initial={false}>
+        <span className="mb-1 block text-right font-geist text-[0.65rem] font-medium uppercase tracking-[0.12em] text-purple/55">
+          {label}
+        </span>
+        <div className="relative h-[38px] w-[72px]">
           <Image
             src={iconSrc}
             alt=""
             width={72}
             height={38}
-            className="h-[38px] w-[72px]"
+            className="absolute inset-0 h-[38px] w-[72px]"
           />
-        </motion.div>
-        <span className="absolute left-1/2 top-[31px] -translate-y-1/2">
-          <motion.span
-            className="block h-[2px] w-[19px] origin-left rounded-full bg-purple"
-            variants={{
-              initial: { rotate: reduceMotion ? needleAngle : -180 },
-              visible: {
-                rotate: needleAngle,
-                transition: reduceMotion
-                  ? { duration: 0 }
-                  : {
-                      delay: 1.18,
-                      type: "spring",
-                      stiffness: 38,
-                      damping: 10,
-                      mass: 1.05,
-                    },
-              },
-            }}
-          />
-          <motion.span
-            className="absolute -left-[3px] -top-[2px] h-[6px] w-[6px] rounded-full bg-purple"
-            variants={{
-              initial: { opacity: reduceMotion ? 1 : 0, scale: 0.5 },
-              visible: {
-                opacity: 1,
-                scale: 1,
-                transition: {
-                  delay: reduceMotion ? 0 : 1.1,
-                  duration: reduceMotion ? 0 : 0.42,
-                },
-              },
-            }}
-          />
-        </span>
-      </div>
+          <motion.svg
+            className="absolute inset-0 h-[38px] w-[72px]"
+            viewBox="0 0 72 38"
+            fill="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <mask id={revealMaskId} maskUnits="userSpaceOnUse">
+                <rect width="72" height="38" fill="black" />
+                <motion.path
+                  d="M17.75 31.4A17.6 17.6 0 0 1 52.95 31.4"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="35"
+                  strokeLinecap="butt"
+                  pathLength={1}
+                  animate={fillControls}
+                />
+              </mask>
+            </defs>
+            <path
+              d={fillPath}
+              fill={isLowerRisk ? "#45AC1F" : "#E53E76"}
+              opacity="0.5"
+              mask={`url(#${revealMaskId})`}
+            />
+          </motion.svg>
+          <span className="absolute left-1/2 top-[31px] -translate-y-1/2">
+            <motion.span
+              className="block h-[2px] w-[19px] origin-left rounded-full bg-purple"
+              animate={needleControls}
+            />
+            <motion.span
+              className="absolute -left-[3px] -top-[2px] h-[6px] w-[6px] rounded-full bg-purple"
+              animate={hubControls}
+            />
+          </span>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -537,42 +634,44 @@ export function HdxSection() {
           className="mx-auto flex max-w-[64rem] flex-col items-center text-center"
           variants={fadeUp(14)}
         >
-          <SectionLabel captionClassName="text-pink" iconClassName="bg-pink">
-            Powered by HDX
-          </SectionLabel>
           <Heading
             size="large"
-            className="mt-5 max-w-[18ch] text-balance text-purple md:text-[3.4rem] lg:text-[4rem] lg:leading-[0.98]"
+            className="max-w-[18ch] text-balance text-[2.55rem] leading-[1.08] text-purple md:text-5xl md:leading-[1.2]"
           >
-            Growth, governance, and value—connected
+            Powered by HDX
           </Heading>
-          <Paragraph
-            size="large"
-            className="mt-6 max-w-[50rem] text-balance text-purple/65 lg:mt-8"
-          >
-            HDX connects protocol growth, governance participation, and value
-            distribution. As Hydration generates more revenue, expands its
-            strategies, and attracts more capital, HDX holders help decide how
-            that value is used and distributed.
-          </Paragraph>
+          <div className="mt-7 max-w-[36.1rem] space-y-7 text-balance text-purple/65 lg:mt-8">
+            <Paragraph size="large" className="leading-7">
+              HDX connects protocol growth, governance participation, and value
+              distribution across the Hydration ecosystem.
+            </Paragraph>
+            <Paragraph size="large" className="leading-7">
+              As Hydration generates more revenue, expands its strategies, and
+              attracts more capital, HDX holders help decide how that value is
+              used and distributed.
+            </Paragraph>
+          </div>
+          <h3 className="mt-8 font-gazpacho text-[1.7rem] font-medium leading-[1.05] text-pink md:text-[1.8125rem] md:leading-[1.035]">
+            Why hold HDX
+          </h3>
         </motion.div>
 
         <motion.div
-          className="relative mx-auto mt-16 hidden max-w-[75rem] lg:block lg:mt-24"
+          className="relative mx-auto mt-16 hidden max-w-[75rem] lg:block"
           initial="initial"
           whileInView="visible"
           viewport={{ once: true, amount: 0.16, margin: "0px 0px -8% 0px" }}
           variants={revealStagger(0.1, 26)}
         >
-          <div className="absolute left-[16.667%] right-[calc(50%+3.875rem)] top-0 h-px bg-pink" />
-          <div className="absolute left-[calc(50%+3.875rem)] right-[15.833%] top-0 h-px bg-pink" />
-          <div className="absolute left-1/2 top-0 z-20 grid h-36 w-36 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-pink bg-lavender">
+          <div className="absolute left-[16.667%] right-1/2 top-0 h-px bg-pink" />
+          <div className="absolute left-1/2 right-[15.833%] top-0 h-px bg-pink" />
+          <div className="absolute left-1/2 top-0 z-20 grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-pink bg-lavender">
             <Image
               src={HdxFlowLogo}
-              width={124}
-              height={124}
+              width={68}
+              height={68}
               alt="HDX at the center of Hydration governance"
-              className="h-[7.75rem] w-[7.75rem]"
+              className="h-[4.25rem] w-[4.25rem]"
             />
           </div>
 
@@ -617,7 +716,7 @@ export function HdxSection() {
         </motion.div>
 
         <motion.div
-          className="mx-auto mt-14 max-w-[34rem] lg:hidden"
+          className="mx-auto mt-10 max-w-[34rem] lg:hidden"
           initial="initial"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1, margin: "0px 0px -8% 0px" }}
@@ -626,10 +725,10 @@ export function HdxSection() {
           <div className="ml-px flex items-center gap-4">
             <Image
               src={HdxFlowLogo}
-              width={72}
-              height={72}
+              width={60}
+              height={60}
               alt="HDX at the center of Hydration governance"
-              className="h-[4.5rem] w-[4.5rem] shrink-0"
+              className="h-[3.75rem] w-[3.75rem] shrink-0"
             />
             <div className="h-px flex-1 bg-pink/40" />
           </div>

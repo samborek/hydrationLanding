@@ -9,11 +9,11 @@ export type StatsData = {
 };
 
 const fallbackStats: StatsData = {
-  tvl: 0,
-  vol_30d: 0,
-  xcm_vol_30d: 0,
-  assets_count: 0,
-  accounts_count: 0,
+  tvl: 66_000_000,
+  vol_30d: 60_000_000,
+  xcm_vol_30d: 28_000_000,
+  assets_count: 443,
+  accounts_count: 109_000,
 };
 
 export async function fetchStats() {

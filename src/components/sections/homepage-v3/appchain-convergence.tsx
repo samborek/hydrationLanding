@@ -211,6 +211,7 @@ function ProceduralField({
     const drawing = context;
 
     let animationFrame = 0;
+    let visible = false;
     let width = 1;
     let height = 1;
     let pixelRatio = 1;
@@ -1141,15 +1142,33 @@ function ProceduralField({
       else if (variant === "pool") drawPoolNetwork(time);
       else drawNetwork(time);
 
-      if (!reducedMotion) animationFrame = window.requestAnimationFrame(draw);
+      if (!reducedMotion && visible) {
+        animationFrame = window.requestAnimationFrame(draw);
+      }
     }
 
     resize();
     draw(750);
     window.addEventListener("resize", resize);
 
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        const nextVisible = entry.isIntersecting;
+        if (nextVisible && !visible && !reducedMotion) {
+          visible = true;
+          animationFrame = window.requestAnimationFrame(draw);
+        } else if (!nextVisible) {
+          visible = false;
+          window.cancelAnimationFrame(animationFrame);
+        }
+      },
+      { rootMargin: "160px 0px", threshold: 0.01 },
+    );
+    intersectionObserver.observe(surface);
+
     return () => {
       window.removeEventListener("resize", resize);
+      intersectionObserver.disconnect();
       window.cancelAnimationFrame(animationFrame);
     };
   }, [variant]);
