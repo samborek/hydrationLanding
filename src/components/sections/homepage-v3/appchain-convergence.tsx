@@ -463,6 +463,14 @@ function ProceduralField({
     }
 
     function drawPoolNetwork(time: number) {
+      type PoolKind =
+        | "core"
+        | "oracle"
+        | "priority"
+        | "liquidations"
+        | "risk"
+        | "runtime";
+
       const unit = Math.min(width, height);
       const center = {
         x: width * 0.5,
@@ -475,6 +483,7 @@ function ProceduralField({
           surface: "#98AFFF",
           side: "#36154B",
           stroke: "#AAEEFC",
+          kind: "oracle" as const,
         },
         {
           x: width * 0.75,
@@ -482,6 +491,7 @@ function ProceduralField({
           surface: "#53A4E3",
           side: "#043875",
           stroke: "#AAEEFC",
+          kind: "priority" as const,
         },
         {
           x: width * 0.69,
@@ -489,6 +499,7 @@ function ProceduralField({
           surface: "#F9AFCA",
           side: "#CC1775",
           stroke: "#FFDEEC",
+          kind: "liquidations" as const,
         },
         {
           x: width * 0.31,
@@ -496,6 +507,7 @@ function ProceduralField({
           surface: "#B3CE92",
           side: "#111A15",
           stroke: "#BFFF98",
+          kind: "risk" as const,
         },
         {
           x: width * 0.25,
@@ -503,6 +515,7 @@ function ProceduralField({
           surface: "#AAEEFC",
           side: "#043875",
           stroke: "#98AFFF",
+          kind: "runtime" as const,
         },
       ];
 
@@ -582,6 +595,7 @@ function ProceduralField({
           surface: string;
           side: string;
           stroke: string;
+          kind: PoolKind;
         },
         radiusX: number,
         radiusY: number,
@@ -589,22 +603,76 @@ function ProceduralField({
         phase: number,
       ) => {
         const pointCount = 64;
+        const shapePoint = (angle: number) => {
+          const cosine = Math.cos(angle);
+          const sine = Math.sin(angle);
+
+          if (basin.kind === "risk") {
+            return {
+              x:
+                Math.sign(cosine) *
+                Math.pow(Math.abs(cosine), 0.56) *
+                radiusX,
+              y:
+                Math.sign(sine) *
+                Math.pow(Math.abs(sine), 0.56) *
+                radiusY,
+            };
+          }
+
+          if (basin.kind === "runtime") {
+            const sides = 6;
+            const sector = (Math.PI * 2) / sides;
+            const localAngle =
+              ((angle + sector * 0.5 + Math.PI * 2) % sector) - sector * 0.5;
+            const polygonRadius = Math.cos(Math.PI / sides) / Math.cos(localAngle);
+
+            return {
+              x: cosine * polygonRadius * radiusX,
+              y: sine * polygonRadius * radiusY,
+            };
+          }
+
+          const lobeScale =
+            basin.kind === "liquidations"
+              ? 1 + Math.cos(angle * 2) * 0.12
+              : 1;
+
+          return {
+            x: cosine * radiusX * lobeScale,
+            y: sine * radiusY * lobeScale,
+          };
+        };
         const shellPoints = Array.from(
           { length: pointCount + 1 },
           (_, step) => {
             const angle = (step / pointCount) * Math.PI * 2;
+            const shape = shapePoint(angle);
 
             return {
-              x: basin.x + Math.cos(angle) * radiusX,
-              y: basin.y + Math.sin(angle) * radiusY,
+              x: basin.x + shape.x,
+              y: basin.y + shape.y,
             };
           },
         );
+        const shellTopPoints = shellPoints.map((point) => ({
+          x: point.x,
+          y: point.y - radiusY * 0.22,
+        }));
         const surfacePoints = Array.from(
           { length: pointCount + 1 },
           (_, step) => {
             const angle = (step / pointCount) * Math.PI * 2;
+            const shape = shapePoint(angle);
             const frontness = (Math.sin(angle) + 1) * 0.5;
+            const motionScale =
+              basin.kind === "core"
+                ? 1
+                : basin.kind === "priority"
+                  ? 0.52
+                  : basin.kind === "liquidations"
+                    ? 0.34
+                    : 0.2;
             const displacement =
               Math.sin(angle * 3 + time * 0.92 + phase) * radiusY * 0.1 +
               Math.sin(angle * 5 - time * 0.64 + phase * 0.7) *
@@ -612,17 +680,31 @@ function ProceduralField({
                 0.045;
 
             return {
-              x: basin.x + Math.cos(angle) * radiusX,
+              x: basin.x + shape.x,
               y:
                 basin.y +
-                Math.sin(angle) * radiusY +
-                displacement * (0.34 + frontness * 0.66),
+                shape.y +
+                displacement * (0.34 + frontness * 0.66) * motionScale,
             };
           },
         );
-        const bottomPoints = shellPoints.map((point) => ({
+        const frontSurfacePoints = surfacePoints.slice(
+          0,
+          pointCount / 2 + 1,
+        );
+        const frontSurfaceSkirtPoints = frontSurfacePoints.map((point) => ({
           x: point.x,
-          y: point.y + depth,
+          y: point.y + radiusY * 0.38,
+        }));
+        const bottomScale =
+          basin.kind === "priority"
+            ? 0.58
+            : basin.kind === "oracle"
+              ? 0.9
+              : 0.94;
+        const bottomPoints = shellPoints.map((point) => ({
+          x: basin.x + (point.x - basin.x) * bottomScale,
+          y: basin.y + (point.y - basin.y) * bottomScale + depth,
         }));
 
         const tracePoints = (points: Array<{ x: number; y: number }>) => {
@@ -632,7 +714,7 @@ function ProceduralField({
 
         drawing.globalAlpha = 0.68;
         drawing.beginPath();
-        tracePoints(shellPoints);
+        tracePoints(shellTopPoints);
         [...bottomPoints].reverse().forEach((point) =>
           drawing.lineTo(point.x, point.y),
         );
@@ -642,7 +724,7 @@ function ProceduralField({
 
         drawing.globalAlpha = 0.24;
         drawing.beginPath();
-        tracePoints(shellPoints.slice(0, pointCount / 2 + 1));
+        tracePoints(shellTopPoints.slice(0, pointCount / 2 + 1));
         bottomPoints
           .slice(0, pointCount / 2 + 1)
           .reverse()
@@ -651,7 +733,44 @@ function ProceduralField({
         drawing.fillStyle = basin.stroke;
         drawing.fill();
 
-        drawing.globalAlpha = 0.46;
+        drawing.globalAlpha = 0.58;
+        drawing.beginPath();
+        tracePoints(frontSurfacePoints);
+        [...frontSurfaceSkirtPoints].reverse().forEach((point) =>
+          drawing.lineTo(point.x, point.y),
+        );
+        drawing.closePath();
+        drawing.fillStyle = basin.surface;
+        drawing.fill();
+
+        drawing.save();
+        drawing.beginPath();
+        tracePoints(surfacePoints);
+        drawing.closePath();
+        drawing.clip();
+        drawing.filter = `blur(${Math.max(4, unit * 0.006)}px)`;
+        drawing.globalAlpha = 0.82;
+        drawing.drawImage(surface, 0, 0, width, height);
+        drawing.restore();
+
+        drawing.save();
+        drawing.filter = `blur(${Math.max(2.4, unit * 0.004)}px)`;
+        drawing.globalAlpha = 0.3;
+        drawing.beginPath();
+        tracePoints(shellTopPoints);
+        drawing.closePath();
+        drawing.fillStyle = basin.surface;
+        drawing.fill();
+
+        drawing.globalAlpha = 0.24;
+        drawing.beginPath();
+        tracePoints(surfacePoints);
+        drawing.closePath();
+        drawing.fillStyle = basin.surface;
+        drawing.fill();
+        drawing.restore();
+
+        drawing.globalAlpha = 0.62;
         drawing.beginPath();
         tracePoints(surfacePoints);
         drawing.closePath();
@@ -669,31 +788,227 @@ function ProceduralField({
         drawing.closePath();
         drawing.clip();
 
-        for (let wave = -1; wave <= 1; wave += 1) {
-          const waveY =
-            basin.y +
-            wave * radiusY * 0.42 +
-            Math.sin(time * 0.85 + phase + wave) * radiusY * 0.08;
-          drawing.beginPath();
-          for (let step = 0; step <= 18; step += 1) {
-            const progress = step / 18;
-            const x = basin.x - radiusX + progress * radiusX * 2;
-            const y =
-              waveY +
-              Math.sin(progress * Math.PI * 3 + time * 1.15 + phase) *
-                radiusY *
-                0.19 +
-              Math.sin(progress * Math.PI * 6 - time * 0.7 + phase) *
-                radiusY *
-                0.055;
-            if (step === 0) drawing.moveTo(x, y);
-            else drawing.lineTo(x, y);
+        const drawCoreWaves = () => {
+          for (let wave = -1; wave <= 1; wave += 1) {
+            const waveY =
+              basin.y +
+              wave * radiusY * 0.42 +
+              Math.sin(time * 0.85 + phase + wave) * radiusY * 0.08;
+            drawing.beginPath();
+            for (let step = 0; step <= 18; step += 1) {
+              const progress = step / 18;
+              const x = basin.x - radiusX + progress * radiusX * 2;
+              const y =
+                waveY +
+                Math.sin(progress * Math.PI * 3 + time * 1.15 + phase) *
+                  radiusY *
+                  0.19 +
+                Math.sin(progress * Math.PI * 6 - time * 0.7 + phase) *
+                  radiusY *
+                  0.055;
+              if (step === 0) drawing.moveTo(x, y);
+              else drawing.lineTo(x, y);
+            }
+            drawing.globalAlpha = wave === 0 ? 0.76 : 0.34;
+            drawing.strokeStyle = wave === 0 ? "#AAEEFC" : basin.stroke;
+            drawing.lineWidth = wave === 0 ? 1.8 : 1;
+            drawing.stroke();
           }
-          drawing.globalAlpha = wave === 0 ? 0.76 : 0.34;
-          drawing.strokeStyle = wave === 0 ? "#AAEEFC" : basin.stroke;
-          drawing.lineWidth = wave === 0 ? 1.8 : 1;
+        };
+
+        const drawOraclePulse = () => {
+          for (let ring = 0; ring < 3; ring += 1) {
+            const pulse = (time * 0.22 + ring * 0.33) % 1;
+            drawing.globalAlpha = (1 - pulse) * 0.72;
+            drawing.beginPath();
+            drawing.ellipse(
+              basin.x,
+              basin.y,
+              radiusX * (0.18 + pulse * 0.72),
+              radiusY * (0.18 + pulse * 0.64),
+              0,
+              0,
+              Math.PI * 2,
+            );
+            drawing.strokeStyle = ring === 0 ? "#FFDEEC" : basin.stroke;
+            drawing.lineWidth = ring === 0 ? 1.6 : 1;
+            drawing.stroke();
+          }
+
+          const orbit = time * 0.65 + phase;
+          drawing.globalAlpha = 0.92;
+          drawing.beginPath();
+          drawing.arc(
+            basin.x + Math.cos(orbit) * radiusX * 0.56,
+            basin.y + Math.sin(orbit) * radiusY * 0.5,
+            Math.max(1.6, unit * 0.0035),
+            0,
+            Math.PI * 2,
+          );
+          drawing.fillStyle = "#FFDEEC";
+          drawing.fill();
+        };
+
+        const drawPriorityVortex = () => {
+          for (let arm = 0; arm < 3; arm += 1) {
+            drawing.beginPath();
+            for (let step = 0; step <= 42; step += 1) {
+              const progress = step / 42;
+              const angle =
+                time * 0.52 +
+                phase +
+                arm * ((Math.PI * 2) / 3) +
+                progress * Math.PI * 3.2;
+              const orbit = radiusX * (0.06 + progress * 0.76);
+              const x = basin.x + Math.cos(angle) * orbit;
+              const y =
+                basin.y +
+                Math.sin(angle) * radiusY * (0.08 + progress * 0.72);
+              if (step === 0) drawing.moveTo(x, y);
+              else drawing.lineTo(x, y);
+            }
+            drawing.globalAlpha = arm === 0 ? 0.84 : 0.5;
+            drawing.strokeStyle = arm === 0 ? "#FFDEEC" : basin.stroke;
+            drawing.lineWidth = arm === 0 ? 1.8 : 1.15;
+            drawing.stroke();
+          }
+
+          drawing.globalAlpha = 0.9;
+          drawing.beginPath();
+          drawing.arc(
+            basin.x,
+            basin.y,
+            Math.max(2.2, unit * 0.0045),
+            0,
+            Math.PI * 2,
+          );
+          drawing.fillStyle = "#AAEEFC";
+          drawing.fill();
+        };
+
+        const drawLiquidationChannels = () => {
+          for (let lane = -1; lane <= 1; lane += 1) {
+            const channelY = basin.y + lane * radiusY * 0.34;
+            drawing.beginPath();
+            drawing.moveTo(basin.x - radiusX * 0.82, channelY);
+            drawing.bezierCurveTo(
+              basin.x - radiusX * 0.28,
+              channelY,
+              basin.x - radiusX * 0.24,
+              basin.y,
+              basin.x,
+              basin.y,
+            );
+            drawing.bezierCurveTo(
+              basin.x + radiusX * 0.24,
+              basin.y,
+              basin.x + radiusX * 0.3,
+              channelY * 0.45 + basin.y * 0.55,
+              basin.x + radiusX * 0.82,
+              channelY * 0.45 + basin.y * 0.55,
+            );
+            drawing.globalAlpha = lane === 0 ? 0.82 : 0.44;
+            drawing.strokeStyle = lane === 0 ? "#AAEEFC" : basin.stroke;
+            drawing.lineWidth = lane === 0 ? 2 : 1.1;
+            drawing.stroke();
+          }
+
+          for (let packet = 0; packet < 3; packet += 1) {
+            const progress = (time * 0.24 + packet * 0.33) % 1;
+            drawing.globalAlpha = 0.88 - packet * 0.14;
+            drawing.beginPath();
+            drawing.arc(
+              basin.x - radiusX * 0.68 + progress * radiusX * 1.36,
+              basin.y + (packet - 1) * radiusY * 0.13 * (1 - progress),
+              Math.max(1.4, unit * 0.003),
+              0,
+              Math.PI * 2,
+            );
+            drawing.fillStyle = packet === 1 ? "#AAEEFC" : "#FFDEEC";
+            drawing.fill();
+          }
+        };
+
+        const drawRiskBarriers = () => {
+          for (let layer = 0; layer < 3; layer += 1) {
+            const insetX = radiusX * (0.18 + layer * 0.16);
+            const insetY = radiusY * (0.2 + layer * 0.16);
+            drawing.globalAlpha = 0.76 - layer * 0.17;
+            drawing.beginPath();
+            drawing.roundRect(
+              basin.x - radiusX + insetX,
+              basin.y - radiusY + insetY,
+              radiusX * 2 - insetX * 2,
+              radiusY * 2 - insetY * 2,
+              Math.max(3, radiusY * 0.28),
+            );
+            drawing.strokeStyle = layer === 0 ? "#FFDEEC" : basin.stroke;
+            drawing.lineWidth = layer === 0 ? 1.6 : 1;
+            drawing.stroke();
+          }
+
+          drawing.globalAlpha = 0.86;
+          drawing.beginPath();
+          drawing.moveTo(basin.x, basin.y - radiusY * 0.48);
+          drawing.lineTo(basin.x, basin.y + radiusY * 0.48);
+          drawing.strokeStyle = basin.stroke;
+          drawing.lineWidth = 1.2;
           drawing.stroke();
-        }
+        };
+
+        const drawRuntimeMesh = () => {
+          const meshPoints: Array<{ x: number; y: number }> = [];
+          for (let row = -1; row <= 1; row += 1) {
+            for (let column = -2; column <= 2; column += 1) {
+              meshPoints.push({
+                x:
+                  basin.x +
+                  column * radiusX * 0.28 +
+                  (Math.abs(row) % 2) * radiusX * 0.14,
+                y: basin.y + row * radiusY * 0.38,
+              });
+            }
+          }
+
+          meshPoints.forEach((point, index) => {
+            meshPoints.slice(index + 1).forEach((neighbor) => {
+              const deltaX = point.x - neighbor.x;
+              const deltaY = point.y - neighbor.y;
+              if (
+                Math.hypot(deltaX / radiusX, deltaY / radiusY) < 0.48
+              ) {
+                drawing.globalAlpha = 0.24;
+                drawing.beginPath();
+                drawing.moveTo(point.x, point.y);
+                drawing.lineTo(neighbor.x, neighbor.y);
+                drawing.strokeStyle = basin.stroke;
+                drawing.lineWidth = 0.9;
+                drawing.stroke();
+              }
+            });
+
+            const signal =
+              0.55 + Math.sin(time * 1.1 + index * 0.8) * 0.25;
+            drawing.globalAlpha = signal;
+            drawing.beginPath();
+            drawing.arc(
+              point.x,
+              point.y,
+              Math.max(1.2, unit * 0.0025),
+              0,
+              Math.PI * 2,
+            );
+            drawing.fillStyle = index % 3 === 0 ? "#FFDEEC" : basin.stroke;
+            drawing.fill();
+          });
+        };
+
+        if (basin.kind === "core") drawCoreWaves();
+        if (basin.kind === "oracle") drawOraclePulse();
+        if (basin.kind === "priority") drawPriorityVortex();
+        if (basin.kind === "liquidations") drawLiquidationChannels();
+        if (basin.kind === "risk") drawRiskBarriers();
+        if (basin.kind === "runtime") drawRuntimeMesh();
 
         drawing.beginPath();
         surfacePoints
@@ -713,12 +1028,19 @@ function ProceduralField({
 
       const satelliteRadiusX = unit * 0.085;
       const satelliteRadiusY = unit * 0.039;
+      const satelliteDepth: Record<Exclude<PoolKind, "core">, number> = {
+        oracle: 0.026,
+        priority: 0.058,
+        liquidations: 0.038,
+        risk: 0.05,
+        runtime: 0.046,
+      };
       satellites.forEach((pool, index) =>
         drawBasin(
           pool,
           satelliteRadiusX,
           satelliteRadiusY,
-          unit * 0.042,
+          unit * satelliteDepth[pool.kind],
           index * 1.37,
         ),
       );
@@ -729,6 +1051,7 @@ function ProceduralField({
           surface: "#53A4E3",
           side: "#043875",
           stroke: "#AAEEFC",
+          kind: "core",
         },
         unit * 0.14,
         unit * 0.064,
@@ -836,7 +1159,7 @@ function ProceduralField({
 
 function HydrationSygnet() {
   return (
-    <svg viewBox="0 0 50 50" fill="none" style={{ color: "#98AFFF" }}>
+    <svg viewBox="0 0 50 50" fill="none">
       <path
         d="M45.1137 28.3983C45.6872 27.827 46.4245 27.0925 47.1593 26.3631C48.7953 24.736 48.7953 22.0938 47.1593 20.4641L45.4261 18.7375C39.2226 24.9171 29.9418 26.1566 22.5018 22.4636C27.5301 23.3894 32.7427 22.6676 37.3614 20.1938C40.4515 18.5386 41.0378 14.3662 38.557 11.8949L28.3289 1.70616C26.0426 -0.571323 22.338 -0.571323 20.0543 1.70616L9.02996 12.688C16.2907 9.61485 25.0109 11.0405 30.9147 16.9625C21.9079 12.6064 10.7479 14.152 3.26946 21.6016C2.69597 22.1729 1.95607 22.9099 1.22385 23.6393C-0.409576 25.269 -0.409576 27.9087 1.22385 29.5358L2.95455 31.2598C9.15797 25.0803 18.4388 23.8408 25.8788 27.5338C20.8505 26.608 15.6379 27.3297 11.0193 29.8036C7.92906 31.4588 7.34277 35.6312 9.82363 38.1025L20.0517 48.2912C22.338 50.5687 26.0426 50.5687 28.3263 48.2912L39.3507 37.3093C32.0899 40.3825 23.3698 38.9569 17.4659 33.0349C26.4727 37.3909 37.6327 35.8454 45.1112 28.3958L45.1137 28.3983Z"
         fill="currentColor"
