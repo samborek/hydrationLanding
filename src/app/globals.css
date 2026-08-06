@@ -679,7 +679,7 @@ html.lenis body {
 
 .appchain-pool-network {
   position: absolute;
-  top: 4.2rem;
+  top: 2.5rem;
   left: 50%;
   width: min(74vw, 56rem);
   height: 43rem;
@@ -696,12 +696,13 @@ html.lenis body {
 
 .appchain-pool-network-logo {
   position: absolute;
-  top: 51%;
+  top: 48%;
   left: 50%;
+  z-index: 2;
   width: 3.1rem;
   height: 3.1rem;
-  color: #ffdeec;
-  transform: translate(-50%, -58%);
+  color: #fff;
+  transform: translate(-50%, -50%);
 }
 
 .appchain-pool-network-logo svg {
@@ -736,7 +737,7 @@ html.lenis body {
   }
 
   .appchain-pool-network {
-    top: 4rem;
+    top: 2.75rem;
     width: 25rem;
     height: 30rem;
   }
@@ -1291,6 +1292,65 @@ html.lenis body {
 .appchain-spectrum-label--liquidations { top: 47%; }
 .appchain-spectrum-label--risk { top: 64%; }
 .appchain-spectrum-label--runtime { top: 81%; }
+
+@media (min-width: 768px) {
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label {
+    width: min(18vw, 12rem);
+  }
+
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--oracle {
+    top: 7%;
+    left: 50%;
+    right: auto;
+    text-align: center;
+    transform: translateX(-50%);
+  }
+
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--priority {
+    top: 27%;
+    right: auto;
+    left: 70%;
+  }
+
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--liquidations {
+    top: 59%;
+    right: auto;
+    left: 66%;
+    text-align: left;
+  }
+
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--risk {
+    top: 59%;
+    right: 66%;
+    left: auto;
+    text-align: right;
+  }
+
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--runtime {
+    top: 27%;
+    right: 70%;
+    left: auto;
+    text-align: right;
+  }
+
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--oracle::before {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--priority::before,
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--liquidations::before {
+    right: auto;
+    left: 0;
+  }
+
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--risk::before,
+  .appchain-spectrum-stage.is-pool-view .appchain-spectrum-label--runtime::before {
+    right: 0;
+    left: auto;
+  }
+}
 
 @media (max-width: 767px) {
   .appchain-spectrum-scene {

@@ -56,7 +56,9 @@ export default function AppchainConvergence() {
 
       <div
         ref={stageRef}
-        className="appchain-spectrum-stage relative mt-10 h-[49rem] md:mt-14 md:h-[52rem] lg:mt-16 lg:h-[56rem]"
+        className={`appchain-spectrum-stage relative mt-10 h-[49rem] md:mt-14 md:h-[52rem] lg:mt-16 lg:h-[56rem] ${
+          visualMode === "pools" ? "is-pool-view" : "is-stack-view"
+        }`}
         onPointerMove={(event) => updateTilt(event.clientX, event.clientY)}
         onPointerLeave={resetTilt}
       >
@@ -462,39 +464,42 @@ function ProceduralField({
 
     function drawPoolNetwork(time: number) {
       const unit = Math.min(width, height);
-      const center = { x: width * 0.5, y: height * 0.51 };
+      const center = {
+        x: width * 0.5,
+        y: height * 0.48,
+      };
       const satellites = [
         {
           x: width * 0.5,
-          y: height * 0.16,
+          y: height * 0.13,
           surface: "#98AFFF",
           side: "#36154B",
           stroke: "#AAEEFC",
         },
         {
           x: width * 0.75,
-          y: height * 0.34,
+          y: height * 0.31,
           surface: "#53A4E3",
           side: "#043875",
           stroke: "#AAEEFC",
         },
         {
           x: width * 0.69,
-          y: height * 0.73,
+          y: height * 0.68,
           surface: "#F9AFCA",
           side: "#CC1775",
           stroke: "#FFDEEC",
         },
         {
           x: width * 0.31,
-          y: height * 0.73,
+          y: height * 0.68,
           surface: "#B3CE92",
           side: "#111A15",
           stroke: "#BFFF98",
         },
         {
           x: width * 0.25,
-          y: height * 0.34,
+          y: height * 0.31,
           surface: "#AAEEFC",
           side: "#043875",
           stroke: "#98AFFF",
@@ -583,61 +588,85 @@ function ProceduralField({
         depth: number,
         phase: number,
       ) => {
-        drawing.globalAlpha = 0.64;
-        drawing.beginPath();
-        drawing.moveTo(basin.x - radiusX, basin.y);
-        drawing.lineTo(basin.x - radiusX, basin.y + depth);
-        drawing.bezierCurveTo(
-          basin.x - radiusX,
-          basin.y + depth + radiusY,
-          basin.x + radiusX,
-          basin.y + depth + radiusY,
-          basin.x + radiusX,
-          basin.y + depth,
+        const pointCount = 64;
+        const shellPoints = Array.from(
+          { length: pointCount + 1 },
+          (_, step) => {
+            const angle = (step / pointCount) * Math.PI * 2;
+
+            return {
+              x: basin.x + Math.cos(angle) * radiusX,
+              y: basin.y + Math.sin(angle) * radiusY,
+            };
+          },
         );
-        drawing.lineTo(basin.x + radiusX, basin.y);
-        drawing.bezierCurveTo(
-          basin.x + radiusX,
-          basin.y + radiusY,
-          basin.x - radiusX,
-          basin.y + radiusY,
-          basin.x - radiusX,
-          basin.y,
+        const surfacePoints = Array.from(
+          { length: pointCount + 1 },
+          (_, step) => {
+            const angle = (step / pointCount) * Math.PI * 2;
+            const frontness = (Math.sin(angle) + 1) * 0.5;
+            const displacement =
+              Math.sin(angle * 3 + time * 0.92 + phase) * radiusY * 0.1 +
+              Math.sin(angle * 5 - time * 0.64 + phase * 0.7) *
+                radiusY *
+                0.045;
+
+            return {
+              x: basin.x + Math.cos(angle) * radiusX,
+              y:
+                basin.y +
+                Math.sin(angle) * radiusY +
+                displacement * (0.34 + frontness * 0.66),
+            };
+          },
+        );
+        const bottomPoints = shellPoints.map((point) => ({
+          x: point.x,
+          y: point.y + depth,
+        }));
+
+        const tracePoints = (points: Array<{ x: number; y: number }>) => {
+          drawing.moveTo(points[0].x, points[0].y);
+          points.slice(1).forEach((point) => drawing.lineTo(point.x, point.y));
+        };
+
+        drawing.globalAlpha = 0.68;
+        drawing.beginPath();
+        tracePoints(shellPoints);
+        [...bottomPoints].reverse().forEach((point) =>
+          drawing.lineTo(point.x, point.y),
         );
         drawing.closePath();
         drawing.fillStyle = basin.side;
         drawing.fill();
 
-        drawing.globalAlpha = 0.42;
+        drawing.globalAlpha = 0.24;
         drawing.beginPath();
-        drawing.ellipse(
-          basin.x,
-          basin.y,
-          radiusX,
-          radiusY,
-          0,
-          0,
-          Math.PI * 2,
-        );
+        tracePoints(shellPoints.slice(0, pointCount / 2 + 1));
+        bottomPoints
+          .slice(0, pointCount / 2 + 1)
+          .reverse()
+          .forEach((point) => drawing.lineTo(point.x, point.y));
+        drawing.closePath();
+        drawing.fillStyle = basin.stroke;
+        drawing.fill();
+
+        drawing.globalAlpha = 0.46;
+        drawing.beginPath();
+        tracePoints(surfacePoints);
+        drawing.closePath();
         drawing.fillStyle = basin.surface;
         drawing.fill();
 
-        drawing.globalAlpha = 0.72;
+        drawing.globalAlpha = 0.82;
         drawing.strokeStyle = basin.stroke;
-        drawing.lineWidth = Math.max(1.2, unit * 0.0025);
+        drawing.lineWidth = Math.max(1.25, unit * 0.0026);
         drawing.stroke();
 
         drawing.save();
         drawing.beginPath();
-        drawing.ellipse(
-          basin.x,
-          basin.y,
-          radiusX - 3,
-          radiusY - 2,
-          0,
-          0,
-          Math.PI * 2,
-        );
+        tracePoints(surfacePoints);
+        drawing.closePath();
         drawing.clip();
 
         for (let wave = -1; wave <= 1; wave += 1) {
@@ -653,15 +682,31 @@ function ProceduralField({
               waveY +
               Math.sin(progress * Math.PI * 3 + time * 1.15 + phase) *
                 radiusY *
-                0.11;
+                0.19 +
+              Math.sin(progress * Math.PI * 6 - time * 0.7 + phase) *
+                radiusY *
+                0.055;
             if (step === 0) drawing.moveTo(x, y);
             else drawing.lineTo(x, y);
           }
-          drawing.globalAlpha = wave === 0 ? 0.72 : 0.38;
+          drawing.globalAlpha = wave === 0 ? 0.76 : 0.34;
           drawing.strokeStyle = wave === 0 ? "#AAEEFC" : basin.stroke;
-          drawing.lineWidth = wave === 0 ? 1.7 : 1;
+          drawing.lineWidth = wave === 0 ? 1.8 : 1;
           drawing.stroke();
         }
+
+        drawing.beginPath();
+        surfacePoints
+          .slice(0, pointCount / 2 + 1)
+          .forEach((point, index) => {
+            const insetY = point.y + radiusY * 0.16;
+            if (index === 0) drawing.moveTo(point.x, insetY);
+            else drawing.lineTo(point.x, insetY);
+          });
+        drawing.globalAlpha = 0.3;
+        drawing.strokeStyle = "#FFDEEC";
+        drawing.lineWidth = 1;
+        drawing.stroke();
         drawing.restore();
         drawing.globalAlpha = 1;
       };
@@ -673,7 +718,7 @@ function ProceduralField({
           pool,
           satelliteRadiusX,
           satelliteRadiusY,
-          unit * 0.025,
+          unit * 0.042,
           index * 1.37,
         ),
       );
@@ -687,7 +732,7 @@ function ProceduralField({
         },
         unit * 0.14,
         unit * 0.064,
-        unit * 0.042,
+        unit * 0.065,
         0.4,
       );
 

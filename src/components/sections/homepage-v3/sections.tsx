@@ -3,9 +3,9 @@
 import AnimateOnView from "@/animation/motion-section";
 import { fadeUp, revealStagger, staggerChildren } from "@/animation/variants";
 import type { StatsData } from "@/api/stats";
+import AppchainConvergence from "@/components/sections/homepage-v3/appchain-convergence";
 import HdxFlowLogo from "@/components/sections/built-to-be-unstoppable/assets/logo.svg";
 import ArchFeatureCard from "@/components/sections/arch-feature-card";
-import AppchainConvergence from "@/components/sections/homepage-v3/appchain-convergence";
 import LockIcon from "@/components/sections/devs-and-security/icons/lock";
 import DiscordLogo from "@/components/footer/assets/discord.svg";
 import TelegramLogo from "@/components/footer/assets/telegram.svg";
@@ -468,16 +468,14 @@ export function HdxSection() {
         </motion.div>
 
         <motion.div
-          className="relative mx-auto mt-16 hidden max-w-[80rem] lg:block lg:mt-24"
+          className="relative mx-auto mt-16 hidden max-w-[75rem] lg:block lg:mt-24"
           initial="initial"
           whileInView="visible"
           viewport={{ once: true, amount: 0.16, margin: "0px 0px -8% 0px" }}
           variants={revealStagger(0.1, 26)}
         >
-          <div className="absolute left-[12.5%] right-[calc(50%+6.7rem)] top-0 h-px bg-pink" />
-          <div className="absolute left-[calc(50%+6.7rem)] right-[12.5%] top-0 h-px bg-pink" />
-          <div className="absolute left-1/2 top-0 z-10 h-[4.5rem] w-[7.5rem] -translate-x-[6.7rem] -translate-y-1/2 rounded-full border border-pink" />
-          <div className="absolute left-1/2 top-0 z-10 h-[4.5rem] w-[7.5rem] -translate-x-[0.8rem] -translate-y-1/2 rounded-full border border-pink" />
+          <div className="absolute left-[16.667%] right-[calc(50%+3.875rem)] top-0 h-px bg-pink" />
+          <div className="absolute left-[calc(50%+3.875rem)] right-[15.833%] top-0 h-px bg-pink" />
           <div className="absolute left-1/2 top-0 z-20 grid h-36 w-36 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-pink bg-lavender">
             <Image
               src={HdxFlowLogo}
