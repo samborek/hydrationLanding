@@ -82,16 +82,16 @@ export default function HeroSection({ stats }: { stats: StatsData }) {
   );
   const statsOpacity = useTransform(
     scrollYProgress,
-    [0.48, 0.62],
+    [0.3, 0.46],
     [0, 1]
   );
-  const statsY = useTransform(scrollYProgress, [0.48, 0.66], [42, 0]);
+  const statsY = useTransform(scrollYProgress, [0.3, 0.5], [42, 0]);
 
   return (
     <section
       ref={sceneRef}
       data-homepage-hero
-      className="relative z-10 h-[210vh] min-h-[88rem] bg-beige lg:h-[235vh] lg:min-h-[122rem]"
+      className="relative z-10 h-[190vh] min-h-[80rem] bg-beige lg:h-[195vh] lg:min-h-[104rem]"
     >
       <div className="sticky top-0 h-screen overflow-hidden">
         <motion.div
