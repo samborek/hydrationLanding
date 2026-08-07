@@ -3,7 +3,6 @@
 import AnimateOnView from "@/animation/motion-section";
 import { fadeUp, revealStagger, staggerChildren } from "@/animation/variants";
 import type { StatsData } from "@/api/stats";
-import AppchainConvergence from "@/components/sections/homepage-v3/appchain-convergence";
 import HdxFlowLogo from "@/components/sections/built-to-be-unstoppable/assets/logo.svg";
 import ArchFeatureCard from "@/components/sections/arch-feature-card";
 import LockIcon from "@/components/sections/devs-and-security/icons/lock";
@@ -219,7 +218,7 @@ export function ProductiveYieldSection() {
 export function StrategiesSection() {
   return (
     <AnimateOnView
-      className="bg-white pt-16 lg:pt-28"
+      className="relative bg-white pt-16 lg:pt-28 after:absolute after:inset-x-0 after:bottom-0 after:h-20 after:bg-beige lg:after:h-28"
       variants={revealStagger(0.1, 18)}
       threshold={0.12}
       viewportMargin="0px 0px -10% 0px"
@@ -244,7 +243,7 @@ export function StrategiesSection() {
                 Built for different risk profiles
               </Heading>
             </div>
-            <p className="mt-6 max-w-[42rem] font-geist text-[1.1rem] font-normal leading-[1.55] text-purple-dim lg:text-[1.114rem]">
+            <p className="mt-8 max-w-[42rem] font-geist text-[1.1rem] font-normal leading-[1.55] text-purple/50 lg:mt-11 lg:text-[1.114rem]">
               Put your capital to work through strategies designed around
               transparent yield sources and clearly defined risk.
             </p>
@@ -252,7 +251,7 @@ export function StrategiesSection() {
         </motion.div>
 
         <motion.div
-          className="mt-12 grid border-t border-purple/10 lg:mt-16 lg:grid-cols-2"
+          className="container relative z-10 mx-auto mt-12 grid gap-3 px-6 md:px-[50px] lg:mt-16 lg:grid-cols-2 xl:px-16"
           initial="initial"
           whileInView="visible"
           viewport={{ once: true, amount: 0.14, margin: "0px 0px -8% 0px" }}
@@ -265,8 +264,7 @@ export function StrategiesSection() {
             riskLabel="Lower risk"
             riskIconSrc="/strategy-risk-low.svg"
             riskNeedleAngle={-137}
-            titleClassName="text-[#45AC1F]"
-            side="left"
+            cardClassName="bg-[#B3D7FA]"
             cta="Explore Stable-yield strategies"
           />
           <StrategyTile
@@ -276,10 +274,9 @@ export function StrategiesSection() {
             riskLabel="Elevated risk"
             riskIconSrc="/strategy-risk-high.svg"
             riskNeedleAngle={-54}
-            titleClassName="text-pink"
-            className="border-t border-purple/10 lg:border-l lg:border-t-0"
-            side="right"
+            cardClassName="bg-purple"
             cta="Explore Enhanced-yield strategies"
+            inverse
           />
         </motion.div>
       </section>
@@ -292,32 +289,25 @@ function StrategyTile({
   title,
   description,
   cta,
-  className = "",
-  titleClassName,
+  cardClassName,
   riskLabel,
   riskIconSrc,
   riskNeedleAngle,
-  side,
+  inverse = false,
 }: {
   eyebrow: string;
   title: string;
   description: string;
   cta: string;
-  className?: string;
-  titleClassName: string;
+  cardClassName: string;
   riskLabel: string;
   riskIconSrc: string;
   riskNeedleAngle: number;
-  side: "left" | "right";
+  inverse?: boolean;
 }) {
-  const gridPadding =
-    side === "left"
-      ? "lg:pl-[50px] lg:pr-8 xl:pl-[max(4rem,calc((100vw-83rem)/2+4rem))] xl:pr-8"
-      : "lg:pl-8 lg:pr-[50px] xl:pl-8 xl:pr-[max(4rem,calc((100vw-83rem)/2+4rem))]";
-
   return (
     <motion.article
-      className={`flex min-h-[31rem] flex-col px-6 py-8 md:px-[50px] md:py-10 lg:min-h-[38rem] lg:py-12 ${gridPadding} ${className}`}
+      className={`flex min-h-[31rem] flex-col rounded-[2rem] px-6 py-8 md:px-10 md:py-12 lg:min-h-[43.9375rem] ${cardClassName}`}
       variants={revealStagger(0.12, 24)}
     >
       <motion.div
@@ -325,11 +315,13 @@ function StrategyTile({
         variants={revealStagger(0.12, 14)}
       >
         <motion.div variants={fadeUp(12)}>
-          <span className="font-geist text-xs font-medium uppercase tracking-[0.14em] text-purple/55">
+          <span
+            className={`font-geist text-xs font-medium uppercase tracking-[0.14em] ${inverse ? "text-lavender" : "text-purple/55"}`}
+          >
             Strategy profile
           </span>
           <h3
-            className={`mt-3 font-gazpacho text-[2.1rem] font-medium leading-none md:text-[2.6rem] ${titleClassName}`}
+            className={`mt-3 font-gazpacho text-[2.1rem] font-medium leading-none md:text-[2.6rem] ${inverse ? "text-lavender" : "text-purple"}`}
           >
             {title}
           </h3>
@@ -338,25 +330,30 @@ function StrategyTile({
           label={riskLabel}
           iconSrc={riskIconSrc}
           needleAngle={riskNeedleAngle}
+          inverse={inverse}
         />
       </motion.div>
 
       <motion.div
-        className="mt-auto pt-20 lg:mt-[6.8125rem] lg:min-h-[15.0625rem] lg:pt-0"
+        className="mt-auto pt-20 lg:pt-28"
         variants={revealStagger(0.08, 10)}
       >
         <motion.p
-          className="max-w-[31rem] font-geist text-[1.45rem] leading-[1.5] tracking-[-0.0333em] md:text-[1.5rem]"
+          className="max-w-[31rem] font-geist text-[1.45rem] leading-[1.3] tracking-[-0.0285em] md:text-[1.75rem]"
           variants={fadeUp(14)}
         >
-          <span className="font-medium text-purple">{eyebrow}. </span>
-          <span className="text-purple/50">{description}</span>
+          <span className={`font-medium ${inverse ? "text-lavender" : "text-purple"}`}>
+            {eyebrow}.{" "}
+          </span>
+          <span className={inverse ? "text-lavender/70" : "text-purple"}>
+            {description}
+          </span>
         </motion.p>
         <Button
           role="primary"
           fill="solid"
           action={{ href: "https://app.hydration.net", target: "_blank" }}
-          className="mt-8 rounded-full bg-purple px-6 py-3 text-white hover:bg-pink md:mt-12"
+          className={`mt-8 rounded-full bg-white px-6 py-3 md:mt-12 ${inverse ? "text-lavender hover:bg-lavender hover:text-purple" : "text-purple hover:bg-purple hover:text-white"}`}
         >
           {cta}
         </Button>
@@ -369,10 +366,12 @@ function RiskGauge({
   label,
   iconSrc,
   needleAngle,
+  inverse = false,
 }: {
   label: string;
   iconSrc: string;
   needleAngle: number;
+  inverse?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
   const fillControls = useAnimationControls();
@@ -494,7 +493,9 @@ function RiskGauge({
       }}
     >
       <motion.div initial={false}>
-        <span className="mb-1 block text-right font-geist text-[0.65rem] font-medium uppercase tracking-[0.12em] text-purple/55">
+        <span
+          className={`mb-1 block text-right font-geist text-[0.65rem] font-medium uppercase tracking-[0.12em] ${inverse ? "text-lavender" : "text-purple/55"}`}
+        >
           {label}
         </span>
         <div className="relative h-[38px] w-[72px]">
@@ -527,18 +528,18 @@ function RiskGauge({
             </defs>
             <path
               d={fillPath}
-              fill={isLowerRisk ? "#45AC1F" : "#E53E76"}
-              opacity="0.5"
+              fill="white"
+              opacity="0.48"
               mask={`url(#${revealMaskId})`}
             />
           </motion.svg>
           <span className="absolute left-1/2 top-[31px] -translate-y-1/2">
             <motion.span
-              className="block h-[2px] w-[19px] origin-left rounded-full bg-purple"
+              className={`block h-[2px] w-[19px] origin-left rounded-full ${inverse ? "bg-lavender" : "bg-purple"}`}
               animate={needleControls}
             />
             <motion.span
-              className="absolute -left-[3px] -top-[2px] h-[6px] w-[6px] rounded-full bg-purple"
+              className={`absolute -left-[3px] -top-[2px] h-[6px] w-[6px] rounded-full ${inverse ? "bg-lavender" : "bg-purple"}`}
               animate={hubControls}
             />
           </span>
@@ -551,54 +552,95 @@ function RiskGauge({
 export function IntegratedSystemSection() {
   return (
     <AnimateOnView
-      className="bg-purple px-6 py-16 md:px-[50px] lg:py-28 xl:px-0"
+      className="bg-beige pb-16 pt-32 lg:pb-28 lg:pt-[12.5rem]"
       variants={revealStagger(0.1, 20)}
       threshold={0.1}
       viewportMargin="0px 0px -10% 0px"
     >
       <section
         id="why-hydration"
-        className="container mx-auto scroll-mt-24 max-xl:!px-0 lg:scroll-mt-28"
+        className="container mx-auto scroll-mt-24 px-6 md:px-[50px] lg:scroll-mt-28 xl:px-16"
       >
         <motion.div
-          className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20"
+          className="max-w-[38.5rem]"
           variants={fadeUp(14)}
         >
-          <div>
-            <SectionLabel
-              captionClassName="text-lavender"
-              iconClassName="bg-lavender"
-            >
-              Why Hydration is different
-            </SectionLabel>
-            <Heading
-              size="large"
-              className="mt-5 max-w-[12ch] text-balance text-white"
-            >
-              Hydration owns the full DeFi stack
-            </Heading>
-          </div>
-          <div className="flex flex-col gap-5 lg:pt-9">
-            <Paragraph size="large" className="text-white/75">
+          <SectionLabel captionClassName="text-blue" iconClassName="bg-blue">
+            Unique value
+          </SectionLabel>
+          <Heading
+            size="large"
+            className="mt-5 max-w-[31.5rem] text-balance text-purple lg:text-[4rem] lg:leading-[1.2]"
+          >
+            Why Hydration Is Different
+          </Heading>
+          <div className="mt-9 flex flex-col gap-5">
+            <Paragraph size="large" className="max-w-[38.5rem] leading-7 text-purple">
               Most DeFi protocols depend on external infrastructure they cannot
-              fully control. Hydration owns the execution, liquidity, lending,
-              stablecoin, oracle, and security layers.
+              fully control. Hydration owns the full DeFi stack.
             </Paragraph>
-            <Paragraph size="large" className="text-white/55">
-              That lets products coordinate more efficiently and gives the
-              protocol more ways to protect users at every layer.
+            <Paragraph size="large" className="max-w-[38.5rem] leading-7 text-purple">
+              By combining execution, liquidity, lending, stablecoins, oracles,
+              and security at the appchain level, Hydration can coordinate
+              products more efficiently and protect users at every layer.
             </Paragraph>
           </div>
         </motion.div>
 
         <motion.div
-          className="mt-14 lg:mt-20"
+          className="mt-24 flex min-h-[27rem] justify-end lg:mt-[7.375rem]"
           initial="initial"
           whileInView="visible"
           viewport={{ once: true, amount: 0.12, margin: "0px 0px -8% 0px" }}
           variants={revealStagger(0.08, 30)}
         >
-          <AppchainConvergence />
+          <div className="w-full max-w-[38rem] lg:pr-5">
+            <Heading
+              size="large"
+              className="max-w-[10ch] text-balance text-purple lg:text-[3.25rem] lg:leading-[1.206]"
+            >
+              One integrated financial system
+            </Heading>
+            <div className="mt-6 flex max-w-[31rem] flex-col gap-6">
+              <Paragraph size="large" className="leading-7 text-purple">
+                Hydration’s products are designed to work together rather than
+                operate as isolated applications.
+              </Paragraph>
+              <Paragraph size="large" className="leading-7 text-purple">
+                Capital can move efficiently between strategies, borrowing
+                markets, liquidity, and HOLLAR without relying on fragmented
+                external infrastructure.
+              </Paragraph>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="min-h-[31.75rem] lg:pt-[7.375rem]"
+          initial="initial"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.12, margin: "0px 0px -8% 0px" }}
+          variants={revealStagger(0.08, 30)}
+        >
+          <div className="w-full max-w-[38rem] lg:pl-5">
+            <Heading
+              size="large"
+              className="max-w-[10ch] text-balance text-purple lg:text-[3.25rem] lg:leading-[1.206]"
+            >
+              Appchain-level execution
+            </Heading>
+            <Paragraph size="large" className="mt-6 max-w-[31rem] leading-7 text-purple">
+              Owning the execution environment allows Hydration to optimize how
+              financial activity is processed. This includes:
+            </Paragraph>
+            <ul className="mt-5 list-disc space-y-1 pl-7 font-geist text-lg leading-7 text-purple marker:text-purple">
+              <li>Onchain oracle updates</li>
+              <li>Transaction prioritization</li>
+              <li>Prioritized and partial liquidations</li>
+              <li>Protocol-wide risk controls</li>
+              <li>Security enforced at the runtime level</li>
+            </ul>
+          </div>
         </motion.div>
       </section>
     </AnimateOnView>
