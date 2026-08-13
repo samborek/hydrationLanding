@@ -23,7 +23,7 @@ const securityGroups: readonly SecurityGroup[] = [
     title: "Authority & access",
     icon: "/assets/security-authority.svg",
     mechanisms: [
-      "Onchain governance as the ultimate decision-making and authorization layer",
+      "Onchain governance as the ultimate decision-making and authorization layer (no msigs)",
       "Fine-grained protocol permissions",
       "Appchain-native security controls",
     ],
@@ -62,7 +62,7 @@ const securityGroups: readonly SecurityGroup[] = [
 export default function SecurityFeature() {
   return (
     <AnimateOnView
-      className="overflow-hidden bg-beige pt-16 md:pt-24"
+      className="overflow-hidden bg-white pt-10 md:pt-14 lg:pt-16"
       variants={revealStagger(0.08, 18)}
       threshold={0.08}
       viewportMargin="0px 0px -10% 0px"

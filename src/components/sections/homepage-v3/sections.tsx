@@ -18,14 +18,20 @@ import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
 import DiamondIcon from "@/components/ui/labels/icons/diamond";
+import { getCapitalMetrics } from "./capital-metrics";
+import IntegratedSystemStory from "./integrated-system-story";
 import {
+  animate,
   motion,
   useAnimationControls,
+  useMotionValue,
   useReducedMotion,
+  useTransform,
 } from "framer-motion";
+import type { Variants } from "framer-motion";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import { useId, useRef } from "react";
+import { useRef } from "react";
 
 const yieldPillars = [
   {
@@ -75,27 +81,7 @@ const hdxBenefits = [
 ] as const;
 
 export function CapitalAtWorkSection({ stats }: { stats: StatsData }) {
-  const capitalMetrics = [
-    {
-      title: "Total value locked",
-      value: stats.tvl,
-      prefix: "$",
-    },
-    {
-      title: "Trading volume",
-      value: stats.vol_30d,
-      prefix: "$",
-    },
-    {
-      title: "Cross-chain volume",
-      value: stats.xcm_vol_30d,
-      prefix: "$",
-    },
-    {
-      title: "Total accounts",
-      value: stats.accounts_count,
-    },
-  ] as const;
+  const capitalMetrics = getCapitalMetrics(stats);
 
   return (
     <AnimateOnView
@@ -229,18 +215,12 @@ export function StrategiesSection() {
           variants={fadeUp(14)}
         >
           <div className="max-w-[50rem]">
-            <div className="max-w-[27.69rem]">
-              <SectionLabel
-                captionClassName="text-pink"
-                iconClassName="bg-pink"
-              >
-                Strategies
-              </SectionLabel>
+            <div className="max-w-[32rem]">
               <Heading
                 size="large"
-                className="mt-5 max-w-[13ch] text-purple lg:text-[2.922rem] lg:leading-[1.2]"
+                className="max-w-[16ch] text-purple lg:text-[2.922rem] lg:leading-[1.2]"
               >
-                Built for different risk profiles
+                Strategies built for different risk profiles
               </Heading>
             </div>
             <p className="mt-8 max-w-[42rem] font-geist text-[1.1rem] font-normal leading-[1.55] text-purple/50 lg:mt-11 lg:text-[1.114rem]">
@@ -311,10 +291,18 @@ function StrategyTile({
       variants={revealStagger(0.12, 24)}
     >
       <motion.div
-        className="flex items-start justify-between gap-6"
+        className="flex flex-col items-start"
         variants={revealStagger(0.12, 14)}
       >
         <motion.div variants={fadeUp(12)}>
+          <RiskGauge
+            label={riskLabel}
+            iconSrc={riskIconSrc}
+            needleAngle={riskNeedleAngle}
+            inverse={inverse}
+          />
+        </motion.div>
+        <motion.div className="mt-8 md:mt-10" variants={fadeUp(12)}>
           <span
             className={`font-geist text-xs font-medium uppercase tracking-[0.14em] ${inverse ? "text-lavender" : "text-purple/55"}`}
           >
@@ -326,12 +314,6 @@ function StrategyTile({
             {title}
           </h3>
         </motion.div>
-        <RiskGauge
-          label={riskLabel}
-          iconSrc={riskIconSrc}
-          needleAngle={riskNeedleAngle}
-          inverse={inverse}
-        />
       </motion.div>
 
       <motion.div
@@ -375,21 +357,39 @@ function RiskGauge({
 }) {
   const reduceMotion = useReducedMotion();
   const fillControls = useAnimationControls();
-  const needleControls = useAnimationControls();
-  const hubControls = useAnimationControls();
   const hasEntered = useRef(false);
   const isGaugeAnimating = useRef(false);
-  const isLowerRisk = iconSrc.includes("low");
-  const riskProgress = isLowerRisk ? 0.24 : 0.7;
-  const revealMaskId = `risk-gauge-${useId().replace(/:/g, "")}`;
-  const fillPath = isLowerRisk
-    ? "M17.7695 31.406C17.7695 29.0981 18.2241 26.8128 19.1073 24.6806C19.9905 22.5484 21.285 20.6111 22.9169 18.9792L35.3438 31.406L17.7695 31.406Z"
-    : "M17.582 31.406C17.582 28.0985 18.5154 24.858 20.2749 22.0573C22.0344 19.2566 24.5485 17.0092 27.5282 15.5736C30.508 14.1379 33.8324 13.5723 37.1192 13.9418C40.4061 14.3112 43.522 15.6007 46.1087 17.662L35.1562 31.406L17.582 31.406Z";
+  const pivot = { x: 36, y: 31 };
+  const fillRadius = 18;
+  const needleLength = 19;
+  const initialAngle = -180;
+  const pointAtAngle = (angle: number, radius: number) => {
+    const radians = (angle * Math.PI) / 180;
+
+    return {
+      x: pivot.x + Math.cos(radians) * radius,
+      y: pivot.y + Math.sin(radians) * radius,
+    };
+  };
+  const initialFillPoint = pointAtAngle(initialAngle, fillRadius);
+  const sectorPath = (point: { x: number; y: number }) =>
+    `M ${pivot.x} ${pivot.y} L ${initialFillPoint.x} ${initialFillPoint.y} A ${fillRadius} ${fillRadius} 0 0 1 ${point.x} ${point.y} Z`;
+  const gaugeAngle = useMotionValue(initialAngle);
+  const fillPath = useTransform(gaugeAngle, (angle) =>
+    sectorPath(pointAtAngle(angle, fillRadius)),
+  );
+  const needleX = useTransform(
+    gaugeAngle,
+    (angle) => pointAtAngle(angle, needleLength).x,
+  );
+  const needleY = useTransform(
+    gaugeAngle,
+    (angle) => pointAtAngle(angle, needleLength).y,
+  );
 
   const showFinalState = () => {
-    fillControls.set({ opacity: 1, pathLength: riskProgress });
-    needleControls.set({ rotate: needleAngle });
-    hubControls.set({ opacity: 1, scale: 1 });
+    gaugeAngle.set(needleAngle);
+    fillControls.set({ opacity: 0.42 });
   };
 
   const playEntrance = () => {
@@ -402,33 +402,21 @@ function RiskGauge({
     }
 
     isGaugeAnimating.current = true;
-    fillControls.set({ opacity: 0, pathLength: 0 });
-    needleControls.set({ rotate: -180 });
-    hubControls.set({ opacity: 0, scale: 0.5 });
+    gaugeAngle.set(initialAngle);
+    fillControls.set({ opacity: 0 });
     void Promise.all([
       fillControls.start({
-        opacity: 1,
-        pathLength: riskProgress,
+        opacity: 0.42,
         transition: {
-          delay: 0.08,
-          duration: 1.1,
+          delay: 0.2,
+          duration: 1.25,
           ease: [0.2, 0.65, 0.3, 0.9],
         },
       }),
-      needleControls.start({
-        rotate: needleAngle,
-        transition: {
-          delay: 0.55,
-          type: "spring",
-          stiffness: 38,
-          damping: 10,
-          mass: 1.05,
-        },
-      }),
-      hubControls.start({
-        opacity: 1,
-        scale: 1,
-        transition: { delay: 0.5, duration: 0.42 },
+      animate(gaugeAngle, needleAngle, {
+        delay: 0.2,
+        duration: 1.25,
+        ease: [0.2, 0.65, 0.3, 0.9],
       }),
     ]).finally(() => {
       isGaugeAnimating.current = false;
@@ -439,36 +427,17 @@ function RiskGauge({
     if (reduceMotion || !hasEntered.current || isGaugeAnimating.current) return;
 
     isGaugeAnimating.current = true;
-    void Promise.all([
-      fillControls.start({
-        opacity: 1,
-        pathLength: [riskProgress, 0, riskProgress],
-        transition: {
-          duration: 1.45,
-          times: [0, 0.42, 1],
-          ease: [0.2, 0.65, 0.3, 0.9],
-        },
-      }),
-      needleControls.start({
-        rotate: [needleAngle, -180, needleAngle],
-        transition: {
-          duration: 1.45,
-          times: [0, 0.42, 1],
-          ease: [0.2, 0.65, 0.3, 0.9],
-        },
-      }),
-      hubControls.start({
-        opacity: [1, 0.6, 1],
-        scale: [1, 0.72, 1],
-        transition: {
-          duration: 1.45,
-          times: [0, 0.42, 1],
-          ease: [0.2, 0.65, 0.3, 0.9],
-        },
-      }),
-    ]).finally(() => {
+    void (async () => {
+      await animate(gaugeAngle, initialAngle, {
+        duration: 0.58,
+        ease: [0.2, 0.65, 0.3, 0.9],
+      });
+      await animate(gaugeAngle, needleAngle, {
+        duration: 0.87,
+        ease: [0.2, 0.65, 0.3, 0.9],
+      });
       isGaugeAnimating.current = false;
-    });
+    })();
   };
 
   return (
@@ -493,77 +462,85 @@ function RiskGauge({
       }}
     >
       <motion.div initial={false}>
-        <span
-          className={`mb-1 block text-right font-geist text-[0.65rem] font-medium uppercase tracking-[0.12em] ${inverse ? "text-lavender" : "text-purple/55"}`}
-        >
-          {label}
-        </span>
-        <div className="relative h-[38px] w-[72px]">
+        <div className="relative h-[76px] w-[144px] md:h-[95px] md:w-[180px]">
           <Image
             src={iconSrc}
             alt=""
             width={72}
             height={38}
-            className="absolute inset-0 h-[38px] w-[72px]"
+            className="absolute inset-0 h-full w-full"
           />
           <motion.svg
-            className="absolute inset-0 h-[38px] w-[72px]"
+            className="absolute inset-0 h-full w-full overflow-visible"
             viewBox="0 0 72 38"
             fill="none"
             aria-hidden="true"
           >
-            <defs>
-              <mask id={revealMaskId} maskUnits="userSpaceOnUse">
-                <rect width="72" height="38" fill="black" />
-                <motion.path
-                  d="M17.75 31.4A17.6 17.6 0 0 1 52.95 31.4"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="35"
-                  strokeLinecap="butt"
-                  pathLength={1}
-                  animate={fillControls}
-                />
-              </mask>
-            </defs>
-            <path
+            <motion.path
               d={fillPath}
               fill="white"
-              opacity="0.48"
-              mask={`url(#${revealMaskId})`}
+              opacity="0"
+              animate={fillControls}
+            />
+            <motion.line
+              x1={pivot.x}
+              y1={pivot.y}
+              x2={needleX}
+              y2={needleY}
+              stroke={inverse ? "#DFB1F3" : "#240E32"}
+              strokeWidth="1"
+              strokeLinecap="round"
+            />
+            <circle
+              cx={pivot.x}
+              cy={pivot.y}
+              r="2.25"
+              fill={inverse ? "#DFB1F3" : "#240E32"}
             />
           </motion.svg>
-          <span className="absolute left-1/2 top-[31px] -translate-y-1/2">
-            <motion.span
-              className={`block h-[2px] w-[19px] origin-left rounded-full ${inverse ? "bg-lavender" : "bg-purple"}`}
-              animate={needleControls}
-            />
-            <motion.span
-              className={`absolute -left-[3px] -top-[2px] h-[6px] w-[6px] rounded-full ${inverse ? "bg-lavender" : "bg-purple"}`}
-              animate={hubControls}
-            />
-          </span>
         </div>
       </motion.div>
     </motion.div>
   );
 }
 
+const integratedSectionReveal: Variants = {
+  initial: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.4,
+      ease: [0.333, 0, 0, 1],
+      staggerChildren: 0.055,
+    },
+  },
+};
+
+const integratedIntroReveal: Variants = {
+  initial: { opacity: 0, y: 22, scale: 0.99 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.46, ease: [0.333, 0, 0, 1] },
+  },
+};
+
 export function IntegratedSystemSection() {
   return (
     <AnimateOnView
-      className="bg-beige pb-16 pt-32 lg:pb-28 lg:pt-[12.5rem]"
-      variants={revealStagger(0.1, 20)}
-      threshold={0.1}
-      viewportMargin="0px 0px -10% 0px"
+      className="bg-beige pb-10 pt-32 lg:pb-12 lg:pt-28"
+      variants={integratedSectionReveal}
+      threshold={0.06}
+      viewportMargin="0px 0px 4% 0px"
     >
       <section
         id="why-hydration"
         className="container mx-auto scroll-mt-24 px-6 md:px-[50px] lg:scroll-mt-28 xl:px-16"
       >
         <motion.div
-          className="max-w-[38.5rem]"
-          variants={fadeUp(14)}
+          className="max-w-[38.5rem] lg:hidden"
+          variants={integratedIntroReveal}
         >
           <SectionLabel captionClassName="text-blue" iconClassName="bg-blue">
             Unique value
@@ -575,11 +552,17 @@ export function IntegratedSystemSection() {
             Why Hydration Is Different
           </Heading>
           <div className="mt-9 flex flex-col gap-5">
-            <Paragraph size="large" className="max-w-[38.5rem] leading-7 text-purple">
+            <Paragraph
+              size="large"
+              className="max-w-[38.5rem] leading-7 text-purple"
+            >
               Most DeFi protocols depend on external infrastructure they cannot
               fully control. Hydration owns the full DeFi stack.
             </Paragraph>
-            <Paragraph size="large" className="max-w-[38.5rem] leading-7 text-purple">
+            <Paragraph
+              size="large"
+              className="max-w-[38.5rem] leading-7 text-purple"
+            >
               By combining execution, liquidity, lending, stablecoins, oracles,
               and security at the appchain level, Hydration can coordinate
               products more efficiently and protect users at every layer.
@@ -587,61 +570,7 @@ export function IntegratedSystemSection() {
           </div>
         </motion.div>
 
-        <motion.div
-          className="mt-24 flex min-h-[27rem] justify-end lg:mt-[7.375rem]"
-          initial="initial"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.12, margin: "0px 0px -8% 0px" }}
-          variants={revealStagger(0.08, 30)}
-        >
-          <div className="w-full max-w-[38rem] lg:pr-5">
-            <Heading
-              size="large"
-              className="max-w-[10ch] text-balance text-purple lg:text-[3.25rem] lg:leading-[1.206]"
-            >
-              One integrated financial system
-            </Heading>
-            <div className="mt-6 flex max-w-[31rem] flex-col gap-6">
-              <Paragraph size="large" className="leading-7 text-purple">
-                Hydration’s products are designed to work together rather than
-                operate as isolated applications.
-              </Paragraph>
-              <Paragraph size="large" className="leading-7 text-purple">
-                Capital can move efficiently between strategies, borrowing
-                markets, liquidity, and HOLLAR without relying on fragmented
-                external infrastructure.
-              </Paragraph>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          className="min-h-[31.75rem] lg:pt-[7.375rem]"
-          initial="initial"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.12, margin: "0px 0px -8% 0px" }}
-          variants={revealStagger(0.08, 30)}
-        >
-          <div className="w-full max-w-[38rem] lg:pl-5">
-            <Heading
-              size="large"
-              className="max-w-[10ch] text-balance text-purple lg:text-[3.25rem] lg:leading-[1.206]"
-            >
-              Appchain-level execution
-            </Heading>
-            <Paragraph size="large" className="mt-6 max-w-[31rem] leading-7 text-purple">
-              Owning the execution environment allows Hydration to optimize how
-              financial activity is processed. This includes:
-            </Paragraph>
-            <ul className="mt-5 list-disc space-y-1 pl-7 font-geist text-lg leading-7 text-purple marker:text-purple">
-              <li>Onchain oracle updates</li>
-              <li>Transaction prioritization</li>
-              <li>Prioritized and partial liquidations</li>
-              <li>Protocol-wide risk controls</li>
-              <li>Security enforced at the runtime level</li>
-            </ul>
-          </div>
-        </motion.div>
+        <IntegratedSystemStory />
       </section>
     </AnimateOnView>
   );
@@ -694,7 +623,7 @@ export function HdxSection() {
             </Paragraph>
           </div>
           <h3 className="mt-8 font-gazpacho text-[1.7rem] font-medium leading-[1.05] text-pink md:text-[1.8125rem] md:leading-[1.035]">
-            Why hold HDX
+            Why hodl HDX
           </h3>
         </motion.div>
 

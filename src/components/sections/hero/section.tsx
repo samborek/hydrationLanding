@@ -1,6 +1,7 @@
 "use client";
 
 import type { StatsData } from "@/api/stats";
+import { getCapitalMetrics } from "@/components/sections/homepage-v3/capital-metrics";
 import Button from "@/components/ui/buttons/button";
 import Paragraph from "@/components/ui/typography/paragraph";
 import Socials from "@/components/footer/socials";
@@ -290,16 +291,7 @@ function HeroCapitalStats({
   stats: StatsData;
   style: MotionStyle;
 }) {
-  const metrics = [
-    { title: "Total value locked", value: stats.tvl, prefix: "$" },
-    { title: "Trading volume", value: stats.vol_30d, prefix: "$" },
-    {
-      title: "Cross-chain volume",
-      value: stats.xcm_vol_30d,
-      prefix: "$",
-    },
-    { title: "Total accounts", value: stats.accounts_count, prefix: "" },
-  ] as const;
+  const metrics = getCapitalMetrics(stats);
 
   return (
     <motion.div
