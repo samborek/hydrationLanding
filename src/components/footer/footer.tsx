@@ -18,7 +18,7 @@ export default function Footer({
     <footer
       className={twMerge(
         "bg-lavender",
-        isDark && "border-t border-white/10 bg-purple text-white"
+        isDark && "border-t border-lavender/15 bg-purple text-white"
       )}
     >
       <RevealOnView className="container mx-auto">

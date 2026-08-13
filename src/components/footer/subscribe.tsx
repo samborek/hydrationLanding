@@ -44,7 +44,7 @@ export default function SubscribeToNewsletter({
               "hover:bg-lavender hover:text-purple active:bg-lavender active:text-purple"
           )}
         >
-          Join Us
+          Subscribe
         </Button>
       </form>
     </div>

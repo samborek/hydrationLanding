@@ -100,36 +100,99 @@ const connectorGroups = [
   {
     color: "#B3CF92",
     lines: [
-      { x1: 2.973, y1: 107.06, x2: 2.973, y2: 20.319, dotX: 2.974, dotY: 107.06 },
-      { x1: 201.237, y1: 320.194, x2: 201.237, y2: 196.279, dotX: 201.238, dotY: 320.194 },
+      {
+        x1: 2.973,
+        y1: 107.06,
+        x2: 2.973,
+        y2: 20.319,
+        dotX: 2.974,
+        dotY: 107.06,
+      },
+      {
+        x1: 201.237,
+        y1: 320.194,
+        x2: 201.237,
+        y2: 196.279,
+        dotX: 201.238,
+        dotY: 320.194,
+      },
     ],
   },
   {
     color: "#53A4E3",
     lines: [
       { x1: 84.76, y1: 81.784, x2: 84.76, y2: 0, dotX: 84.759, dotY: 81.784 },
-      { x1: 67.412, y1: 305.621, x2: 67.412, y2: 206.489, dotX: 67.411, dotY: 305.621 },
+      {
+        x1: 67.412,
+        y1: 305.621,
+        x2: 67.412,
+        y2: 206.489,
+        dotX: 67.411,
+        dotY: 305.621,
+      },
     ],
   },
   {
     color: "#F9AFCA",
     lines: [
-      { x1: 164.064, y1: 35.685, x2: 164.064, y2: 119.947, dotX: 164.063, dotY: 35.684 },
-      { x1: 17.843, y1: 189.34, x2: 17.843, y2: 288.472, dotX: 17.845, dotY: 189.34 },
+      {
+        x1: 164.064,
+        y1: 35.685,
+        x2: 164.064,
+        y2: 119.947,
+        dotX: 164.063,
+        dotY: 35.684,
+      },
+      {
+        x1: 17.843,
+        y1: 189.34,
+        x2: 17.843,
+        y2: 288.472,
+        dotX: 17.845,
+        dotY: 189.34,
+      },
     ],
   },
   {
     color: "#CC1775",
     lines: [
-      { x1: 42.627, y1: 5.945, x2: 42.627, y2: 119.947, dotX: 42.628, dotY: 5.945 },
-      { x1: 146.715, y1: 189.34, x2: 146.715, y2: 308.298, dotX: 146.716, dotY: 189.34 },
+      {
+        x1: 42.627,
+        y1: 5.945,
+        x2: 42.627,
+        y2: 119.947,
+        dotX: 42.628,
+        dotY: 5.945,
+      },
+      {
+        x1: 146.715,
+        y1: 189.34,
+        x2: 146.715,
+        y2: 308.298,
+        dotX: 146.716,
+        dotY: 189.34,
+      },
     ],
   },
   {
     color: "#AAEEFC",
     lines: [
-      { x1: 206.194, y1: 50.555, x2: 206.194, y2: 134.817, dotX: 206.195, dotY: 50.554 },
-      { x1: 240.892, y1: 146.713, x2: 240.892, y2: 64.929, dotX: 240.89, dotY: 146.713 },
+      {
+        x1: 206.194,
+        y1: 50.555,
+        x2: 206.194,
+        y2: 134.817,
+        dotX: 206.195,
+        dotY: 50.554,
+      },
+      {
+        x1: 240.892,
+        y1: 146.713,
+        x2: 240.892,
+        y2: 64.929,
+        dotX: 240.89,
+        dotY: 146.713,
+      },
     ],
   },
 ] as const;
@@ -166,7 +229,7 @@ export default function IntegratedSystemStory() {
   const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: storyRef,
-    offset: ["start 12%", "end end"],
+    offset: ["start 88%", "end end"],
   });
   const progress = useSpring(scrollYProgress, {
     stiffness: 145,
@@ -178,7 +241,7 @@ export default function IntegratedSystemStory() {
   return (
     <div
       ref={storyRef}
-      className="relative mt-16 lg:mt-0 lg:grid lg:min-h-[340svh] lg:grid-cols-[minmax(28rem,0.92fr)_minmax(28rem,1fr)] lg:items-start lg:gap-x-16 xl:grid-cols-[minmax(31rem,0.9fr)_minmax(31rem,1fr)] xl:gap-x-24"
+      className="relative mt-16 lg:mt-0 lg:grid lg:min-h-[320svh] lg:grid-cols-[minmax(28rem,1.04fr)_minmax(28rem,0.96fr)] lg:items-start lg:gap-x-8 xl:grid-cols-[minmax(34rem,1.08fr)_minmax(31rem,0.92fr)] xl:gap-x-12"
     >
       <motion.div
         className="lg:hidden"
@@ -319,7 +382,11 @@ function IntegratedSystemCopy() {
   );
 }
 
-function AppchainExecutionCopy({ progress }: { progress: MotionValue<number> }) {
+function AppchainExecutionCopy({
+  progress,
+}: {
+  progress: MotionValue<number>;
+}) {
   return (
     <>
       <h2 className="max-w-[14ch] text-balance font-gazpacho text-[3.25rem] font-medium leading-[1.206] text-purple">
@@ -369,11 +436,7 @@ function AppchainFeature({
   );
 
   return (
-    <motion.li
-      className="flex gap-3"
-      initial={false}
-      style={{ opacity, y }}
-    >
+    <motion.li className="flex gap-3" initial={false} style={{ opacity, y }}>
       <motion.span
         aria-hidden="true"
         className="mt-[0.58rem] h-2.5 w-2.5 shrink-0 rounded-full"
@@ -398,14 +461,10 @@ function DesktopStoryPanel({
 }) {
   const whyOpacity = useTransform(
     progress,
-    [0.015, 0.055, 0.27, 0.35],
+    [0, 0.025, 0.27, 0.35],
     [0, 1, 1, 0],
   );
-  const whyY = useTransform(
-    progress,
-    [0.015, 0.055, 0.27, 0.35],
-    [22, 0, 0, -16],
-  );
+  const whyY = useTransform(progress, [0, 0.025, 0.27, 0.35], [22, 0, 0, -16]);
   const integratedOpacity = useTransform(
     progress,
     [0.31, 0.38, 0.58, 0.66],
@@ -478,8 +537,6 @@ function HydrationLayerVisual({
   // That keeps the incoming state particulate without leaving thousands of
   // moving SVG paths in the DOM.
   const baseOpacity = useTransform(progress, [0.87, 0.94], [0, 1]);
-  const baseY = useTransform(progress, [0.87, 0.94], [6, 0]);
-  const baseScale = useTransform(progress, [0.87, 0.94], [0.985, 1]);
 
   const wireOpacity = useTransform(progress, [0.2, 0.3], [0, 0.8]);
   const middleOpacity = useTransform(progress, [0.23, 0.3], [0, 1]);
@@ -500,7 +557,7 @@ function HydrationLayerVisual({
 
   return (
     <motion.figure
-      className="relative mx-auto aspect-[497/638] w-full max-w-[31rem] overflow-visible lg:max-w-[34rem]"
+      className="relative mx-auto aspect-[497/638] w-full max-w-[31rem] overflow-visible lg:max-w-[36rem] xl:max-w-[42rem]"
       style={{ y: staticState ? 0 : visualY }}
       aria-label="Hydration's integrated appchain layers assembling from particles"
     >
@@ -563,9 +620,6 @@ function HydrationLayerVisual({
           width: "68.666%",
           height: "27.982%",
           opacity: staticState ? 1 : baseOpacity,
-          y: staticState ? 0 : baseY,
-          scale: staticState ? 1 : baseScale,
-          transformOrigin: "50% 100%",
         }}
       />
 
@@ -657,15 +711,21 @@ function ConnectorGroup({
   const opacity = useTransform(progress, [start, start + 0.025], [0, 1], {
     clamp: true,
   });
-  const dotScale = useTransform(
+  const dotOpacity = useTransform(
     progress,
-    [start + 0.035, start + 0.065],
+    [start + 0.04, start + 0.055],
     [0, 1],
+    { clamp: true },
+  );
+  const dotRadius = useTransform(
+    progress,
+    [start + 0.04, start + 0.058, start + 0.075],
+    [0, 3.45, 2.974],
     { clamp: true },
   );
 
   return (
-    <motion.g style={{ opacity: staticState ? 1 : opacity }}>
+    <g>
       {group.lines.map((line, lineIndex) => (
         <g key={`${line.x1}-${line.y1}-${lineIndex}`}>
           <motion.line
@@ -676,22 +736,23 @@ function ConnectorGroup({
             stroke={group.color}
             strokeWidth="0.644359"
             strokeDasharray="1.49 1.98"
-            style={{ pathLength: staticState ? 1 : pathLength }}
+            style={{
+              opacity: staticState ? 1 : opacity,
+              pathLength: staticState ? 1 : pathLength,
+            }}
           />
           <motion.circle
             cx={line.dotX}
             cy={line.dotY}
-            r="2.974"
+            r={staticState ? 2.974 : dotRadius}
             fill={group.color}
             style={{
-              scale: staticState ? 1 : dotScale,
-              transformBox: "fill-box",
-              transformOrigin: "center",
+              opacity: staticState ? 1 : dotOpacity,
             }}
           />
         </g>
       ))}
-    </motion.g>
+    </g>
   );
 }
 
@@ -733,6 +794,7 @@ function ParticleAssemblyCanvas({
       const arrivalFade = smoothstep(0.015, 0.22, stageProgress);
       const resolveFade = 1 - smoothstep(0.72, 1, stageProgress);
       const points = pointsRef.current[stage.id];
+      const scalesInPlace = stage.id === "base";
 
       points.forEach((point) => {
         const pointProgress = clamp(
@@ -740,14 +802,15 @@ function ParticleAssemblyCanvas({
         );
         const eased = easeOutQuint(pointProgress);
         const sizeScale = mix(
-          0.16,
+          scalesInPlace ? 0 : 0.16,
           1,
-          easeOutQuint(clamp(pointProgress * 1.45)),
+          easeOutQuint(clamp(pointProgress * (scalesInPlace ? 1.18 : 1.45))),
         );
-        const x = mix(point.startX, point.x, eased);
-        const y =
-          mix(point.startY, point.y, eased) +
-          Math.sin(pointProgress * Math.PI) * point.sway;
+        const x = scalesInPlace ? point.x : mix(point.startX, point.x, eased);
+        const y = scalesInPlace
+          ? point.y
+          : mix(point.startY, point.y, eased) +
+            Math.sin(pointProgress * Math.PI) * point.sway;
         const pointFade = smoothstep(0, 0.24, pointProgress);
         const alpha = arrivalFade * resolveFade * pointFade;
         if (alpha <= 0.01) return;
@@ -906,18 +969,16 @@ function sampleParticleLayer(
     return {
       x: candidate.x,
       y: candidate.y,
-      // The final layer rises in near-vertical streams. The other layers keep
-      // their wider lateral dispersion.
-      startX:
-        candidate.x +
-        (random() - 0.5) * (isBaseLayer ? 14 : 150),
-      startY,
+      // Base dots stay in their final coordinates and resolve through scale.
+      // The other layers retain the more spatial assembly motion.
+      startX: isBaseLayer ? candidate.x : candidate.x + (random() - 0.5) * 150,
+      startY: isBaseLayer ? candidate.y : startY,
       radius: 0.8 + random() * 1.35,
       color: candidate.color,
       delay: isBaseLayer
         ? verticalOrder * 0.24 + random() * 0.075
         : verticalOrder * 0.13 + random() * 0.045,
-      sway: (random() - 0.5) * (isBaseLayer ? 4 : 18),
+      sway: isBaseLayer ? 0 : (random() - 0.5) * 18,
     };
   });
 }

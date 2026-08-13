@@ -2,7 +2,6 @@
 
 import AnimateOnView from "@/animation/motion-section";
 import { fadeUp, revealStagger, staggerChildren } from "@/animation/variants";
-import type { StatsData } from "@/api/stats";
 import HdxFlowLogo from "@/components/sections/built-to-be-unstoppable/assets/logo.svg";
 import ArchFeatureCard from "@/components/sections/arch-feature-card";
 import LockIcon from "@/components/sections/devs-and-security/icons/lock";
@@ -18,7 +17,7 @@ import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
 import DiamondIcon from "@/components/ui/labels/icons/diamond";
-import { getCapitalMetrics } from "./capital-metrics";
+import { formatCompactMetric, useCapitalMetrics } from "./capital-metrics";
 import IntegratedSystemStory from "./integrated-system-story";
 import {
   animate,
@@ -28,7 +27,7 @@ import {
   useReducedMotion,
   useTransform,
 } from "framer-motion";
-import type { Variants } from "framer-motion";
+import type { AnimationPlaybackControls, Variants } from "framer-motion";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
@@ -57,6 +56,21 @@ const yieldPillars = [
   },
 ] as const;
 
+const sectionFillFade: Variants = {
+  initial: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.7, ease: [0.2, 0.65, 0.3, 0.9] },
+  },
+};
+
+const stationarySectionReveal = (staggerChildren: number): Variants => ({
+  initial: {},
+  visible: {
+    transition: { staggerChildren },
+  },
+});
+
 const hdxBenefits = [
   {
     title: "Participate in governance",
@@ -80,8 +94,8 @@ const hdxBenefits = [
   },
 ] as const;
 
-export function CapitalAtWorkSection({ stats }: { stats: StatsData }) {
-  const capitalMetrics = getCapitalMetrics(stats);
+export function CapitalAtWorkSection() {
+  const capitalMetrics = useCapitalMetrics("allTime");
 
   return (
     <AnimateOnView
@@ -120,12 +134,12 @@ function CapitalMetricCard({
 }: {
   metric: {
     title: string;
-    value: number;
-    prefix?: string;
+    value: number | null;
+    prefix: "" | "$";
   };
 }) {
-  const hasLiveValue = Number.isFinite(metric.value) && metric.value > 0;
-  const displayValue = formatMetricValue(metric.value);
+  const hasLiveValue = metric.value !== null && Number.isFinite(metric.value);
+  const displayValue = formatCompactMetric(metric.value, metric.prefix);
 
   return (
     <motion.article
@@ -134,7 +148,7 @@ function CapitalMetricCard({
     >
       <div>
         <p className="font-gazpacho text-[2.65rem] font-medium leading-none tracking-tight text-white lg:text-[3rem]">
-          {hasLiveValue ? `${metric.prefix ?? ""}${displayValue}` : "—"}
+          {hasLiveValue ? displayValue : "—"}
         </p>
         <h3 className="mt-2 whitespace-nowrap font-gazpacho text-base font-medium leading-none tracking-tight text-lavender transition-colors group-hover:text-white lg:text-[1.1rem]">
           {metric.title}
@@ -218,9 +232,15 @@ export function StrategiesSection() {
             <div className="max-w-[32rem]">
               <Heading
                 size="large"
-                className="max-w-[16ch] text-purple lg:text-[2.922rem] lg:leading-[1.2]"
+                className="max-w-[19ch] text-purple lg:text-[2.922rem] lg:leading-[1.2]"
               >
-                Strategies built for different risk profiles
+                <span className="lg:whitespace-nowrap">
+                  Strategies built for
+                </span>
+                <br className="hidden lg:block" />
+                <span className="lg:whitespace-nowrap">
+                  different risk profiles
+                </span>
               </Heading>
             </div>
             <p className="mt-8 max-w-[42rem] font-geist text-[1.1rem] font-normal leading-[1.55] text-purple/50 lg:mt-11 lg:text-[1.114rem]">
@@ -324,7 +344,9 @@ function StrategyTile({
           className="max-w-[31rem] font-geist text-[1.45rem] leading-[1.3] tracking-[-0.0285em] md:text-[1.75rem]"
           variants={fadeUp(14)}
         >
-          <span className={`font-medium ${inverse ? "text-lavender" : "text-purple"}`}>
+          <span
+            className={`font-medium ${inverse ? "text-lavender" : "text-purple"}`}
+          >
             {eyebrow}.{" "}
           </span>
           <span className={inverse ? "text-lavender/70" : "text-purple"}>
@@ -335,7 +357,7 @@ function StrategyTile({
           role="primary"
           fill="solid"
           action={{ href: "https://app.hydration.net", target: "_blank" }}
-          className={`mt-8 rounded-full bg-white px-6 py-3 md:mt-12 ${inverse ? "text-lavender hover:bg-lavender hover:text-purple" : "text-purple hover:bg-purple hover:text-white"}`}
+          className={`mt-8 rounded-full bg-white px-6 py-3 text-purple md:mt-12 ${inverse ? "hover:bg-lavender hover:text-purple" : "hover:bg-purple hover:text-white"}`}
         >
           {cta}
         </Button>
@@ -358,7 +380,8 @@ function RiskGauge({
   const reduceMotion = useReducedMotion();
   const fillControls = useAnimationControls();
   const hasEntered = useRef(false);
-  const isGaugeAnimating = useRef(false);
+  const gaugeAnimation = useRef<AnimationPlaybackControls | null>(null);
+  const animationRun = useRef(0);
   const pivot = { x: 36, y: 31 };
   const fillRadius = 18;
   const needleLength = 19;
@@ -392,6 +415,34 @@ function RiskGauge({
     fillControls.set({ opacity: 0.42 });
   };
 
+  const playFromStart = (delay = 0) => {
+    const run = ++animationRun.current;
+
+    fillControls.stop();
+    gaugeAnimation.current?.stop();
+    gaugeAngle.set(initialAngle);
+    fillControls.set({ opacity: 0 });
+
+    const fillAnimation = fillControls.start({
+      opacity: 0.42,
+      transition: {
+        delay,
+        duration: 1.25,
+        ease: [0.2, 0.65, 0.3, 0.9],
+      },
+    });
+    const needleAnimation = animate(gaugeAngle, needleAngle, {
+      delay,
+      duration: 1.25,
+      ease: [0.2, 0.65, 0.3, 0.9],
+    });
+
+    gaugeAnimation.current = needleAnimation;
+    void Promise.all([fillAnimation, needleAnimation]).finally(() => {
+      if (animationRun.current === run) gaugeAnimation.current = null;
+    });
+  };
+
   const playEntrance = () => {
     if (hasEntered.current) return;
     hasEntered.current = true;
@@ -401,43 +452,13 @@ function RiskGauge({
       return;
     }
 
-    isGaugeAnimating.current = true;
-    gaugeAngle.set(initialAngle);
-    fillControls.set({ opacity: 0 });
-    void Promise.all([
-      fillControls.start({
-        opacity: 0.42,
-        transition: {
-          delay: 0.2,
-          duration: 1.25,
-          ease: [0.2, 0.65, 0.3, 0.9],
-        },
-      }),
-      animate(gaugeAngle, needleAngle, {
-        delay: 0.2,
-        duration: 1.25,
-        ease: [0.2, 0.65, 0.3, 0.9],
-      }),
-    ]).finally(() => {
-      isGaugeAnimating.current = false;
-    });
+    playFromStart(0.2);
   };
 
   const replayGauge = () => {
-    if (reduceMotion || !hasEntered.current || isGaugeAnimating.current) return;
+    if (reduceMotion || !hasEntered.current) return;
 
-    isGaugeAnimating.current = true;
-    void (async () => {
-      await animate(gaugeAngle, initialAngle, {
-        duration: 0.58,
-        ease: [0.2, 0.65, 0.3, 0.9],
-      });
-      await animate(gaugeAngle, needleAngle, {
-        duration: 0.87,
-        ease: [0.2, 0.65, 0.3, 0.9],
-      });
-      isGaugeAnimating.current = false;
-    })();
+    playFromStart();
   };
 
   return (
@@ -529,7 +550,7 @@ const integratedIntroReveal: Variants = {
 export function IntegratedSystemSection() {
   return (
     <AnimateOnView
-      className="bg-beige pb-10 pt-32 lg:pb-12 lg:pt-28"
+      className="bg-beige pb-6 pt-24 lg:pb-0 lg:pt-8"
       variants={integratedSectionReveal}
       threshold={0.06}
       viewportMargin="0px 0px 4% 0px"
@@ -592,14 +613,19 @@ export function HdxSection() {
   return (
     <AnimateOnView
       element="div"
-      className="bg-lavender px-6 py-16 md:px-[50px] lg:py-28 xl:px-0"
-      variants={revealStagger(0.08, 24)}
+      className="relative px-6 py-16 md:px-[50px] lg:py-28 xl:px-0"
+      variants={stationarySectionReveal(0.08)}
       threshold={0.1}
       viewportMargin="0px 0px -10% 0px"
     >
+      <motion.div
+        aria-hidden="true"
+        className="absolute inset-0 bg-lavender"
+        variants={sectionFillFade}
+      />
       <section
         id="hdx"
-        className="container mx-auto scroll-mt-24 max-xl:!px-0 lg:scroll-mt-28"
+        className="container relative mx-auto scroll-mt-24 max-xl:!px-0 lg:scroll-mt-28"
       >
         <motion.div
           className="mx-auto flex max-w-[64rem] flex-col items-center text-center"
@@ -736,77 +762,74 @@ export function CommunityBuildSection() {
   return (
     <AnimateOnView
       element="div"
-      className="overflow-hidden border-y border-white/10 bg-purple text-white"
-      variants={revealStagger(0.1, 24)}
+      className="relative overflow-hidden border-t border-white/10 bg-purple text-white"
+      variants={stationarySectionReveal(0.1)}
       threshold={0.08}
       viewportMargin="0px 0px -10% 0px"
     >
-      <section
-        id="community"
-        className="scroll-mt-24 lg:scroll-mt-28"
-      >
+      <section id="community" className="relative scroll-mt-24 lg:scroll-mt-28">
         <div className="grid min-h-[56rem] lg:min-h-[58rem] lg:grid-cols-[minmax(0,1.05fr)_minmax(34rem,0.95fr)]">
-        <motion.div
-          className="flex items-center px-6 py-20 md:px-[50px] lg:px-[max(50px,calc((100vw-83rem)/2+4rem))] lg:py-28 lg:pr-16 xl:pr-24"
-          variants={fadeUp(14)}
-        >
-          <motion.div className="max-w-[48rem]" variants={fadeUp(10)}>
-            <SectionLabel
-              captionClassName="text-lavender"
-              iconClassName="bg-pink"
-            >
-              Join the Community
-            </SectionLabel>
-            <h2 className="mt-7 max-w-[17ch] text-balance font-gazpacho text-[2.4rem] font-normal leading-[1.04] text-white md:text-[3rem] lg:text-[3.25rem]">
-              Built and governed by the community
-            </h2>
-            <Paragraph
-              size="large"
-              className="mt-8 max-w-[39rem] text-white/65"
-            >
-              Hydration is shaped by an open community of users, contributors,
-              liquidity providers, and HDX holders.
-            </Paragraph>
-            <Paragraph
-              size="large"
-              className="mt-4 max-w-[39rem] text-white/65"
-            >
-              Together, they govern the protocol, allocate resources, distribute
-              value, and build a more secure and productive home for onchain
-              capital.
-            </Paragraph>
-            <motion.div
-              className="mt-12 grid gap-2 sm:grid-cols-3"
-              variants={staggerChildren(0.09)}
-            >
-              <CommunityLink
-                href="https://x.com/hydration_net"
-                name="Twitter"
-                icon={XLogo}
-                className="bg-lavender"
-              />
-              <CommunityLink
-                href="https://discord.gg/kkmY35UxAG"
-                name="Discord"
-                icon={DiscordLogo}
-                className="bg-blue"
-              />
-              <CommunityLink
-                href="https://t.me/hydration_net"
-                name="Telegram"
-                icon={TelegramLogo}
-                className="bg-green"
-              />
+          <motion.div
+            className="flex items-center px-6 py-20 md:px-[50px] lg:px-[max(50px,calc((100vw-83rem)/2+4rem))] lg:py-28 lg:pr-16 xl:pr-24"
+            variants={fadeUp(14)}
+          >
+            <motion.div className="max-w-[48rem]" variants={fadeUp(10)}>
+              <SectionLabel
+                captionClassName="text-lavender"
+                iconClassName="bg-pink"
+              >
+                Join the Community
+              </SectionLabel>
+              <h2 className="mt-7 max-w-[17ch] text-balance font-gazpacho text-[2.4rem] font-normal leading-[1.04] text-white md:text-[3rem] lg:text-[3.25rem]">
+                Built and governed by the community
+              </h2>
+              <Paragraph
+                size="large"
+                className="mt-8 max-w-[39rem] text-white/65"
+              >
+                Hydration is shaped by an open community of users, contributors,
+                liquidity providers, and HDX holders.
+              </Paragraph>
+              <Paragraph
+                size="large"
+                className="mt-4 max-w-[39rem] text-white/65"
+              >
+                Together, they govern the protocol, allocate resources,
+                distribute value, and build a more secure and productive home
+                for onchain capital.
+              </Paragraph>
+              <motion.div
+                className="mt-12 grid gap-2 sm:grid-cols-3"
+                variants={staggerChildren(0.09)}
+              >
+                <CommunityLink
+                  href="https://x.com/hydration_net"
+                  name="Twitter"
+                  icon={XLogo}
+                  className="bg-lavender"
+                />
+                <CommunityLink
+                  href="https://discord.gg/kkmY35UxAG"
+                  name="Discord"
+                  icon={DiscordLogo}
+                  className="bg-blue"
+                />
+                <CommunityLink
+                  href="https://t.me/hydration_net"
+                  name="Telegram"
+                  icon={TelegramLogo}
+                  className="bg-green"
+                />
+              </motion.div>
             </motion.div>
           </motion.div>
-        </motion.div>
 
-        <motion.div
-          className="relative min-h-[32rem] border-t border-white/15 bg-white/[0.035] lg:min-h-full lg:border-l lg:border-t-0"
-          variants={fadeUp(20)}
-        >
-          <ConstructionDrawing />
-        </motion.div>
+          <motion.div
+            className="relative min-h-[32rem] border-t border-white/15 bg-white/[0.035] lg:min-h-full lg:border-l lg:border-t-0"
+            variants={fadeUp(20)}
+          >
+            <ConstructionDrawing />
+          </motion.div>
         </div>
       </section>
     </AnimateOnView>

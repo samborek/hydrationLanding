@@ -1,7 +1,10 @@
 "use client";
 
-import type { StatsData } from "@/api/stats";
-import { getCapitalMetrics } from "@/components/sections/homepage-v3/capital-metrics";
+import {
+  formatCompactMetric,
+  type CapitalMetric,
+  useCapitalMetrics,
+} from "@/components/sections/homepage-v3/capital-metrics";
 import Button from "@/components/ui/buttons/button";
 import Paragraph from "@/components/ui/typography/paragraph";
 import Socials from "@/components/footer/socials";
@@ -18,7 +21,7 @@ import type { MotionStyle, MotionValue } from "framer-motion";
 import useScreenSize from "@/hooks/useScreenSize";
 import Image from "next/image";
 import HeroWaterCanvas from "./water-canvas";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const headlineEase = [0.2, 0.65, 0.3, 0.9] as const;
 const beigeShaderColor = [246 / 255, 246 / 255, 236 / 255] as const;
@@ -27,7 +30,7 @@ const metricRevealEase = (value: number) => 1 - Math.pow(1 - value, 3);
 // while it expands, without introducing a duplicate blurred background.
 const sceneEdgeFeatherEnabled = false;
 
-export default function HeroSection({ stats }: { stats: StatsData }) {
+export default function HeroSection() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const { height: viewportHeight } = useScreenSize();
@@ -42,50 +45,42 @@ export default function HeroSection({ stats }: { stats: StatsData }) {
     [
       "inset(66vh 7vw 0vh 7vw round 2.75rem 2.75rem 0rem 0rem)",
       "inset(0vh 0vw 0vh 0vw round 0rem 0rem 0rem 0rem)",
-    ]
+    ],
   );
   const sceneMaskTop = useTransform(
     scrollYProgress,
     [0, 0.18],
-    ["66vh", "0vh"]
+    ["66vh", "0vh"],
   );
   const sceneMaskSide = useTransform(
     scrollYProgress,
     [0, 0.18],
-    ["7vw", "0vw"]
+    ["7vw", "0vw"],
   );
   const sceneMaskEdgeAlpha = useTransform(
     scrollYProgress,
     [0, 0.035, 0.13, 0.18],
-    [1, 0, 0, 1]
+    [1, 0, 0, 1],
   );
   const sceneFeatherMask = useMotionTemplate`linear-gradient(to bottom, rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) ${sceneMaskTop}, black calc(${sceneMaskTop} + 26px), black calc(100% - 20px), rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) 100%), linear-gradient(to right, rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) ${sceneMaskSide}, black calc(${sceneMaskSide} + 22px), black calc(100% - ${sceneMaskSide} - 22px), rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) calc(100% - ${sceneMaskSide}))`;
   const sceneFillOpacity = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
   const sceneTransitionHeight = useTransform(
     scrollYProgress,
     [0, 0.16, 0.26],
-    [0, 0, 72]
+    [0, 0, 72],
   );
   const sceneScale = useTransform(scrollYProgress, [0, 1], [1, 1.13]);
   const heroContentShift = Math.min(
     56,
-    14 + Math.max(0, (viewportHeight - 720) * 0.072)
+    14 + Math.max(0, (viewportHeight - 720) * 0.072),
   );
   const heroContentY = useTransform(
     scrollYProgress,
     [0, 0.38, 0.74],
-    [14, 14, heroContentShift]
+    [14, 14, heroContentShift],
   );
-  const introChromeOpacity = useTransform(
-    scrollYProgress,
-    [0.08, 0.3],
-    [1, 0]
-  );
-  const statsOpacity = useTransform(
-    scrollYProgress,
-    [0.3, 0.46],
-    [0, 1]
-  );
+  const introChromeOpacity = useTransform(scrollYProgress, [0.08, 0.3], [1, 0]);
+  const statsOpacity = useTransform(scrollYProgress, [0.3, 0.46], [0, 1]);
   const statsY = useTransform(scrollYProgress, [0.3, 0.5], [42, 0]);
 
   return (
@@ -185,9 +180,7 @@ export default function HeroSection({ stats }: { stats: StatsData }) {
           >
             <motion.div
               className="flex w-full flex-col items-center gap-5 lg:flex-row lg:justify-between lg:gap-0"
-              initial={
-                reducedMotion ? false : { opacity: 0, y: 10 }
-              }
+              initial={reducedMotion ? false : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 delay: 1.18,
@@ -201,7 +194,6 @@ export default function HeroSection({ stats }: { stats: StatsData }) {
           </motion.div>
 
           <HeroCapitalStats
-            stats={stats}
             progress={scrollYProgress}
             style={{
               opacity: reducedMotion ? 1 : statsOpacity,
@@ -228,9 +220,7 @@ function HeroSectionContent() {
 
   return (
     <div className="pointer-events-auto flex min-w-0 w-full flex-col items-center gap-8 lg:pb-[100px] lg:pt-[150px]">
-      <motion.h1
-        className="w-full max-w-[19ch] min-w-0 text-balance text-center font-gazpacho text-[clamp(2.35rem,11.25vw,2.75rem)] font-medium leading-[0.92] text-purple sm:text-[76px] lg:text-[88px]"
-      >
+      <motion.h1 className="w-full max-w-[19ch] min-w-0 text-balance text-center font-gazpacho text-[clamp(2.35rem,11.25vw,2.75rem)] font-medium leading-[0.92] text-purple sm:text-[76px] lg:text-[88px]">
         <span className="sm:hidden">
           <AnimatedHeadlineText text="A secure" />
           <br />
@@ -284,14 +274,12 @@ function HeroSectionContent() {
 
 function HeroCapitalStats({
   progress,
-  stats,
   style,
 }: {
   progress: MotionValue<number>;
-  stats: StatsData;
   style: MotionStyle;
 }) {
-  const metrics = getCapitalMetrics(stats);
+  const metrics = useCapitalMetrics("allTime");
 
   return (
     <motion.div
@@ -324,23 +312,18 @@ function AnimatedCapitalMetric({
   progress,
 }: {
   index: number;
-  metric: {
-    title: string;
-    value: number;
-    prefix: string;
-  };
+  metric: CapitalMetric;
   progress: MotionValue<number>;
 }) {
   const reducedMotion = useReducedMotion();
-  const hasLiveValue = Number.isFinite(metric.value) && metric.value > 0;
+  const hasLiveValue = metric.value !== null && Number.isFinite(metric.value);
+  const targetValue = metric.value ?? 0;
   const start = 0.56 + index * 0.02;
   const end = start + 0.33;
-  const animatedValue = useTransform(
-    progress,
-    [start, end],
-    [0, metric.value],
-    { clamp: true, ease: metricRevealEase }
-  );
+  const countProgress = useTransform(progress, [start, end], [0, 1], {
+    clamp: true,
+    ease: metricRevealEase,
+  });
   const metricOpacity = useTransform(progress, [start, end], [0.25, 1], {
     ease: metricRevealEase,
   });
@@ -351,20 +334,24 @@ function AnimatedCapitalMetric({
     progress,
     [start, end],
     ["blur(10px)", "blur(0px)"],
-    { ease: metricRevealEase }
+    { ease: metricRevealEase },
   );
   const [displayValue, setDisplayValue] = useState(() =>
-    formatAnimatedMetricValue(animatedValue.get(), metric.value)
+    formatCompactMetric(countProgress.get() * targetValue, metric.prefix),
   );
 
-  useMotionValueEvent(animatedValue, "change", (latest) => {
-    const nextValue = formatAnimatedMetricValue(latest, metric.value);
-    setDisplayValue((current) =>
-      current === nextValue ? current : nextValue
+  useEffect(() => {
+    setDisplayValue(
+      formatCompactMetric(countProgress.get() * targetValue, metric.prefix),
     );
+  }, [countProgress, metric.prefix, targetValue]);
+
+  useMotionValueEvent(countProgress, "change", (latest) => {
+    const nextValue = formatCompactMetric(latest * targetValue, metric.prefix);
+    setDisplayValue((current) => (current === nextValue ? current : nextValue));
   });
 
-  const finalValue = `${metric.prefix}${formatMetricValue(metric.value)}`;
+  const finalValue = formatCompactMetric(metric.value, metric.prefix);
 
   return (
     <motion.article
@@ -375,16 +362,13 @@ function AnimatedCapitalMetric({
       }}
     >
       <motion.p
-        className="font-gazpacho text-[clamp(2.75rem,7.5vw,4.125rem)] font-medium leading-[0.84] tracking-[-0.045em] text-purple lg:text-[clamp(4rem,5.4vw,5.5rem)]"
+        className="font-gazpacho text-[clamp(2.75rem,7.5vw,4.125rem)] font-medium leading-[0.84] tracking-[-0.045em] text-purple tabular-nums lg:text-[clamp(3.5rem,4.45vw,4.65rem)]"
         style={{ filter: reducedMotion ? "blur(0px)" : valueFilter }}
       >
         {hasLiveValue ? (
           <>
             <span aria-hidden="true">
-              {metric.prefix}
-              {reducedMotion
-                ? formatMetricValue(metric.value)
-                : displayValue}
+              {reducedMotion ? finalValue : displayValue}
             </span>
             <span className="sr-only">{finalValue}</span>
           </>
@@ -392,25 +376,17 @@ function AnimatedCapitalMetric({
           "—"
         )}
       </motion.p>
-      <h3 className="mt-3 whitespace-nowrap font-geist text-xs font-normal leading-none tracking-tight text-purple/55 md:text-sm">
+      <h3 className="mt-3 whitespace-nowrap font-gazpacho text-[0.95rem] font-medium leading-none tracking-tight text-purple/75 md:text-base lg:text-[1.1rem]">
         {metric.title}
       </h3>
+      {metric.delta !== null && (
+        <p className="mt-1 font-geist text-xs font-medium tabular-nums text-purple/65">
+          {metric.delta >= 0 ? "+" : "−"}
+          {formatCompactMetric(Math.abs(metric.delta), metric.prefix)}
+        </p>
+      )}
     </motion.article>
   );
-}
-
-function formatAnimatedMetricValue(value: number, targetValue: number) {
-  if (targetValue >= 1_000_000) {
-    return `${Math.round(value / 1_000_000)}M`;
-  }
-  if (targetValue >= 10_000) return `${Math.round(value / 1_000)}K`;
-  return Math.round(value).toString();
-}
-
-function formatMetricValue(value: number) {
-  if (value >= 1_000_000) return `${Math.round(value / 1_000_000)}M`;
-  if (value >= 10_000) return `${Math.round(value / 1_000)}K`;
-  return Math.round(value).toString();
 }
 
 function AnimatedHeadlineText({

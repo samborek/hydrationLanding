@@ -62,7 +62,7 @@ const securityGroups: readonly SecurityGroup[] = [
 export default function SecurityFeature() {
   return (
     <AnimateOnView
-      className="overflow-hidden bg-white pt-10 md:pt-14 lg:pt-16"
+      className="overflow-hidden bg-white pt-16 md:pt-20 lg:pt-28"
       variants={revealStagger(0.08, 18)}
       threshold={0.08}
       viewportMargin="0px 0px -10% 0px"
@@ -122,20 +122,24 @@ function SecurityPhoto() {
     target: photoRef,
     offset: ["start end", "end start"],
   });
-  const imageY = useTransform(scrollYProgress, [0, 1], [-34, 34]);
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1.08, 1.025]);
+  const imageY = useTransform(scrollYProgress, [0, 1], [-8, 8]);
+  const imageScale = useTransform(
+    scrollYProgress,
+    [0, 0.82, 1],
+    [1, 1.065, 1.065],
+  );
 
   return (
     <motion.div
       ref={photoRef}
-      className="relative aspect-[4/5] w-full overflow-hidden md:aspect-[1676/939]"
+      className="relative aspect-[1780/635] min-h-[25rem] w-full overflow-hidden sm:min-h-[28rem]"
       variants={fadeUp(16)}
     >
       <motion.div
-        className="absolute -inset-[6%] will-change-transform"
+        className="absolute inset-0 will-change-transform"
         style={{
           y: reducedMotion ? 0 : imageY,
-          scale: reducedMotion ? 1.04 : imageScale,
+          scale: reducedMotion ? 1 : imageScale,
         }}
       >
         <Image

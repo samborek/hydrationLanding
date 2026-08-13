@@ -1,6 +1,5 @@
 import Footer from "@/components/footer/footer";
 import Header from "@/components/header/header";
-import { fetchStats } from "@/api/stats";
 import HeroSection from "@/components/sections/hero/section";
 import SecurityFeature from "@/components/sections/new-features/security-feature";
 import {
@@ -89,13 +88,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Home() {
-  const stats = await fetchStats();
-
+export default function Home() {
   return (
     <main className="bg-white-100 overflow-x-clip">
       <Header className="fixed top-0 left-0 right-0 xl:top-4" />
-      <HeroSection stats={stats} />
+      <HeroSection />
       <ProductiveYieldSection />
       <StrategiesSection />
       <IntegratedSystemSection />
