@@ -100,9 +100,12 @@ export default function HeroSection() {
             style={{ scale: reducedMotion ? 1 : sceneScale }}
           >
             <Image
-              src="/assets/hero-arches-sunrise.png"
+              src="/assets/hero-arches-sunrise.webp"
               alt=""
               fill
+              priority
+              fetchPriority="high"
+              quality={86}
               sizes="100vw"
               className="object-cover object-[54%_center]"
             />
@@ -150,10 +153,11 @@ export default function HeroSection() {
                 aria-hidden="true"
               >
                 <Image
-                  src="/assets/hero-arches-sunrise.png"
+                  src="/assets/hero-arches-sunrise.webp"
                   alt=""
                   fill
-                  priority
+                  loading="lazy"
+                  quality={86}
                   sizes="100vw"
                   className="object-cover object-[54%_center]"
                 />
