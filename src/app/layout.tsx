@@ -1,5 +1,3 @@
-"use client";
-
 import SmoothScrolling from "@/components/smooth";
 import "./globals.css";
 

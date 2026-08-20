@@ -28,12 +28,10 @@ type ProtocolHistory = {
 };
 
 type StablecoinResponse = {
-  peggedAssets?: Array<{
-    id: string;
+  currentChainBalances?: Record<string, { peggedUSD?: number }>;
+  tokens?: Array<{
+    date: number;
     circulating?: { peggedUSD?: number };
-    circulatingPrevDay?: { peggedUSD?: number };
-    circulatingPrevWeek?: { peggedUSD?: number };
-    circulatingPrevMonth?: { peggedUSD?: number };
   }>;
 };
 
@@ -148,6 +146,11 @@ async function fetchAllocated(window: CapitalWindow, signal: AbortSignal) {
     (sum, current) => sum + assertNumber(current, "current TVL"),
     0,
   );
+
+  // The homepage displays the all-time totals without a comparison period.
+  // Avoid downloading the full multi-year protocol histories in that case.
+  if (window === "allTime") return { value, delta: null };
+
   try {
     const histories = await Promise.all(
       protocols.map((protocol) =>
@@ -157,20 +160,16 @@ async function fetchAllocated(window: CapitalWindow, signal: AbortSignal) {
         ),
       ),
     );
-    const days =
-      window === "allTime" ? null : { "24h": 1, "7d": 7, "30d": 30 }[window];
+    const days = { "24h": 1, "7d": 7, "30d": 30 }[window];
     const comparableLevel = histories.reduce((sum, history) => {
       const points = history.tvl?.filter((point) =>
         Number.isFinite(point.totalLiquidityUSD),
       );
       if (!points?.length) throw new Error("Missing protocol TVL history");
-      const point =
-        window === "allTime"
-          ? points[0]
-          : nearestPoint(
-              points,
-              Math.floor(Date.now() / 1000) - (days ?? 0) * 86400,
-            );
+      const point = nearestPoint(
+        points,
+        Math.floor(Date.now() / 1000) - days * 86400,
+      );
       return sum + point.totalLiquidityUSD;
     }, 0);
 
@@ -187,20 +186,35 @@ async function fetchAllocated(window: CapitalWindow, signal: AbortSignal) {
 
 async function fetchHollar(window: CapitalWindow, signal: AbortSignal) {
   const response = await fetchJson<StablecoinResponse>(
-    "https://stablecoins.llama.fi/stablecoins",
+    "https://stablecoins.llama.fi/stablecoin/312",
     signal,
   );
-  const hollar = response.peggedAssets?.find((asset) => asset.id === "312");
   const value = assertNumber(
-    hollar?.circulating?.peggedUSD,
+    response.currentChainBalances?.Hydration?.peggedUSD,
     "HOLLAR circulation",
   );
-  const previous = {
-    "24h": hollar?.circulatingPrevDay?.peggedUSD,
-    "7d": hollar?.circulatingPrevWeek?.peggedUSD,
-    "30d": hollar?.circulatingPrevMonth?.peggedUSD,
-    allTime: undefined,
-  }[window];
+
+  if (window === "allTime") return { value, delta: null };
+
+  const days = { "24h": 1, "7d": 7, "30d": 30 }[window];
+  const points = response.tokens?.filter(
+    (point) =>
+      Number.isFinite(point.date) &&
+      Number.isFinite(point.circulating?.peggedUSD),
+  );
+  if (!points?.length) return { value, delta: null };
+
+  const previousPoint = points.reduce((nearest, point) =>
+    Math.abs(
+      point.date - (Math.floor(Date.now() / 1000) - days * 86400),
+    ) <
+    Math.abs(
+      nearest.date - (Math.floor(Date.now() / 1000) - days * 86400),
+    )
+      ? point
+      : nearest,
+  );
+  const previous = previousPoint.circulating?.peggedUSD;
 
   return {
     value,

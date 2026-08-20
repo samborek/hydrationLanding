@@ -105,7 +105,7 @@ export default function HeroSection() {
               fill
               priority
               fetchPriority="high"
-              quality={86}
+              quality={74}
               sizes="100vw"
               className="object-cover object-[54%_center]"
             />
@@ -157,7 +157,7 @@ export default function HeroSection() {
                   alt=""
                   fill
                   loading="lazy"
-                  quality={86}
+                  quality={74}
                   sizes="100vw"
                   className="object-cover object-[54%_center]"
                 />
@@ -246,9 +246,9 @@ function HeroSectionContent() {
       </motion.h1>
       <motion.div
         className="w-full"
-        initial={reducedMotion ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.94, duration: 0.65, ease: headlineEase }}
+        initial={reducedMotion ? false : { y: 12 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.18, duration: 0.65, ease: headlineEase }}
       >
         <Paragraph
           size="large"
@@ -412,9 +412,8 @@ function AnimatedHeadlineText({
         <motion.span
           aria-hidden="true"
           className="inline-block"
-          initial={{ opacity: 0, y }}
+          initial={{ y }}
           animate={{
-            opacity: 1,
             y: 0,
             transition: {
               delay: delay + letterIndex * letterDelay,
