@@ -19,17 +19,12 @@ import {
 } from "framer-motion";
 import type { MotionStyle, MotionValue } from "framer-motion";
 import useScreenSize from "@/hooks/useScreenSize";
-import dynamic from "next/dynamic";
 import Image from "next/image";
+import HeroWaterCanvas from "./water-canvas";
 import { useEffect, useRef, useState } from "react";
-
-const HeroWaterCanvas = dynamic(() => import("./water-canvas"), {
-  ssr: false,
-});
 
 const headlineEase = [0.2, 0.65, 0.3, 0.9] as const;
 const beigeShaderColor = [246 / 255, 246 / 255, 236 / 255] as const;
-const heroWebglMinWidth = 768;
 const metricRevealEase = (value: number) => 1 - Math.pow(1 - value, 3);
 // Preserved for another pass: progressively feathers the real scene container
 // while it expands, without introducing a duplicate blurred background.
@@ -38,9 +33,7 @@ const sceneEdgeFeatherEnabled = false;
 export default function HeroSection() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const { height: viewportHeight, width: viewportWidth } = useScreenSize();
-  const showHeroWaterEffect =
-    viewportWidth >= heroWebglMinWidth && reducedMotion !== true;
+  const { height: viewportHeight } = useScreenSize();
   const { scrollYProgress } = useScroll({
     target: sceneRef,
     offset: ["start start", "end end"],
@@ -169,14 +162,12 @@ export default function HeroSection() {
                   className="object-cover object-[54%_center]"
                 />
               </div>
-              {showHeroWaterEffect && (
-                <HeroWaterCanvas
-                  className="hero-water-camera"
-                  showCapitalBand
-                  transitionColor={beigeShaderColor}
-                  transitionHeightPx={sceneTransitionHeight}
-                />
-              )}
+              <HeroWaterCanvas
+                className="hero-water-camera"
+                showCapitalBand
+                transitionColor={beigeShaderColor}
+                transitionHeightPx={sceneTransitionHeight}
+              />
               <div
                 className="pointer-events-none absolute inset-0 z-[7] bg-[url('/noise.svg')] bg-repeat opacity-20 mix-blend-multiply grayscale"
                 style={{ backgroundSize: "640px 640px" }}
@@ -255,9 +246,9 @@ function HeroSectionContent() {
       </motion.h1>
       <motion.div
         className="w-full"
-        initial={reducedMotion ? false : { y: 12 }}
-        animate={{ y: 0 }}
-        transition={{ delay: 0.18, duration: 0.65, ease: headlineEase }}
+        initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.94, duration: 0.65, ease: headlineEase }}
       >
         <Paragraph
           size="large"
@@ -421,8 +412,9 @@ function AnimatedHeadlineText({
         <motion.span
           aria-hidden="true"
           className="inline-block"
-          initial={{ y }}
+          initial={{ opacity: 0, y }}
           animate={{
+            opacity: 1,
             y: 0,
             transition: {
               delay: delay + letterIndex * letterDelay,

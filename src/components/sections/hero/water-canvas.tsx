@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type { MotionValue } from "framer-motion";
 
 const RIPPLE_COUNT = 12;
+const DESKTOP_HERO_EFFECT_QUERY = "(min-width: 768px)";
 
 const HERO_RIPPLE_SETTINGS = {
   distortion: 4.72,
@@ -208,6 +209,7 @@ export default function HeroWaterCanvas({
     const canvas = canvasRef.current;
     const surface = canvas?.parentElement;
     if (!canvas || !surface) return;
+    if (!window.matchMedia(DESKTOP_HERO_EFFECT_QUERY).matches) return;
     const drawingCanvas = canvas;
     const interactiveSurface = surface;
 
