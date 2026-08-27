@@ -19,12 +19,17 @@ import {
 } from "framer-motion";
 import type { MotionStyle, MotionValue } from "framer-motion";
 import useScreenSize from "@/hooks/useScreenSize";
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import HeroWaterCanvas from "./water-canvas";
 import { useEffect, useRef, useState } from "react";
+
+const HeroWaterCanvas = dynamic(() => import("./water-canvas"), {
+  ssr: false,
+});
 
 const headlineEase = [0.2, 0.65, 0.3, 0.9] as const;
 const beigeShaderColor = [246 / 255, 246 / 255, 236 / 255] as const;
+const heroWebglMinWidth = 768;
 const metricRevealEase = (value: number) => 1 - Math.pow(1 - value, 3);
 // Preserved for another pass: progressively feathers the real scene container
 // while it expands, without introducing a duplicate blurred background.
@@ -33,7 +38,9 @@ const sceneEdgeFeatherEnabled = false;
 export default function HeroSection() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const { height: viewportHeight } = useScreenSize();
+  const { height: viewportHeight, width: viewportWidth } = useScreenSize();
+  const showHeroWaterEffect =
+    viewportWidth >= heroWebglMinWidth && reducedMotion !== true;
   const { scrollYProgress } = useScroll({
     target: sceneRef,
     offset: ["start start", "end end"],
@@ -162,12 +169,14 @@ export default function HeroSection() {
                   className="object-cover object-[54%_center]"
                 />
               </div>
-              <HeroWaterCanvas
-                className="hero-water-camera"
-                showCapitalBand
-                transitionColor={beigeShaderColor}
-                transitionHeightPx={sceneTransitionHeight}
-              />
+              {showHeroWaterEffect && (
+                <HeroWaterCanvas
+                  className="hero-water-camera"
+                  showCapitalBand
+                  transitionColor={beigeShaderColor}
+                  transitionHeightPx={sceneTransitionHeight}
+                />
+              )}
               <div
                 className="pointer-events-none absolute inset-0 z-[7] bg-[url('/noise.svg')] bg-repeat opacity-20 mix-blend-multiply grayscale"
                 style={{ backgroundSize: "640px 640px" }}
@@ -380,7 +389,7 @@ function AnimatedCapitalMetric({
           "—"
         )}
       </motion.p>
-      <h3 className="mt-3 whitespace-nowrap font-gazpacho text-[0.95rem] font-medium leading-none tracking-tight text-purple/75 md:text-base lg:text-[1.1rem]">
+      <h3 className="mt-3 max-w-[18rem] text-balance font-gazpacho text-[0.8rem] font-medium leading-[1.08] tracking-tight text-purple/75 md:text-[0.9rem] lg:max-w-none lg:whitespace-nowrap lg:text-[0.82rem] xl:text-[0.9rem]">
         {metric.title}
       </h3>
       {metric.delta !== null && (

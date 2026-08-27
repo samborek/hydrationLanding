@@ -778,7 +778,7 @@ export function CommunityBuildSection() {
                 captionClassName="text-lavender"
                 iconClassName="bg-pink"
               >
-                Join the Community
+                Community
               </SectionLabel>
               <h2 className="mt-7 max-w-[17ch] text-balance font-gazpacho text-[2.4rem] font-normal leading-[1.04] text-white md:text-[3rem] lg:text-[3.25rem]">
                 Built and governed by the community
@@ -798,8 +798,11 @@ export function CommunityBuildSection() {
                 distribute value, and build a more secure and productive home
                 for onchain capital.
               </Paragraph>
+              <p className="mt-10 font-gazpacho text-[1.5rem] font-medium leading-none text-lavender md:text-[1.65rem]">
+                Join the Community
+              </p>
               <motion.div
-                className="mt-12 grid gap-2 sm:grid-cols-3"
+                className="mt-6 grid gap-2 sm:grid-cols-3"
                 variants={staggerChildren(0.09)}
               >
                 <CommunityLink

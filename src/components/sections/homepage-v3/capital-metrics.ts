@@ -39,13 +39,28 @@ const CACHE_TTL = 30 * 60 * 1000;
 const CACHE_PREFIX = "hydration:defillama-capital:";
 const protocols = ["hydration-dex", "hydration-lending"] as const;
 
-const metricDefinitions: Array<Pick<CapitalMetric, "id" | "title" | "prefix">> =
-  [
-    { id: "allocated", title: "Allocated", prefix: "$" },
-    { id: "earned", title: "Earned", prefix: "$" },
-    { id: "generated", title: "Generated", prefix: "$" },
-    { id: "hollar", title: "HOLLAR Issued", prefix: "" },
-  ];
+const metricDefinitions: Array<Pick<CapitalMetric, "id" | "title" | "prefix">> = [
+  {
+    id: "allocated",
+    title: "Total Capital Allocated",
+    prefix: "$",
+  },
+  {
+    id: "earned",
+    title: "Total Yield Earned",
+    prefix: "$",
+  },
+  {
+    id: "generated",
+    title: "Total Protocol Revenue Generated",
+    prefix: "$",
+  },
+  {
+    id: "hollar",
+    title: "Total HOLLAR Issued",
+    prefix: "",
+  },
+];
 
 const emptyMetrics = metricDefinitions.map((metric) => ({
   ...metric,
