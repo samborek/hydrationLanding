@@ -6,6 +6,7 @@ import {
   AnimatePresence,
   animate,
   motion,
+  useInView,
   useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
@@ -95,27 +96,27 @@ const particleStages: ParticleStage[] = [
 const appchainFeatures = [
   {
     label: "Onchain oracle updates",
-    iconColor: "#62833F",
+    iconColor: "oklch(0.64 0.18 135)",
     icon: "database",
   },
   {
     label: "Transaction prioritization",
-    iconColor: "#126FAF",
+    iconColor: "oklch(0.62 0.2 245)",
     icon: "priority",
   },
   {
     label: "Prioritized and partial liquidations",
-    iconColor: "#C64D7B",
+    iconColor: "oklch(0.68 0.2 350)",
     icon: "partial",
   },
   {
     label: "Protocol-wide risk controls",
-    iconColor: "#CC1775",
+    iconColor: "oklch(0.59 0.25 335)",
     icon: "controls",
   },
   {
     label: "Security enforced at the runtime level",
-    iconColor: "#167F99",
+    iconColor: "oklch(0.63 0.17 210)",
     icon: "security",
   },
 ] as const;
@@ -289,11 +290,16 @@ const clickThroughContentItem: Variants = {
   },
 };
 
+const CLICK_THROUGH_AUTO_ADVANCE_MS = 5200;
+
 export function IntegratedSystemClickThroughStory() {
   const prefersReducedMotion = useReducedMotion();
+  const storyRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(storyRef, { amount: 0.55 });
   const progress = useMotionValue(prefersReducedMotion ? 0.24 : 0);
   const progressAnimation = useRef<ReturnType<typeof animate> | null>(null);
   const [activeStep, setActiveStep] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const selectStep = useCallback(
     (index: number) => {
@@ -321,8 +327,36 @@ export function IntegratedSystemClickThroughStory() {
     return () => progressAnimation.current?.stop();
   }, [selectStep]);
 
+  useEffect(() => {
+    if (
+      !isInView ||
+      isPaused ||
+      prefersReducedMotion ||
+      activeStep === clickThroughSteps.length - 1
+    ) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      selectStep(activeStep + 1);
+    }, CLICK_THROUGH_AUTO_ADVANCE_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeStep, isInView, isPaused, prefersReducedMotion, selectStep]);
+
   return (
-    <div className="grid items-center gap-10 py-12 lg:grid-cols-[minmax(28rem,1.04fr)_minmax(28rem,0.96fr)] lg:gap-x-12 lg:py-16 xl:grid-cols-[minmax(34rem,1.08fr)_minmax(31rem,0.92fr)]">
+    <div
+      ref={storyRef}
+      className="relative grid items-center gap-10 py-12 lg:grid-cols-[minmax(28rem,1.04fr)_minmax(28rem,0.96fr)] lg:gap-x-12 lg:py-16 xl:grid-cols-[minmax(34rem,1.08fr)_minmax(31rem,0.92fr)]"
+      onPointerEnter={() => setIsPaused(true)}
+      onPointerLeave={() => setIsPaused(false)}
+      onFocusCapture={() => setIsPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsPaused(false);
+        }
+      }}
+    >
       <motion.div
         className="mx-auto w-full max-w-[30rem] lg:max-w-none"
         initial={
@@ -349,6 +383,11 @@ export function IntegratedSystemClickThroughStory() {
         >
           {clickThroughSteps.map((step, index) => {
             const isActive = activeStep === index;
+            const isAutoAdvancing =
+              isActive &&
+              !isPaused &&
+              !prefersReducedMotion &&
+              index < clickThroughSteps.length - 1;
 
             return (
               <button
@@ -357,16 +396,31 @@ export function IntegratedSystemClickThroughStory() {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => selectStep(index)}
-                className={`flex min-w-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-2.5 py-2 text-left transition-colors duration-300 md:px-3 ${
+                className={`relative flex min-w-0 items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-xl px-2.5 py-2 text-left transition-colors duration-300 md:px-3 ${
                   isActive
-                    ? "bg-purple text-white"
+                    ? isAutoAdvancing
+                      ? "bg-purple/70 text-white"
+                      : "bg-purple text-white"
                     : "bg-purple/[0.055] text-purple hover:bg-purple/10"
                 }`}
               >
-                <span className="shrink-0 font-geist text-[0.55rem] font-medium tabular-nums opacity-60 md:text-[0.6rem]">
+                {isAutoAdvancing && (
+                  <motion.span
+                    key={`progress-${activeStep}`}
+                    aria-hidden="true"
+                    className="absolute inset-0 origin-left bg-purple"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{
+                      duration: CLICK_THROUGH_AUTO_ADVANCE_MS / 1000,
+                      ease: "linear",
+                    }}
+                  />
+                )}
+                <span className="relative z-10 shrink-0 font-geist text-[0.55rem] font-medium tabular-nums opacity-60 md:text-[0.6rem]">
                   0{index + 1}
                 </span>
-                <span className="min-w-0 font-geist text-[0.6rem] font-medium leading-none md:text-[0.68rem] xl:text-xs">
+                <span className="relative z-10 min-w-0 font-geist text-[0.6rem] font-medium leading-none md:text-[0.68rem] xl:text-xs">
                   {step.label}
                 </span>
               </button>
@@ -395,30 +449,29 @@ export function IntegratedSystemClickThroughStory() {
           </AnimatePresence>
         </div>
 
-        <div className="flex items-center justify-between pt-5">
-          <span className="font-geist text-xs font-medium tabular-nums text-purple/45">
-            0{activeStep + 1} / 03
-          </span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => selectStep(activeStep - 1)}
-              disabled={activeStep === 0}
-              className="rounded-full border border-purple/15 px-4 py-2 font-geist text-sm font-medium text-purple transition-colors hover:bg-purple hover:text-white disabled:cursor-default disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-purple"
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              onClick={() => selectStep(activeStep + 1)}
-              disabled={activeStep === clickThroughSteps.length - 1}
-              className="rounded-full bg-purple px-5 py-2 font-geist text-sm font-medium text-white transition-opacity hover:opacity-85 disabled:cursor-default disabled:opacity-30"
-            >
-              Next
-            </button>
-          </div>
-        </div>
       </motion.div>
+
+      <div className="flex items-center justify-center gap-2 rounded-full bg-white/80 p-1.5 backdrop-blur-md lg:absolute lg:bottom-28 lg:left-1/2 lg:z-20 lg:-translate-x-1/2">
+        <button
+          type="button"
+          onClick={() => selectStep(activeStep - 1)}
+          disabled={activeStep === 0}
+          className="min-w-[6.25rem] rounded-full border border-purple/15 px-5 py-2.5 font-geist text-base font-medium text-purple transition-colors hover:bg-purple hover:text-white disabled:cursor-default disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-purple"
+        >
+          Previous
+        </button>
+        <span className="rounded-full bg-purple/10 px-4 py-2.5 font-geist text-base font-semibold tabular-nums text-purple/75">
+          0{activeStep + 1} / 03
+        </span>
+        <button
+          type="button"
+          onClick={() => selectStep(activeStep + 1)}
+          disabled={activeStep === clickThroughSteps.length - 1}
+          className="min-w-[6.25rem] rounded-full bg-purple px-5 py-2.5 font-geist text-base font-medium text-white transition-opacity hover:opacity-85 disabled:cursor-default disabled:opacity-30"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
