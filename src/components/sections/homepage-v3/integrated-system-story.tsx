@@ -395,7 +395,7 @@ export function IntegratedSystemClickThroughStory() {
           </AnimatePresence>
         </div>
 
-        <div className="flex items-center justify-between border-t border-purple/10 pt-5">
+        <div className="flex items-center justify-between pt-5">
           <span className="font-geist text-xs font-medium tabular-nums text-purple/45">
             0{activeStep + 1} / 03
           </span>
@@ -544,14 +544,8 @@ function WhyHydrationCopy({
 
   return (
     <>
-      <motion.p
-        className="font-geist text-sm font-medium uppercase tracking-wide text-blue"
-        variants={itemVariants}
-      >
-        Unique value
-      </motion.p>
       <motion.h2
-        className="mt-5 max-w-[15ch] text-balance font-gazpacho text-[2.65rem] font-medium leading-[1.16] text-purple md:text-[3.35rem] xl:text-[3.75rem]"
+        className="max-w-[15ch] text-balance font-gazpacho text-[2.65rem] font-medium leading-[1.16] text-purple md:text-[3.35rem] xl:text-[3.75rem]"
         variants={itemVariants}
       >
         Why Hydration
