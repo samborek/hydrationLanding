@@ -41,7 +41,7 @@ export default function HeroSection() {
 
   const sceneClip = useTransform(
     scrollYProgress,
-    [0, 0.18],
+    [0, 0.16],
     [
       "inset(66vh 7vw 0vh 7vw round 2.75rem 2.75rem 0rem 0rem)",
       "inset(0vh 0vw 0vh 0vw round 0rem 0rem 0rem 0rem)",
@@ -49,24 +49,24 @@ export default function HeroSection() {
   );
   const sceneMaskTop = useTransform(
     scrollYProgress,
-    [0, 0.18],
+    [0, 0.16],
     ["66vh", "0vh"],
   );
   const sceneMaskSide = useTransform(
     scrollYProgress,
-    [0, 0.18],
+    [0, 0.16],
     ["7vw", "0vw"],
   );
   const sceneMaskEdgeAlpha = useTransform(
     scrollYProgress,
-    [0, 0.035, 0.13, 0.18],
+    [0, 0.03, 0.115, 0.16],
     [1, 0, 0, 1],
   );
   const sceneFeatherMask = useMotionTemplate`linear-gradient(to bottom, rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) ${sceneMaskTop}, black calc(${sceneMaskTop} + 26px), black calc(100% - 20px), rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) 100%), linear-gradient(to right, rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) ${sceneMaskSide}, black calc(${sceneMaskSide} + 22px), black calc(100% - ${sceneMaskSide} - 22px), rgba(0, 0, 0, ${sceneMaskEdgeAlpha}) calc(100% - ${sceneMaskSide}))`;
-  const sceneFillOpacity = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
+  const sceneFillOpacity = useTransform(scrollYProgress, [0, 0.16], [0, 1]);
   const sceneTransitionHeight = useTransform(
     scrollYProgress,
-    [0, 0.16, 0.26],
+    [0, 0.14, 0.22],
     [0, 0, 72],
   );
   const sceneScale = useTransform(scrollYProgress, [0, 1], [1, 1.13]);
@@ -76,18 +76,18 @@ export default function HeroSection() {
   );
   const heroContentY = useTransform(
     scrollYProgress,
-    [0, 0.38, 0.74],
+    [0, 0.32, 0.68],
     [14, 14, heroContentShift],
   );
-  const introChromeOpacity = useTransform(scrollYProgress, [0.08, 0.3], [1, 0]);
-  const statsOpacity = useTransform(scrollYProgress, [0.3, 0.46], [0, 1]);
-  const statsY = useTransform(scrollYProgress, [0.3, 0.5], [42, 0]);
+  const introChromeOpacity = useTransform(scrollYProgress, [0.06, 0.23], [1, 0]);
+  const statsOpacity = useTransform(scrollYProgress, [0.22, 0.36], [0, 1]);
+  const statsY = useTransform(scrollYProgress, [0.22, 0.4], [42, 0]);
 
   return (
     <section
       ref={sceneRef}
       data-homepage-hero
-      className="relative z-10 h-[190vh] min-h-[80rem] bg-beige lg:h-[195vh] lg:min-h-[104rem]"
+      className="relative z-10 h-[165vh] min-h-[70rem] bg-beige lg:h-[165vh] lg:min-h-[86rem]"
     >
       <div className="sticky top-0 h-screen overflow-hidden">
         <motion.div
@@ -322,8 +322,8 @@ function AnimatedCapitalMetric({
   const reducedMotion = useReducedMotion();
   const hasLiveValue = metric.value !== null && Number.isFinite(metric.value);
   const targetValue = metric.value ?? 0;
-  const start = 0.56 + index * 0.02;
-  const end = start + 0.33;
+  const start = 0.3 + index * 0.018;
+  const end = start + 0.28;
   const countProgress = useTransform(progress, [start, end], [0, 1], {
     clamp: true,
     ease: metricRevealEase,

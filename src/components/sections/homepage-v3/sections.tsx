@@ -18,7 +18,9 @@ import Paragraph from "@/components/ui/typography/paragraph";
 import SectionLabel from "@/components/ui/labels/section";
 import DiamondIcon from "@/components/ui/labels/icons/diamond";
 import { formatCompactMetric, useCapitalMetrics } from "./capital-metrics";
-import IntegratedSystemStory from "./integrated-system-story";
+import IntegratedSystemStory, {
+  IntegratedSystemClickThroughStory,
+} from "./integrated-system-story";
 import {
   animate,
   motion,
@@ -30,7 +32,7 @@ import {
 import type { AnimationPlaybackControls, Variants } from "framer-motion";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const yieldPillars = [
   {
@@ -218,7 +220,7 @@ export function ProductiveYieldSection() {
 export function StrategiesSection() {
   return (
     <AnimateOnView
-      className="relative bg-white pt-16 lg:pt-28 after:absolute after:inset-x-0 after:bottom-0 after:h-20 after:bg-beige lg:after:h-28"
+      className="relative bg-white pt-16 lg:pt-20 after:absolute after:inset-x-0 after:bottom-0 after:h-20 after:bg-beige"
       variants={revealStagger(0.1, 18)}
       threshold={0.12}
       viewportMargin="0px 0px -10% 0px"
@@ -243,7 +245,7 @@ export function StrategiesSection() {
                 </span>
               </Heading>
             </div>
-            <p className="mt-8 max-w-[42rem] font-geist text-[1.1rem] font-normal leading-[1.55] text-purple/50 lg:mt-11 lg:text-[1.114rem]">
+            <p className="mt-8 max-w-[42rem] font-geist text-[1.1rem] font-normal leading-[1.55] text-purple/50 lg:text-[1.114rem]">
               Put your capital to work through strategies designed around
               transparent yield sources and clearly defined risk.
             </p>
@@ -251,7 +253,7 @@ export function StrategiesSection() {
         </motion.div>
 
         <motion.div
-          className="container relative z-10 mx-auto mt-12 grid gap-3 px-6 md:px-[50px] lg:mt-16 lg:grid-cols-2 xl:px-16"
+          className="container relative z-10 mx-auto mt-12 grid gap-3 px-6 md:px-[50px] lg:grid-cols-2 xl:px-16"
           initial="initial"
           whileInView="visible"
           viewport={{ once: true, amount: 0.14, margin: "0px 0px -8% 0px" }}
@@ -307,7 +309,7 @@ function StrategyTile({
 }) {
   return (
     <motion.article
-      className={`flex min-h-[31rem] flex-col rounded-[2rem] px-6 py-8 md:px-10 md:py-12 lg:min-h-[43.9375rem] ${cardClassName}`}
+      className={`flex min-h-[31rem] flex-col rounded-[2rem] px-6 py-8 md:px-10 md:py-10 lg:min-h-[34rem] lg:px-8 lg:py-9 xl:px-10 xl:py-10 ${cardClassName}`}
       variants={revealStagger(0.12, 24)}
     >
       <motion.div
@@ -322,7 +324,7 @@ function StrategyTile({
             inverse={inverse}
           />
         </motion.div>
-        <motion.div className="mt-8 md:mt-10" variants={fadeUp(12)}>
+        <motion.div className="mt-8" variants={fadeUp(12)}>
           <span
             className={`font-geist text-xs font-medium uppercase tracking-[0.14em] ${inverse ? "text-lavender" : "text-purple/55"}`}
           >
@@ -337,11 +339,11 @@ function StrategyTile({
       </motion.div>
 
       <motion.div
-        className="mt-auto pt-20 lg:pt-28"
+        className="mt-auto pt-14 lg:pt-10 xl:pt-12"
         variants={revealStagger(0.08, 10)}
       >
         <motion.p
-          className="max-w-[31rem] font-geist text-[1.45rem] leading-[1.3] tracking-[-0.0285em] md:text-[1.75rem]"
+          className="max-w-[31rem] font-geist text-[1.4rem] leading-[1.3] tracking-[-0.0285em] md:text-[1.5rem] xl:text-[1.6rem]"
           variants={fadeUp(14)}
         >
           <span
@@ -357,7 +359,7 @@ function StrategyTile({
           role="primary"
           fill="solid"
           action={{ href: "https://app.hydration.net", target: "_blank" }}
-          className={`mt-8 rounded-full bg-white px-6 py-3 text-purple md:mt-12 ${inverse ? "hover:bg-lavender hover:text-purple" : "hover:bg-purple hover:text-white"}`}
+          className={`mt-8 rounded-full bg-white px-6 py-3 text-purple ${inverse ? "hover:bg-lavender hover:text-purple" : "hover:bg-purple hover:text-white"}`}
         >
           {cta}
         </Button>
@@ -547,10 +549,17 @@ const integratedIntroReveal: Variants = {
   },
 };
 
-export function IntegratedSystemSection() {
+export function IntegratedSystemSection({
+  interaction = "clickThrough",
+}: {
+  interaction?: "clickThrough" | "scroll";
+}) {
+  const [activeInteraction, setActiveInteraction] = useState(interaction);
+  const usesScrollStory = activeInteraction === "scroll";
+
   return (
     <AnimateOnView
-      className="bg-beige pb-6 pt-24 lg:pb-0 lg:pt-8"
+      className="bg-beige pb-6 pt-16 lg:pb-0 lg:pt-0"
       variants={integratedSectionReveal}
       threshold={0.06}
       viewportMargin="0px 0px 4% 0px"
@@ -559,39 +568,79 @@ export function IntegratedSystemSection() {
         id="why-hydration"
         className="container mx-auto scroll-mt-24 px-6 md:px-[50px] lg:scroll-mt-28 xl:px-16"
       >
-        <motion.div
-          className="max-w-[38.5rem] lg:hidden"
-          variants={integratedIntroReveal}
-        >
-          <SectionLabel captionClassName="text-blue" iconClassName="bg-blue">
-            Unique value
-          </SectionLabel>
-          <Heading
-            size="large"
-            className="mt-5 max-w-[31.5rem] text-balance text-purple lg:text-[4rem] lg:leading-[1.2]"
+        <div className="relative z-40 flex justify-center pb-3 pt-6 lg:pb-0 lg:pt-8">
+          <div
+            className="inline-flex rounded-full border border-purple/10 bg-white/80 p-1 shadow-[0_12px_40px_rgba(36,14,50,0.08)] backdrop-blur-md"
+            role="group"
+            aria-label="Why Hydration interaction preview"
           >
-            Why Hydration Is Different
-          </Heading>
-          <div className="mt-9 flex flex-col gap-5">
-            <Paragraph
-              size="large"
-              className="max-w-[38.5rem] leading-7 text-purple"
+            <button
+              type="button"
+              aria-pressed={!usesScrollStory}
+              onClick={() => setActiveInteraction("clickThrough")}
+              className={`rounded-full px-4 py-2 font-geist text-xs font-medium transition-colors md:px-5 md:text-sm ${
+                !usesScrollStory
+                  ? "bg-purple text-white"
+                  : "text-purple/60 hover:text-purple"
+              }`}
             >
-              Most DeFi protocols depend on external infrastructure they cannot
-              fully control. Hydration owns the full DeFi stack.
-            </Paragraph>
-            <Paragraph
-              size="large"
-              className="max-w-[38.5rem] leading-7 text-purple"
+              Click-through
+            </button>
+            <button
+              type="button"
+              aria-pressed={usesScrollStory}
+              onClick={() => setActiveInteraction("scroll")}
+              className={`rounded-full px-4 py-2 font-geist text-xs font-medium transition-colors md:px-5 md:text-sm ${
+                usesScrollStory
+                  ? "bg-purple text-white"
+                  : "text-purple/60 hover:text-purple"
+              }`}
             >
-              By combining execution, liquidity, lending, stablecoins, oracles,
-              and security at the appchain level, Hydration can coordinate
-              products more efficiently and protect users at every layer.
-            </Paragraph>
+              Original scroll
+            </button>
           </div>
-        </motion.div>
+        </div>
 
-        <IntegratedSystemStory />
+        {usesScrollStory && (
+          <motion.div
+            className="max-w-[38.5rem] lg:hidden"
+            variants={integratedIntroReveal}
+          >
+            <SectionLabel captionClassName="text-blue" iconClassName="bg-blue">
+              Unique value
+            </SectionLabel>
+            <Heading
+              size="large"
+              className="mt-5 max-w-[31.5rem] text-balance text-purple lg:text-[4rem] lg:leading-[1.2]"
+            >
+              Why Hydration Is Different
+            </Heading>
+            <div className="mt-9 flex flex-col gap-5">
+              <Paragraph
+                size="large"
+                className="max-w-[38.5rem] leading-7 text-purple"
+              >
+                Most DeFi protocols depend on external infrastructure they
+                cannot fully control. Hydration owns the full DeFi stack.
+              </Paragraph>
+              <Paragraph
+                size="large"
+                className="max-w-[38.5rem] leading-7 text-purple"
+              >
+                By combining execution, liquidity, lending, stablecoins,
+                oracles, and security at the appchain level, Hydration can
+                coordinate products more efficiently and protect users at every
+                layer.
+              </Paragraph>
+            </div>
+          </motion.div>
+        )}
+
+        {usesScrollStory ? (
+          <IntegratedSystemStory />
+        ) : (
+          <IntegratedSystemClickThroughStory />
+        )}
       </section>
     </AnimateOnView>
   );

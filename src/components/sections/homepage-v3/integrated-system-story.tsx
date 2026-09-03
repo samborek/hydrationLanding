@@ -3,7 +3,10 @@
 import Heading from "@/components/ui/typography/heading";
 import Paragraph from "@/components/ui/typography/paragraph";
 import {
+  AnimatePresence,
+  animate,
   motion,
+  useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
@@ -16,6 +19,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 
@@ -50,7 +54,7 @@ const particleStages: ParticleStage[] = [
   {
     id: "middle",
     src: "/assets/why-hydration-middle-grid.svg",
-    start: 0.015,
+    start: 0.02,
     end: 0.3,
     origin: "bottom",
     left: 0.10283,
@@ -63,8 +67,8 @@ const particleStages: ParticleStage[] = [
   {
     id: "top",
     src: "/assets/why-hydration-top-matrix.svg",
-    start: 0.34,
-    end: 0.62,
+    start: 0.36,
+    end: 0.64,
     origin: "top",
     left: 0.08071,
     top: 0.06061,
@@ -76,8 +80,8 @@ const particleStages: ParticleStage[] = [
   {
     id: "base",
     src: "/assets/why-hydration-base-halftone.svg",
-    start: 0.67,
-    end: 0.94,
+    start: 0.7,
+    end: 0.96,
     origin: "bottom",
     left: 0.13033,
     top: 0.66056,
@@ -89,11 +93,31 @@ const particleStages: ParticleStage[] = [
 ];
 
 const appchainFeatures = [
-  { label: "Onchain oracle updates", color: "#B3CF92" },
-  { label: "Transaction prioritization", color: "#53A4E3" },
-  { label: "Prioritized and partial liquidations", color: "#F9AFCA" },
-  { label: "Protocol-wide risk controls", color: "#CC1775" },
-  { label: "Security enforced at the runtime level", color: "#AAEEFC" },
+  {
+    label: "Onchain oracle updates",
+    iconColor: "#62833F",
+    icon: "database",
+  },
+  {
+    label: "Transaction prioritization",
+    iconColor: "#126FAF",
+    icon: "priority",
+  },
+  {
+    label: "Prioritized and partial liquidations",
+    iconColor: "#C64D7B",
+    icon: "partial",
+  },
+  {
+    label: "Protocol-wide risk controls",
+    iconColor: "#CC1775",
+    icon: "controls",
+  },
+  {
+    label: "Security enforced at the runtime level",
+    iconColor: "#167F99",
+    icon: "security",
+  },
 ] as const;
 
 const connectorGroups = [
@@ -224,24 +248,199 @@ const storyStepItem: Variants = {
   },
 };
 
+const clickThroughSteps = [
+  { label: "Overview", progress: 0.3 },
+  { label: "Integrated system", progress: 0.61 },
+  { label: "Appchain execution", progress: 1 },
+] as const;
+
+const clickThroughContentContainer: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      delayChildren: 0,
+      staggerChildren: 0.045,
+    },
+  },
+  exit: {
+    opacity: 0,
+    x: 10,
+    transition: {
+      duration: 0.1,
+      ease: [0.4, 0, 1, 1],
+    },
+  },
+};
+
+const clickThroughContentItem: Variants = {
+  hidden: {
+    opacity: 0,
+    x: -18,
+    filter: "blur(3px)",
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.2,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
+export function IntegratedSystemClickThroughStory() {
+  const prefersReducedMotion = useReducedMotion();
+  const progress = useMotionValue(prefersReducedMotion ? 0.24 : 0);
+  const progressAnimation = useRef<ReturnType<typeof animate> | null>(null);
+  const [activeStep, setActiveStep] = useState(0);
+
+  const selectStep = useCallback(
+    (index: number) => {
+      const step = clickThroughSteps[index];
+      if (!step) return;
+
+      setActiveStep(index);
+      progressAnimation.current?.stop();
+
+      if (prefersReducedMotion) {
+        progress.set(step.progress);
+        return;
+      }
+
+      progressAnimation.current = animate(progress, step.progress, {
+        duration: 0.8,
+        ease: [0.16, 1, 0.3, 1],
+      });
+    },
+    [prefersReducedMotion, progress],
+  );
+
+  useEffect(() => {
+    selectStep(0);
+    return () => progressAnimation.current?.stop();
+  }, [selectStep]);
+
+  return (
+    <div className="grid items-center gap-10 py-12 lg:grid-cols-[minmax(28rem,1.04fr)_minmax(28rem,0.96fr)] lg:gap-x-12 lg:py-16 xl:grid-cols-[minmax(34rem,1.08fr)_minmax(31rem,0.92fr)]">
+      <motion.div
+        className="mx-auto w-full max-w-[30rem] lg:max-w-none"
+        initial={
+          prefersReducedMotion ? false : { opacity: 0, y: 20, scale: 0.98 }
+        }
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <HydrationLayerVisual progress={progress} staticState={false} />
+      </motion.div>
+
+      <motion.div
+        className="p-5 md:p-8 lg:p-10"
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.18 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div
+          className="grid grid-cols-[0.8fr_1.1fr_1.3fr] gap-2"
+          role="tablist"
+          aria-label="Why Hydration topics"
+        >
+          {clickThroughSteps.map((step, index) => {
+            const isActive = activeStep === index;
+
+            return (
+              <button
+                key={step.label}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => selectStep(index)}
+                className={`flex min-w-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-2.5 py-2 text-left transition-colors duration-300 md:px-3 ${
+                  isActive
+                    ? "bg-purple text-white"
+                    : "bg-purple/[0.055] text-purple hover:bg-purple/10"
+                }`}
+              >
+                <span className="shrink-0 font-geist text-[0.55rem] font-medium tabular-nums opacity-60 md:text-[0.6rem]">
+                  0{index + 1}
+                </span>
+                <span className="min-w-0 font-geist text-[0.6rem] font-medium leading-none md:text-[0.68rem] xl:text-xs">
+                  {step.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="relative mt-8 flex min-h-[25rem] items-center overflow-hidden md:mt-10 lg:min-h-[27rem]">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              className="w-full"
+              key={activeStep}
+              variants={clickThroughContentContainer}
+              initial={prefersReducedMotion ? false : "hidden"}
+              animate={prefersReducedMotion ? undefined : "visible"}
+              exit={prefersReducedMotion ? undefined : "exit"}
+            >
+              {activeStep === 0 ? (
+                <WhyHydrationCopy animateItems />
+              ) : activeStep === 1 ? (
+                <IntegratedSystemCopy animateItems />
+              ) : (
+                <AppchainExecutionCopy progress={progress} animateItems />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="flex items-center justify-between border-t border-purple/10 pt-5">
+          <span className="font-geist text-xs font-medium tabular-nums text-purple/45">
+            0{activeStep + 1} / 03
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => selectStep(activeStep - 1)}
+              disabled={activeStep === 0}
+              className="rounded-full border border-purple/15 px-4 py-2 font-geist text-sm font-medium text-purple transition-colors hover:bg-purple hover:text-white disabled:cursor-default disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-purple"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => selectStep(activeStep + 1)}
+              disabled={activeStep === clickThroughSteps.length - 1}
+              className="rounded-full bg-purple px-5 py-2 font-geist text-sm font-medium text-white transition-opacity hover:opacity-85 disabled:cursor-default disabled:opacity-30"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function IntegratedSystemStory() {
   const storyRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: storyRef,
-    offset: ["start 88%", "end end"],
+    offset: ["start 88px", "end end"],
   });
   const progress = useSpring(scrollYProgress, {
-    stiffness: 145,
-    damping: 32,
-    mass: 0.42,
+    stiffness: 180,
+    damping: 34,
+    mass: 0.36,
     restDelta: 0.001,
   });
 
   return (
     <div
       ref={storyRef}
-      className="relative mt-16 lg:mt-0 lg:grid lg:min-h-[320svh] lg:grid-cols-[minmax(28rem,1.04fr)_minmax(28rem,0.96fr)] lg:items-start lg:gap-x-8 xl:grid-cols-[minmax(34rem,1.08fr)_minmax(31rem,0.92fr)] xl:gap-x-12"
+      className="relative mt-16 lg:mt-0 lg:grid lg:min-h-[270svh] lg:grid-cols-[minmax(28rem,1.04fr)_minmax(28rem,0.96fr)] lg:items-start lg:gap-x-8 xl:grid-cols-[minmax(34rem,1.08fr)_minmax(31rem,0.92fr)] xl:gap-x-12"
     >
       <motion.div
         className="lg:hidden"
@@ -258,10 +457,12 @@ export default function IntegratedSystemStory() {
       </motion.div>
 
       <div className="hidden lg:sticky lg:top-[5.5rem] lg:flex lg:h-[calc(100svh-5.5rem)] lg:items-center">
-        <HydrationLayerVisual
-          progress={progress}
-          staticState={Boolean(prefersReducedMotion)}
-        />
+        <div className="w-full -translate-y-[clamp(3rem,6vh,4rem)]">
+          <HydrationLayerVisual
+            progress={progress}
+            staticState={Boolean(prefersReducedMotion)}
+          />
+        </div>
       </div>
 
       <div className="relative z-10 mt-16 space-y-24 lg:hidden">
@@ -305,12 +506,13 @@ export default function IntegratedSystemStory() {
           </Paragraph>
           <ul className="mt-5 space-y-2.5 font-geist text-lg leading-7 text-purple">
             {appchainFeatures.map((item) => (
-              <li key={item.label} className="flex gap-3">
+              <li key={item.label} className="flex items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="mt-[0.68rem] h-1.5 w-1.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: item.color }}
-                />
+                  className="flex h-7 w-7 shrink-0 items-center justify-center"
+                >
+                  <FilledFeatureIcon name={item.icon} color={item.iconColor} />
+                </span>
                 <span>{item.label}</span>
               </li>
             ))}
@@ -333,18 +535,33 @@ export default function IntegratedSystemStory() {
   );
 }
 
-function WhyHydrationCopy() {
+function WhyHydrationCopy({
+  animateItems = false,
+}: {
+  animateItems?: boolean;
+} = {}) {
+  const itemVariants = animateItems ? clickThroughContentItem : undefined;
+
   return (
     <>
-      <p className="font-geist text-sm font-medium uppercase tracking-wide text-blue">
+      <motion.p
+        className="font-geist text-sm font-medium uppercase tracking-wide text-blue"
+        variants={itemVariants}
+      >
         Unique value
-      </p>
-      <h2 className="mt-5 max-w-[15ch] text-balance font-gazpacho text-[3.35rem] font-medium leading-[1.16] text-purple xl:text-[3.75rem]">
+      </motion.p>
+      <motion.h2
+        className="mt-5 max-w-[15ch] text-balance font-gazpacho text-[2.65rem] font-medium leading-[1.16] text-purple md:text-[3.35rem] xl:text-[3.75rem]"
+        variants={itemVariants}
+      >
         Why Hydration
         <br />
         Is Different
-      </h2>
-      <div className="mt-8 flex max-w-[31rem] flex-col gap-5">
+      </motion.h2>
+      <motion.div
+        className="mt-8 flex max-w-[31rem] flex-col gap-5"
+        variants={itemVariants}
+      >
         <p className="font-geist text-lg font-normal leading-7 text-purple">
           Most DeFi protocols depend on external infrastructure they cannot
           fully control. Hydration owns the full DeFi stack.
@@ -354,20 +571,32 @@ function WhyHydrationCopy() {
           security at the appchain level, Hydration can coordinate products more
           efficiently and protect users at every layer.
         </p>
-      </div>
+      </motion.div>
     </>
   );
 }
 
-function IntegratedSystemCopy() {
+function IntegratedSystemCopy({
+  animateItems = false,
+}: {
+  animateItems?: boolean;
+} = {}) {
+  const itemVariants = animateItems ? clickThroughContentItem : undefined;
+
   return (
     <>
-      <h2 className="max-w-[14ch] text-balance font-gazpacho text-[3.25rem] font-medium leading-[1.206] text-purple">
+      <motion.h2
+        className="max-w-[14ch] text-balance font-gazpacho text-[2.65rem] font-medium leading-[1.206] text-purple md:text-[3.25rem]"
+        variants={itemVariants}
+      >
         One integrated
         <br />
         financial system
-      </h2>
-      <div className="mt-6 flex max-w-[31rem] flex-col gap-6">
+      </motion.h2>
+      <motion.div
+        className="mt-6 flex max-w-[31rem] flex-col gap-6"
+        variants={itemVariants}
+      >
         <p className="font-geist text-lg font-normal leading-7 text-purple">
           Hydration’s products are designed to work together rather than operate
           as isolated applications.
@@ -377,28 +606,41 @@ function IntegratedSystemCopy() {
           liquidity, and HOLLAR without relying on fragmented external
           infrastructure.
         </p>
-      </div>
+      </motion.div>
     </>
   );
 }
 
 function AppchainExecutionCopy({
   progress,
+  animateItems = false,
 }: {
   progress: MotionValue<number>;
+  animateItems?: boolean;
 }) {
+  const itemVariants = animateItems ? clickThroughContentItem : undefined;
+
   return (
     <>
-      <h2 className="max-w-[14ch] text-balance font-gazpacho text-[3.25rem] font-medium leading-[1.206] text-purple">
+      <motion.h2
+        className="max-w-[14ch] text-balance font-gazpacho text-[2.65rem] font-medium leading-[1.206] text-purple md:text-[3.25rem]"
+        variants={itemVariants}
+      >
         Appchain-level
         <br />
         execution
-      </h2>
-      <p className="mt-6 max-w-[31rem] font-geist text-lg font-normal leading-7 text-purple">
+      </motion.h2>
+      <motion.p
+        className="mt-6 max-w-[31rem] font-geist text-lg font-normal leading-7 text-purple"
+        variants={itemVariants}
+      >
         Owning the execution environment allows Hydration to optimize how
         financial activity is processed. This includes:
-      </p>
-      <ul className="mt-5 space-y-2.5 font-geist text-lg leading-7 text-purple">
+      </motion.p>
+      <motion.ul
+        className="mt-5 space-y-2.5 font-geist text-lg leading-7 text-purple"
+        variants={itemVariants}
+      >
         {appchainFeatures.map((item, index) => (
           <AppchainFeature
             key={item.label}
@@ -407,8 +649,100 @@ function AppchainExecutionCopy({
             progress={progress}
           />
         ))}
-      </ul>
+      </motion.ul>
     </>
+  );
+}
+
+function FilledFeatureIcon({
+  name,
+  color,
+}: {
+  name: (typeof appchainFeatures)[number]["icon"];
+  color: string;
+}) {
+  const sharedProps = {
+    className: "h-5 w-5",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    xmlns: "http://www.w3.org/2000/svg",
+  } as const;
+
+  if (name === "database") {
+    return (
+      <svg {...sharedProps} style={{ color }}>
+        <ellipse cx="9.5" cy="5.25" rx="6.5" ry="3.25" fill="currentColor" />
+        <path
+          d="M3 6.3v4c0 1.8 2.91 3.25 6.5 3.25 1.3 0 2.52-.2 3.53-.54a6.8 6.8 0 0 1 2.97-2.2V6.3c-1.15 1.3-3.61 2.2-6.5 2.2S4.15 7.6 3 6.3Z"
+          fill="currentColor"
+        />
+        <path
+          d="M3 11.15v4.1c0 1.8 2.91 3.25 6.5 3.25.58 0 1.14-.04 1.67-.11a6.8 6.8 0 0 1 .48-4.41c-.69.12-1.41.18-2.15.18-2.89 0-5.35-.89-6.5-2.21Z"
+          fill="currentColor"
+        />
+        <path
+          d="M17.5 12a5.5 5.5 0 0 0-5.13 3.5l1.9.67a3.5 3.5 0 0 1 5.72-1.3l-1.5.05 2.07 2.02 1.93-2.15-1.42.05A5.48 5.48 0 0 0 17.5 12Zm3.23 6.83a3.5 3.5 0 0 1-5.72 1.3l1.5-.05-2.07-2.02-1.93 2.15 1.42-.05a5.5 5.5 0 0 0 8.7-2l-1.9-.67Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
+  if (name === "priority") {
+    return (
+      <svg {...sharedProps} style={{ color }}>
+        <path d="M6 2.5 10.5 8H7.7v6.5H4.3V8H1.5L6 2.5Z" fill="currentColor" />
+        <path d="m6 21.5-4.5-5.5h2.8V9.5h3.4V16h2.8L6 21.5Z" fill="currentColor" />
+        <rect x="12" y="4" width="10" height="3" rx="1.5" fill="currentColor" />
+        <rect x="12" y="10.5" width="7.5" height="3" rx="1.5" fill="currentColor" />
+        <rect x="12" y="17" width="5" height="3" rx="1.5" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  if (name === "partial") {
+    return (
+      <svg {...sharedProps} style={{ color }}>
+        <path
+          d="M10.5 2.25A9.75 9.75 0 1 0 21.75 13.5H10.5V2.25Z"
+          fill="currentColor"
+        />
+        <path
+          d="M13.5 2.25v8.25h8.25a9.76 9.76 0 0 0-8.25-8.25Z"
+          fill="white"
+        />
+      </svg>
+    );
+  }
+
+  if (name === "controls") {
+    return (
+      <svg {...sharedProps} style={{ color }}>
+        <rect x="2" y="4" width="20" height="3" rx="1.5" fill="currentColor" />
+        <circle cx="8" cy="5.5" r="3.5" fill="currentColor" />
+        <rect x="2" y="10.5" width="20" height="3" rx="1.5" fill="currentColor" />
+        <circle cx="16.5" cy="12" r="3.5" fill="currentColor" />
+        <rect x="2" y="17" width="20" height="3" rx="1.5" fill="currentColor" />
+        <circle cx="11" cy="18.5" r="3.5" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg {...sharedProps} style={{ color }}>
+      <path
+        d="M12 1.75 21 5v6.1c0 5.46-3.69 9.07-9 11.15-5.31-2.08-9-5.69-9-11.15V5l9-3.25Z"
+        fill="currentColor"
+      />
+      <path
+        d="m8.1 11.8 2.55 2.55 5.4-5.4"
+        fill="none"
+        stroke="white"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.2"
+      />
+    </svg>
   );
 }
 
@@ -428,7 +762,7 @@ function AppchainFeature({
   const y = useTransform(progress, [start, start + 0.035], [10, 0], {
     clamp: true,
   });
-  const dotScale = useTransform(
+  const iconScale = useTransform(
     progress,
     [start + 0.03, start + 0.055],
     [0, 1],
@@ -436,15 +770,20 @@ function AppchainFeature({
   );
 
   return (
-    <motion.li className="flex gap-3" initial={false} style={{ opacity, y }}>
+    <motion.li
+      className="flex items-center gap-3"
+      initial={false}
+      style={{ opacity, y }}
+    >
       <motion.span
         aria-hidden="true"
-        className="mt-[0.58rem] h-2.5 w-2.5 shrink-0 rounded-full"
+        className="flex h-7 w-7 shrink-0 items-center justify-center"
         style={{
-          backgroundColor: item.color,
-          scale: dotScale,
+          scale: iconScale,
         }}
-      />
+      >
+        <FilledFeatureIcon name={item.icon} color={item.iconColor} />
+      </motion.span>
       <span>{item.label}</span>
     </motion.li>
   );
@@ -461,22 +800,22 @@ function DesktopStoryPanel({
 }) {
   const whyOpacity = useTransform(
     progress,
-    [0, 0.025, 0.27, 0.35],
-    [0, 1, 1, 0],
+    [0, 0.3, 0.36],
+    [1, 1, 0],
   );
-  const whyY = useTransform(progress, [0, 0.025, 0.27, 0.35], [22, 0, 0, -16]);
+  const whyY = useTransform(progress, [0, 0.3, 0.36], [0, 0, -16]);
   const integratedOpacity = useTransform(
     progress,
-    [0.31, 0.38, 0.58, 0.66],
+    [0.3, 0.36, 0.64, 0.7],
     [0, 1, 1, 0],
   );
   const integratedY = useTransform(
     progress,
-    [0.31, 0.38, 0.58, 0.66],
+    [0.3, 0.36, 0.64, 0.7],
     [24, 0, 0, -18],
   );
-  const appchainOpacity = useTransform(progress, [0.59, 0.66, 0.99], [0, 1, 1]);
-  const appchainY = useTransform(progress, [0.59, 0.66, 0.99], [22, 0, 0]);
+  const appchainOpacity = useTransform(progress, [0.64, 0.7, 1], [0, 1, 1]);
+  const appchainY = useTransform(progress, [0.64, 0.7, 1], [22, 0, 0]);
 
   const opacity =
     phase === "why"
@@ -496,7 +835,7 @@ function DesktopStoryPanel({
         pointerEvents: phase === "appchain" ? undefined : "none",
       }}
     >
-      <div>{children}</div>
+      <div className="-translate-y-[clamp(3rem,6vh,4rem)]">{children}</div>
     </motion.article>
   );
 }
@@ -536,7 +875,7 @@ function HydrationLayerVisual({
   // The vector art resolves only at the end of each sampled-particle pass.
   // That keeps the incoming state particulate without leaving thousands of
   // moving SVG paths in the DOM.
-  const baseOpacity = useTransform(progress, [0.87, 0.94], [0, 1]);
+  const baseOpacity = useTransform(progress, [0.88, 0.96], [0, 1]);
 
   const wireOpacity = useTransform(progress, [0.2, 0.3], [0, 0.8]);
   const middleOpacity = useTransform(progress, [0.23, 0.3], [0, 1]);
@@ -550,9 +889,9 @@ function HydrationLayerVisual({
 
   // The endpoint system resolves last, with the appchain copy and its matching
   // brand-color bullets.
-  const topOpacity = useTransform(progress, [0.55, 0.62], [0, 1]);
-  const topY = useTransform(progress, [0.55, 0.62], [-7, 0]);
-  const topScale = useTransform(progress, [0.55, 0.62], [0.985, 1]);
+  const topOpacity = useTransform(progress, [0.56, 0.64], [0, 1]);
+  const topY = useTransform(progress, [0.56, 0.64], [-7, 0]);
+  const topScale = useTransform(progress, [0.56, 0.64], [0.985, 1]);
   const visualY = useTransform(progress, [0, 1], [14, -12]);
 
   return (
