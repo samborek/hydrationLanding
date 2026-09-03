@@ -100,7 +100,7 @@ export default function HeroSection() {
             style={{ scale: reducedMotion ? 1 : sceneScale }}
           >
             <Image
-              src="/assets/hero-arches-sunrise.webp"
+              src="/assets/hero-arches-sunset-wide.webp"
               alt=""
               fill
               priority
@@ -153,7 +153,7 @@ export default function HeroSection() {
                 aria-hidden="true"
               >
                 <Image
-                  src="/assets/hero-arches-sunrise.webp"
+                  src="/assets/hero-arches-sunset-wide.webp"
                   alt=""
                   fill
                   loading="lazy"

@@ -356,12 +356,12 @@ export default function HeroWaterCanvas({
       if (reducedMotion) render(performance.now());
     };
     const responsiveHeroImage = interactiveSurface.querySelector<HTMLImageElement>(
-      'img[src*="hero-arches-sunrise"]',
+      'img[src*="hero-arches-sunset-wide"]',
     );
     image.src =
       responsiveHeroImage?.currentSrc ||
       responsiveHeroImage?.src ||
-      "/assets/hero-arches-sunrise.webp";
+      "/assets/hero-arches-sunset-wide.webp";
 
     const shaderTime = () => (performance.now() - startTime) / 1000;
 

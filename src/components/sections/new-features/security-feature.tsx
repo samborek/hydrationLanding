@@ -150,6 +150,26 @@ const layoutTransition = {
   },
 } as const;
 
+const securityPanelReveal = {
+  initial: {
+    opacity: 0,
+    y: 26,
+    scale: 0.985,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      delay: 0.16,
+      duration: 0.62,
+      ease: [0.16, 1, 0.3, 1],
+      delayChildren: 0.24,
+      staggerChildren: 0.055,
+    },
+  },
+} as const;
+
 function OriginalSecurityLayout() {
   return (
     <>
@@ -188,7 +208,10 @@ function FigmaSecurityLayout() {
         <div className="container relative z-10 mx-auto px-6 py-20 md:px-[50px] md:py-24 xl:px-16">
           <motion.div
             className="mx-auto grid w-full max-w-[1087px] overflow-hidden rounded-[2rem] border border-purple/15 bg-white shadow-[0_30px_80px_rgba(36,14,50,0.08)] md:grid-cols-2"
-            variants={revealStagger(0.06, 12)}
+            variants={securityPanelReveal}
+            initial="initial"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.12, margin: "0px 0px -5% 0px" }}
           >
             {securityGroups.map((group, groupIndex) => (
               <FigmaSecurityCell
