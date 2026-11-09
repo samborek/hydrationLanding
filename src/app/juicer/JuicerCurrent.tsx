@@ -66,6 +66,78 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
   useEffect(() => { setParity(new URLSearchParams(location.search).get("figma") === "1"); }, []);
   const [showYieldExample, setShowYieldExample] = useState(false);
   const [vaultDetailsOpen, setVaultDetailsOpen] = useState(false);
+  const [vaultDetailsRendered, setVaultDetailsRendered] = useState(false);
+  const vaultCardRef = useRef<HTMLElement>(null);
+  const vaultDetailsRef = useRef<HTMLDivElement>(null);
+  const vaultToggleRef = useRef<HTMLButtonElement>(null);
+  const vaultTargetRef = useRef(false);
+  const vaultAnimationRef = useRef<Animation | null>(null);
+  const vaultFadeRef = useRef<Animation | null>(null);
+  const vaultFrameRef = useRef<number | null>(null);
+  const vaultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useLayoutEffect(() => {
+    if (!vaultDetailsRendered && !vaultTargetRef.current && vaultCardRef.current) {
+      vaultCardRef.current.style.height = "";
+      vaultCardRef.current.style.overflow = "";
+    }
+  }, [vaultDetailsRendered]);
+
+  function toggleVaultDetails(force?: boolean) {
+    const next = force ?? !vaultTargetRef.current;
+    vaultTargetRef.current = next;
+    if (!next && vaultDetailsRef.current?.contains(document.activeElement)) {
+      vaultToggleRef.current?.focus({ preventScroll: true });
+    }
+    const card = vaultCardRef.current;
+    const from = card?.getBoundingClientRect().height ?? 0;
+    if (vaultFrameRef.current !== null) cancelAnimationFrame(vaultFrameRef.current);
+    if (vaultTimerRef.current !== null) clearTimeout(vaultTimerRef.current);
+    vaultAnimationRef.current?.cancel();
+    vaultFadeRef.current?.cancel();
+    if (card) { card.style.height = `${from}px`; card.style.overflow = "hidden"; }
+    setVaultDetailsOpen(next);
+    if (next) setVaultDetailsRendered(true);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (card) { card.style.height = ""; card.style.overflow = ""; }
+      setVaultDetailsRendered(next);
+      return;
+    }
+    vaultFrameRef.current = requestAnimationFrame(() => {
+      vaultFrameRef.current = null;
+      const panel = vaultDetailsRef.current;
+      if (!card || !panel) return;
+      card.style.height = "";
+      const wasHidden = panel.hidden;
+      if (!next) panel.hidden = true;
+      const to = card.getBoundingClientRect().height;
+      panel.hidden = wasHidden;
+      card.style.height = `${from}px`;
+      const animation = card.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 300, easing: "cubic-bezier(.2,.7,.2,1)" });
+      vaultAnimationRef.current = animation;
+      vaultFadeRef.current = panel.animate([{ opacity: next ? 0 : 1 }, { opacity: next ? 1 : 0 }], { duration: 240, easing: "ease-out" });
+      const complete = () => {
+        if (vaultAnimationRef.current !== animation) return;
+        vaultAnimationRef.current = null;
+        if (vaultTimerRef.current !== null) clearTimeout(vaultTimerRef.current);
+        vaultTimerRef.current = null;
+        // Hold the final collapsed height until React commits hidden=true.
+        // Clearing it first exposes the full panel for one paint.
+        card.style.height = `${to}px`;
+        animation.cancel();
+        if (next) {
+          card.style.height = "";
+          card.style.overflow = "";
+        } else {
+          setVaultDetailsRendered(false);
+        }
+      };
+      animation.onfinish = complete;
+      // Background tabs can pause animation frames; still settle state on time.
+      vaultTimerRef.current = setTimeout(complete, 340);
+    });
+  }
+
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [footerDripping, setFooterDripping] = useState(false);
   const [ethCapacity, setEthCapacity] = useState<number | null | undefined>(undefined);
@@ -558,7 +630,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
 
           </div>
           <div className="vault-grid" data-juicer-reveal>
-            <article className="vault-card vault-card-eth">
+            <article className="vault-card vault-card-eth" ref={vaultCardRef}>
               <div className="vault-card-copy">
                 <div className="vault-card-name"><span>Ethereum</span></div>
                 <h3>ETH</h3>
@@ -598,16 +670,17 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
                   Open ETH vault
                 </a>
                 <button
-                  className={`button vault-details-toggle ${vaultDetailsOpen ? "vault-details-toggle-open" : "button-primary"}`}
+                  className="button button-primary vault-details-toggle"
+                  ref={vaultToggleRef}
                   type="button"
                   aria-expanded={vaultDetailsOpen}
                   aria-controls="eth-vault-details"
-                  onClick={() => setVaultDetailsOpen(!vaultDetailsOpen)}
+                  onClick={() => toggleVaultDetails()}
                 >
                   {vaultDetailsOpen ? "Hide vault details ↑" : "How this vault works?"}
                 </button>
               </footer>
-              <div className="vault-details" id="eth-vault-details" hidden={!vaultDetailsOpen}>
+              <div className="vault-details" id="eth-vault-details" ref={vaultDetailsRef} hidden={!vaultDetailsRendered} aria-hidden={!vaultDetailsRendered}>
                 <h4>How this vault works?</h4>
                 <ol className="vault-details-steps">
                   {([
@@ -623,7 +696,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
                   ))}
                 </ol>
                 <div className="vault-details-note"><span>ETH earnings vary with strategy yield, borrowing rates and costs. Withdrawals depend on available funds.</span><span className="vault-exit-note"><img src="/assets/juicer/current/icon-exit-clock.svg" alt="" loading="lazy" decoding="async" />Exit: 7-day waiting period</span></div>
-                <button type="button" className="vault-close-details" onClick={() => setVaultDetailsOpen(false)}>Close details ↑</button>
+                <button type="button" className="vault-close-details" onClick={() => toggleVaultDetails(false)}>Close details ↑</button>
               </div>
             </article>
           </div>

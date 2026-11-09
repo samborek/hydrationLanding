@@ -312,7 +312,6 @@ h1,h2 { font-weight:500; }
 /* Selected vault: public Figma button variant and fine metric dividers. */
 .vault-card-eth .vault-details-toggle.button-primary {box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;width:205px;min-width:205px;height:48px;padding:0 20px;border:0;border-radius:32px;background:var(--ink);color:#fff;font:400 16px/24px Geist,Arial,sans-serif;white-space:nowrap;}
 .vault-card-eth .vault-details-toggle.button-primary:hover {background:#40214e;color:#fff;}
-.vault-card-eth .vault-details-toggle-open {height:48px;min-width:182px;padding:0 20px;background:transparent;color:var(--ink);font:400 16px/24px Geist,Arial,sans-serif;}
 .vault-card-eth .vault-details-toggle:focus-visible {outline:2px solid var(--ink);outline-offset:4px;}
 .vault-apr-caption {display:block;margin-top:7px;font:400 12px/14px Geist,Arial,sans-serif;}
 .vault-card-metrics > div {position:relative;}
@@ -389,4 +388,33 @@ h1,h2 { font-weight:500; }
   --process-restored-height:1000px;
   --process-photo-height:min(940px,calc((100vw - 96px) * .44 * 940 / 560));
  }
+}
+
+/* Keep the vault metrics inside balanced tablet gutters. */
+@media (min-width:761px) and (max-width:1280px) {
+ .vault-card.vault-card-eth {grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+ .vault-card-eth::before {width:50%;}
+ .vault-card-eth .vault-card-metrics {min-width:0;width:100%;box-sizing:border-box;transform:none;padding-inline:clamp(20px,3vw,36px);grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px;}
+ .vault-card-metrics > div {min-width:0;}
+ .vault-card-metrics .current-tvl dd {font-size:clamp(22px,2.6vw,30px);}
+}
+@media (min-width:1281px) {
+ .vault-card-eth .vault-card-metrics {box-sizing:border-box;padding-right:clamp(32px,3vw,48px);}
+}
+
+/* Let the closing title follow the other section headings at each width. */
+@media (min-width:761px) {
+ .closing-section .closing-inner h2 {height:auto;font-size:56px;line-height:1.08;}
+}
+@media (min-width:761px) and (max-width:1500px) {
+ .closing-section .closing-inner h2 {font-size:48px;line-height:1.08;}
+}
+
+/* Four steps need two rows on narrow laptops and tablets. */
+@media (min-width:601px) and (max-width:1200px) {
+ .vault-card-eth:has(.vault-details:not([hidden])) {grid-template-rows:208px 96px auto;}
+ .vault-card-eth .vault-details {height:auto;padding-bottom:48px;}
+ .vault-card-eth .vault-details-steps {grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;}
+ .vault-details-steps li::after {display:none;}
+ .vault-details-note {margin-top:40px;}
 }
