@@ -194,8 +194,10 @@ h1,h2 { font-weight:500; }
    silhouette while fading and the unfiltered reservoir remains solid. */
 @keyframes liquid-flight-fade {
  0%,64%,100% {opacity:1;}
- 74% {opacity:0;}
- 75% {opacity:1;}
+ /* Reposition at 74–75% and hide/reset the input before restoring the group.
+    The input stays hidden through 80%, so it cannot flash on the way back. */
+ 74%,78% {opacity:0;}
+ 79% {opacity:1;}
 }
 @keyframes liquid-drop-form {
  0%,16%,100% {opacity:1;transform:scale(1);d:path('M0 -39C12 -39 21 -34 28 -27C35 -20 39 -11 39 0C39 22 22 39 0 39C-22 39 -39 22 -39 0C-39 -11 -35 -20 -28 -27C-21 -34 -12 -39 0 -39Z');}

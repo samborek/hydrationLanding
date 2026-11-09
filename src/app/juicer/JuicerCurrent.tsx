@@ -219,42 +219,62 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
     };
   }, []);
 
-  // Reveal motion only after a decoded frame is presented. Slow or blocked
-  // autoplay leaves the poster visible rather than exposing an empty video.
+  // Keep the poster until an actual frame is presented. Playback follows
+  // visibility and motion preference on every viewport, including inline iOS video.
   useEffect(() => {
     const video = heroVideoRef.current;
     if (!video) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    const bounds = video.parentElement!.getBoundingClientRect();
+    let inView = bounds.bottom > 0 && bounds.top < window.innerHeight;
     let frame: number | undefined;
     let disposed = false;
     const reveal = () => {
-      if (!disposed) video.parentElement?.classList.add("is-playing");
+      frame = undefined;
+      if (!disposed && motion.matches && !video.paused) video.parentElement?.classList.add("is-playing");
     };
     const ready = () => {
+      if (frame !== undefined) video.cancelVideoFrameCallback(frame);
       if (typeof video.requestVideoFrameCallback === "function") {
         frame = video.requestVideoFrameCallback(reveal);
       } else if (video.readyState >= 2) reveal();
     };
+    const syncPlayback = () => {
+      if (!motion.matches || document.hidden || !inView) {
+        video.pause();
+        if (!motion.matches) video.parentElement?.classList.remove("is-playing");
+        return;
+      }
+      // Set the property as well as the HTML attribute for inline autoplay.
+      video.muted = true;
+      if (!video.currentSrc || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) video.load();
+      void video.play().then(ready).catch(() => {
+        if (!disposed) video.parentElement?.classList.remove("is-playing");
+      });
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      syncPlayback();
+    }, { threshold: 0 });
+    observer.observe(video.parentElement!);
+    const showPoster = () => video.parentElement?.classList.remove("is-playing");
     video.addEventListener("playing", ready);
-    if (!video.paused && video.readyState >= 2) ready();
+    video.addEventListener("error", showPoster);
+    document.addEventListener("visibilitychange", syncPlayback);
+    window.addEventListener("pageshow", syncPlayback);
+    motion.addEventListener("change", syncPlayback);
+    syncPlayback();
     return () => {
       disposed = true;
+      observer.disconnect();
+      video.pause();
       video.removeEventListener("playing", ready);
+      video.removeEventListener("error", showPoster);
+      document.removeEventListener("visibilitychange", syncPlayback);
+      window.removeEventListener("pageshow", syncPlayback);
+      motion.removeEventListener("change", syncPlayback);
       if (frame !== undefined) video.cancelVideoFrameCallback(frame);
     };
-  }, []);
-
-  useEffect(() => {
-    const video = heroVideoRef.current;
-    if (!video) return;
-    const motion = window.matchMedia("(min-width: 761px) and (prefers-reduced-motion: no-preference)");
-    const updateVideo = () => {
-      video.parentElement?.classList.remove("is-playing");
-      video.pause();
-      video.load();
-      if (motion.matches) void video.play().catch(() => {});
-    };
-    motion.addEventListener("change", updateVideo);
-    return () => motion.removeEventListener("change", updateVideo);
   }, []);
 
   useEffect(() => {
@@ -476,7 +496,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
             poster="/juicer-supplied/video/orange-juice-fluid-loop-v4-poster.webp"
             aria-hidden="true"
           >
-            <source src="/juicer-supplied/video/orange-juice-fluid-loop-v4.mp4" type="video/mp4" media="(min-width: 761px) and (prefers-reduced-motion: no-preference)" />
+            <source src="/juicer-supplied/video/orange-juice-fluid-loop-v4.mp4" type="video/mp4" media="(prefers-reduced-motion: no-preference)" />
           </video>
           </div>
           <div className="hero-inner wrap">

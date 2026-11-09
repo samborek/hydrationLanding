@@ -322,11 +322,14 @@ video {
   }
 }
 
-/* Keep the mobile hero lively without delaying the poster or section HTML. */
+/* Mobile has one fail-visible entrance: no zero-opacity key or retained fill.
+   Copy settles within 940ms; loading media never gates the text. */
 @media (max-width: 760px) and (prefers-reduced-motion: no-preference) {
-  .hero-content > .juicer-v2-wordmark { animation: juicer-v2-mobile-hero-enter 520ms cubic-bezier(.16,1,.3,1) 40ms both; }
-  .hero-content > .hero-summary { animation: juicer-v2-mobile-hero-enter 620ms cubic-bezier(.16,1,.3,1) 760ms both; }
-  .hero-content > .hero-actions { animation: juicer-v2-mobile-hero-enter 620ms cubic-bezier(.16,1,.3,1) 900ms both; }
+  .hero-content > .juicer-v2-wordmark { animation: juicer-v2-mobile-hero-enter 520ms cubic-bezier(.2,.65,.3,.9) 0ms backwards; }
+  .hero-content > .hero-summary { animation: juicer-v2-mobile-hero-enter 600ms cubic-bezier(.2,.65,.3,.9) 240ms backwards; }
+  .juicer-hero-line {animation:juicer-v2-mobile-hero-enter 600ms cubic-bezier(.2,.65,.3,.9) 80ms backwards;}
+  .juicer-hero-line + .juicer-hero-line {animation-delay:160ms;}
+  .hero-content > .hero-actions { animation: juicer-v2-mobile-hero-enter 600ms cubic-bezier(.2,.65,.3,.9) 340ms backwards; }
 }
 @keyframes juicer-v2-mobile-hero-enter {
   from { opacity: .25; transform: translate3d(0,22px,0); }
@@ -347,7 +350,7 @@ video {
 @media(max-width:760px) {
   .hero .hero-inner .hero-content h1.hero-description {font-size:clamp(24px,7.9vw,31px);}
 }
-@media (prefers-reduced-motion:no-preference) {
+@media (min-width:761px) and (prefers-reduced-motion:no-preference) {
   .juicer-hero-line {--hero-enter-y:18px;animation:hero-enter 600ms cubic-bezier(.2,.65,.3,.9) 100ms both;}
   .juicer-hero-line + .juicer-hero-line {animation-delay:260ms;}
 }
@@ -395,7 +398,7 @@ video {
 @media(max-width:600px) {
   .hero-art {bottom:calc(100% - 280px);}
 }
-@media(max-width:760px), (prefers-reduced-motion:reduce) {
+@media(prefers-reduced-motion:reduce) {
   .hero-art .hero-video {display:none;}
   .hero-art.is-playing .hero-art-poster.is-ready {opacity:.94;}
   .hero-art.is-playing .hero-art-preview {opacity:.7;}
