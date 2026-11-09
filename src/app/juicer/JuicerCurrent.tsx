@@ -9,6 +9,7 @@ import {
   ArrowDown01Icon,
   EthereumIcon,
 } from "./v2/components/icons/Hugeicons";
+import { heroPreview } from "./hero-preview";
 import PreviewDialog from "./v2/components/PreviewDialog";
 import { modeledNetApr, readEthVaultCapacity } from "./v2/ethVault";
 
@@ -119,11 +120,36 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
     };
   }, []);
 
+  // Reveal motion only after a decoded frame is presented. Slow or blocked
+  // autoplay leaves the poster visible rather than exposing an empty video.
+  useEffect(() => {
+    const video = heroVideoRef.current;
+    if (!video) return;
+    let frame: number | undefined;
+    let disposed = false;
+    const reveal = () => {
+      if (!disposed) video.parentElement?.classList.add("is-playing");
+    };
+    const ready = () => {
+      if (typeof video.requestVideoFrameCallback === "function") {
+        frame = video.requestVideoFrameCallback(reveal);
+      } else if (video.readyState >= 2) reveal();
+    };
+    video.addEventListener("playing", ready);
+    if (!video.paused && video.readyState >= 2) ready();
+    return () => {
+      disposed = true;
+      video.removeEventListener("playing", ready);
+      if (frame !== undefined) video.cancelVideoFrameCallback(frame);
+    };
+  }, []);
+
   useEffect(() => {
     const video = heroVideoRef.current;
     if (!video) return;
     const motion = window.matchMedia("(min-width: 761px) and (prefers-reduced-motion: no-preference)");
     const updateVideo = () => {
+      video.parentElement?.classList.remove("is-playing");
       video.pause();
       video.load();
       if (motion.matches) void video.play().catch(() => {});
@@ -162,6 +188,8 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
       const progress = Math.max(-1, Math.min(1,
         (window.innerHeight / 2 - rect.top - rect.height / 2) / ((window.innerHeight + rect.height) / 2),
       ));
+      // Zoom drift instead of vertical travel: scale stays at or above 1 so the
+      // proportional crop never exposes the frame edge.
       const drift = window.innerWidth <= 760 ? 0.02 : 0.03;
       photo.style.setProperty("--process-parallax-scale", (1 + drift + progress * drift).toFixed(4));
     };
@@ -373,6 +401,9 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
       <a className="skip-link" href="#juicer-main">Skip to content</a>
       <main id="juicer-main">
         <section className="hero" aria-labelledby="hero-title">
+          <div className="hero-art" aria-hidden="true">
+            <img className="hero-art-preview" src={heroPreview} alt="" />
+            <img className="hero-art-poster" ref={(image) => { if (image?.complete && image.naturalWidth) image.classList.add("is-ready"); }} src="/juicer-supplied/video/orange-juice-fluid-loop-v4-poster.webp" alt="" decoding="async" onLoad={(event) => event.currentTarget.classList.add("is-ready")} />
           <video
             ref={heroVideoRef}
             className="hero-video"
@@ -386,16 +417,19 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
           >
             <source src="/juicer-supplied/video/orange-juice-fluid-loop-v4.mp4" type="video/mp4" media="(min-width: 761px) and (prefers-reduced-motion: no-preference)" />
           </video>
+          </div>
           <div className="hero-inner wrap">
             <div className="hero-content">
               <img className="juicer-v2-wordmark" src="/juicer-supplied/brand/juicer-script.svg" alt="Juicer" width={150} height={60} />
               <h1 id="hero-title" className="hero-description">
-                Earn more from what
-                <br />
-                <em>you already hold.</em>
+                <span className="juicer-sr-only">Earn more from what you already hold.</span>
+                <span aria-hidden="true">
+                  <span className="juicer-hero-line">Earn more from what</span>
+                  <em className="juicer-hero-line">you already hold.</em>
+                </span>
               </h1>
-              <p className="hero-summary">Juicer compounds eligible yield into the asset you deposit.</p>
-              <div className="hero-actions">
+              <p className="hero-summary hero-copy-enter">Juicer compounds eligible yield into the asset you deposit.</p>
+              <div className="hero-actions hero-action-enter">
                 <a href="#vaults" className="button button-primary">
                   Explore the vaults
                 </a>
@@ -446,7 +480,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
                 [strategyArt.deposit, "Deposit into a vault", "Your asset supplies collateral to Hydration’s lending market. Vault shares represent your position."],
                 [strategyArt.earn, "Earn in your deposited asset", "Juicer puts the strategy to work and converts eligible earnings back into your deposited asset, after fees and interest."],
                 [strategyArt.withdraw, "Claim your yield", "After the 7-day waiting period, Juicer repays the exit’s debt and releases collateral as funds become available."],
-              ].map(([art,title,description],i)=><li key={title} data-juicer-mobile-reveal><div className="current-step-icon"><img src={art} alt="" width={100} height={100}/><span className="current-step-badge" aria-hidden="true">0{i+1}</span></div><div><h3>{title}</h3><p>{description}</p></div></li>)}
+              ].map(([art,title,description],i)=><li key={title} data-juicer-mobile-reveal><div className="current-step-icon"><img src={art} alt="" width={100} height={100} loading="lazy" decoding="async"/><span className="current-step-badge" aria-hidden="true">0{i+1}</span></div><div><h3>{title}</h3><p>{description}</p></div></li>)}
             </ol>
           </div>
         </section>
@@ -531,7 +565,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
                 <p>Keep your ETH exposure while Juicer manages the strategy and compounds eligible yield back into ETH.</p>
               </div>
               <span className="vault-card-icon eth" aria-hidden="true">
-                <img src="/juicer-supplied/art/orbit-lemon.png" alt="" />
+                <img src="/juicer-supplied/art/orbit-lemon.png" alt="" loading="lazy" decoding="async" />
                 <span className="vault-asset-mark"><EthereumIcon size={28} /></span>
               </span>
               <dl className="vault-card-metrics">
@@ -583,12 +617,12 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
                     ["icon-repeat.svg", "Harvest & compound", "Eligible earnings return to ETH after fees and interest."],
                   ] as const).map(([icon, title, description], index) => (
                     <li key={title}>
-                      <div className="vault-step-top"><span className="vault-step-icon"><img src={`/assets/juicer/current/${icon}`} alt="" /></span><span className="vault-step-number">0{index + 1}</span></div>
+                      <div className="vault-step-top"><span className="vault-step-icon"><img src={`/assets/juicer/current/${icon}`} alt="" loading="lazy" decoding="async" /></span><span className="vault-step-number">0{index + 1}</span></div>
                       <strong>{title}</strong><p>{description}</p>
                     </li>
                   ))}
                 </ol>
-                <div className="vault-details-note"><span>ETH earnings vary with strategy yield, borrowing rates and costs. Withdrawals depend on available funds.</span><span className="vault-exit-note"><img src="/assets/juicer/current/icon-exit-clock.svg" alt="" />Exit: 7-day waiting period</span></div>
+                <div className="vault-details-note"><span>ETH earnings vary with strategy yield, borrowing rates and costs. Withdrawals depend on available funds.</span><span className="vault-exit-note"><img src="/assets/juicer/current/icon-exit-clock.svg" alt="" loading="lazy" decoding="async" />Exit: 7-day waiting period</span></div>
                 <button type="button" className="vault-close-details" onClick={() => setVaultDetailsOpen(false)}>Close details ↑</button>
               </div>
             </article>

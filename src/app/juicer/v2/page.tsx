@@ -24,7 +24,7 @@ export default async function JuicerV2Page() {
   const css = await getCurrentStyles({ preserveV2Top: true });
   return (
     <div className="juicer-v2-page bg-beige text-purple [&>footer]:border-t-0">
-      <link rel="preload" as="image" href="/juicer-supplied/video/orange-juice-fluid-loop-v4-poster.webp" media="(max-width: 760px)" fetchPriority="high" />
+      <link rel="preload" as="image" href="/juicer-supplied/video/orange-juice-fluid-loop-v4-poster.webp" fetchPriority="high" />
       <Header className="fixed top-0 left-0 right-0 xl:top-4" fullPageNavigation />
       <style dangerouslySetInnerHTML={{ __html: css }} />
       <style dangerouslySetInnerHTML={{ __html: ".juicer-v2-page .footer-blog-cta{border-radius:9999px}" }} />

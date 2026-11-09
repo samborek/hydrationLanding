@@ -9,6 +9,7 @@
  .selected-benefit:nth-child(2) .selected-icon {animation-delay:580ms;}
  .selected-benefit:nth-child(3) .selected-icon {animation-delay:740ms;}
 }
+/* Benefit artwork stays still after its one-time entrance. */
 @keyframes juicer-mobile-content-enter {from {opacity:.25;transform:translate3d(0,22px,0);}to {opacity:1;transform:translate3d(0,0,0);}}
 @keyframes juicer-mobile-icon-enter {from {opacity:.5;transform:translate3d(0,10px,0) rotate(-8deg) scale(.85);}to {opacity:1;transform:translate3d(0,0,0) rotate(0) scale(1);}}
 em {font-style:normal;}
@@ -32,6 +33,8 @@ h1,h2 { font-weight:500; }
 .selected-icon img {width:99px;height:99px;display:block;object-fit:contain;}
 .current-process {display:grid;grid-template-columns:minmax(0,660fr) minmax(0,876fr);gap:100px;padding:0 80px;max-width:1796px;margin:41.7px auto 38.2px;min-height:1139px;align-items:center;}
 .current-process-photo {height:940px;border-radius:330px 330px 16px 16px;overflow:hidden;background:#d7e6e9;}
+/* Crop proportionally instead of stretching; keep the juicer and fruit in frame at every width.
+   Scroll motion is a gentle zoom drift (scale stays >= 1), so the frame edge never shows. */
 .current-process-photo img {position:relative;left:0;width:100%;max-width:none;height:100%;object-fit:cover;object-position:36% 50%;}
 .current-process-photo img {transform:scale(calc(var(--process-parallax-scale,1.03) + .03));opacity:.72;transition:transform 650ms cubic-bezier(.2,.7,.2,1),opacity 750ms ease;will-change:transform;}
 .current-process-photo.is-visible img {transform:scale(var(--process-parallax-scale,1.03));opacity:1;}
@@ -362,6 +365,28 @@ h1,h2 { font-weight:500; }
  70%,100% {d:path('M195 226C190 232 191 237 195 240C199 237 200 232 195 226Z');opacity:0;}
 }
 
+/* Process photo: keep the arch at its designed 560x940 proportions on desktop and
+   tablet so narrower columns shrink the frame instead of making it a thin strip. */
 @media(min-width:761px){
  .current-process-photo{height:auto;max-height:940px;aspect-ratio:560/940;}
+}
+
+/* Halve the restored desktop gap: half the outer margin and half the
+   empty space above the proportional photo in the centred grid. */
+@media(min-width:761px){
+ .current-process{
+  --process-restored-height:1139px;
+  --process-photo-height:min(940px,calc((min(100vw,1796px) - 260px) * 660 / 1536 * 940 / 560));
+  margin-top:20.85px;
+  min-height:calc((var(--process-restored-height) + var(--process-photo-height)) / 2);
+ }
+}
+@media(min-width:1041px) and (max-width:1500px){
+ .current-process{--process-photo-height:min(940px,calc((100vw - 168px) * .44 * 940 / 560));}
+}
+@media(min-width:761px) and (max-width:1040px){
+ .current-process{
+  --process-restored-height:1000px;
+  --process-photo-height:min(940px,calc((100vw - 96px) * .44 * 940 / 560));
+ }
 }
