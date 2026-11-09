@@ -15,7 +15,7 @@
     "dev": "next dev",
     "dev:clean": "rm -rf .next && next dev",
     "build": "next build",
-    "build:check": "NEXT_DIST_DIR=.next-build next build",
+    "build:check": "NEXT_PUBLIC_AGENTATION_PREVIEW=1 NEXT_DIST_DIR=.next-build next build",
     "start": "next start",
     "lint": "next lint",
     "test:capital-metrics": "node scripts/test-capital-metrics.mjs",
@@ -23,7 +23,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "serve-storybook": "serve -s storybook-static",
-    "chromatic": "npx chromatic --exit-zero-on-changes --project-token=chpt_e5157c870f8c90c"
+    "chromatic": "npx chromatic --exit-zero-on-changes --project-token=chpt_e5157c870f8c90c",
+    "preview:production": "NEXT_DIST_DIR=.next-build next start --hostname 127.0.0.1 --port 3187"
   },
   "dependencies": {
     "@studio-freight/react-lenis": "^0.0.47",
@@ -44,6 +45,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "agentation": "^3.1.2",
     "chromatic": "^11.4.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",

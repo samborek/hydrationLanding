@@ -1,0 +1,12 @@
+{
+  "source": "/Users/samborek/Dev Projects/hydration-landing/design-qa-assets/hugeicons-solid-rounded",
+  "package": "@hugeicons-pro/core-solid-rounded",
+  "version": "4.2.3",
+  "style": "solid-rounded",
+  "icons": [
+    "ArrowDownLeft02Icon",
+    "EthereumIcon",
+    "ArrowDown01Icon",
+    "Cancel01Icon"
+  ]
+}

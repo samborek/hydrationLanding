@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 const dev = process.env.NODE_ENV !== "production";
+const agentationPreview = dev || process.env.NEXT_PUBLIC_AGENTATION_PREVIEW === "1";
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""}`,
@@ -33,6 +34,13 @@ const nextConfig = {
           { key: "Content-Security-Policy", value: csp },
           { key: "X-Frame-Options", value: "DENY" },
         ],
+      },
+      {
+        source: "/juicer/v2",
+        headers: [{
+          key: "Content-Security-Policy",
+          value: csp.replace("connect-src 'self'", `connect-src 'self' https://hdx.tarn.hydration.cloud${agentationPreview && process.env.AGENTATION_BROWSER_ORIGIN ? ` ${process.env.AGENTATION_BROWSER_ORIGIN}` : ""}`),
+        }],
       },
     ];
   },

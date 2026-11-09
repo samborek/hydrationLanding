@@ -1,0 +1,22 @@
+[
+  {
+    "source": "/Users/Shared/HydrationProjects/hydration-ui-propeller/packages/ui/src/assets/icons/JuicerLogo.svg",
+    "file": "JuicerLogo.svg",
+    "sha256": "2c2bdb704badc3eda019512ccb015ff4f7ce569a30c92d7c1815f7c7ff49cb73"
+  },
+  {
+    "source": "/Users/Shared/HydrationProjects/hydration-ui-propeller/packages/ui/src/assets/images/juicer/Deposit.webp",
+    "file": "Deposit.webp",
+    "sha256": "7eb42ccef4efada51bb7632985582700a7070e9b8b1ead6555783fa80da36c21"
+  },
+  {
+    "source": "/Users/Shared/HydrationProjects/hydration-ui-propeller/packages/ui/src/assets/images/juicer/Earn.webp",
+    "file": "Earn.webp",
+    "sha256": "94abfb66005b8ce92d845d8e20d680316f8e62af763d9f6392b2202d9b5f8c64"
+  },
+  {
+    "source": "/Users/Shared/HydrationProjects/hydration-ui-propeller/packages/ui/src/assets/images/juicer/Withdraw.webp",
+    "file": "Withdraw.webp",
+    "sha256": "e8b6289d62b039498f5ef397ad31cffdb5a8feb82433f7f63cdb2d34397f3718"
+  }
+]

@@ -23,6 +23,7 @@ import { usePrefersReducedMotion } from "@/animation/reduced-motion";
 import type { MotionStyle, MotionValue } from "framer-motion";
 import useScreenSize from "@/hooks/useScreenSize";
 import Image from "next/image";
+import Link from "next/link";
 import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from "react";
 
 const HeroWaterCanvas = lazy(() => import("./water-canvas"));
@@ -261,27 +262,45 @@ export default function HeroSection({
 function HeroSectionContent() {
   return (
     <div className="pointer-events-auto flex min-w-0 w-full flex-col items-center gap-8 lg:pb-[100px] lg:pt-[150px]">
-      <h1 className="w-full max-w-[19ch] min-w-0 text-balance text-center font-gazpacho text-[clamp(2.35rem,11.25vw,2.75rem)] font-medium leading-[0.92] text-purple sm:text-[clamp(2.75rem,7.3vw,5.5rem)] xl:text-[88px]">
-        <span className="sr-only">{homepageCopy.hero.title}</span>
-        <span className="sm:hidden" aria-hidden="true">
-          A&nbsp;secure
-          <br />
-          home&nbsp;for
-          <br />
-          <span className="font-normal italic text-[#240E32]">
-            your&nbsp;onchain
+      <div className="relative flex w-full min-w-0 flex-col items-center gap-4">
+        <Link
+          href="/juicer"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#ffc44c]/80 bg-[#ffc44c]/15 px-3.5 font-geist text-sm font-medium text-purple transition-colors hover:bg-[#ffc44c]/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-purple lg:absolute lg:bottom-full lg:mb-4"
+        >
+          <Image
+            src="/assets/juicer/JuicerLogo.svg"
+            alt=""
+            width={22}
+            height={22}
+            className="size-[22px] rounded-full object-contain"
+          />
+          Juicer is Live
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h9m-4-4 4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </Link>
+        <h1 className="w-full max-w-[19ch] min-w-0 text-balance text-center font-gazpacho text-[clamp(2.35rem,11.25vw,2.75rem)] font-medium leading-[0.92] text-purple sm:text-[clamp(2.75rem,7.3vw,5.5rem)] xl:text-[88px]">
+          <span className="sr-only">{homepageCopy.hero.title}</span>
+          <span className="sm:hidden" aria-hidden="true">
+            A&nbsp;secure
             <br />
-            capital.
+            home&nbsp;for
+            <br />
+            <span className="font-normal italic text-[#240E32]">
+              your&nbsp;onchain
+              <br />
+              capital.
+            </span>
           </span>
-        </span>
-        <span className="hidden sm:inline" aria-hidden="true">
-          <AnimatedHeadlineText text="A secure home for" />
-          <br />
-          <span className="font-normal italic text-[#240E32]">
-            <AnimatedHeadlineText delay={0.32} text="your onchain capital." />
+          <span className="hidden sm:inline" aria-hidden="true">
+            <AnimatedHeadlineText text="A secure home for" />
+            <br />
+            <span className="font-normal italic text-[#240E32]">
+              <AnimatedHeadlineText delay={0.32} text="your onchain capital." />
+            </span>
           </span>
-        </span>
-      </h1>
+        </h1>
+      </div>
       <div className="hero-copy-enter w-full">
         <Paragraph
           size="large"

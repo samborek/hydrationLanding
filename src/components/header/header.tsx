@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Button from "../ui/buttons/button";
 import Logo from "../icons/logo";
 import { twMerge } from "tailwind-merge";
 import { useLenis } from "@studio-freight/react-lenis";
 import { usePrefersReducedMotion } from "@/animation/reduced-motion";
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import LaunchAppButton from "./launch-app-button";
 
 type MenuItem = {
@@ -14,40 +15,29 @@ type MenuItem = {
   href: string;
   target?: "_blank";
   showExternalIcon?: boolean;
+  isNew?: boolean;
 };
 
-const currentMenuGroups: { label: string; items: MenuItem[] }[] = [
-  {
-    label: "Opportunities",
-    items: [
-      { label: "Productive yield", href: "#productive-yield" },
-      { label: "Strategies", href: "#strategies" },
-    ],
-  },
-  {
-    label: "About Hydration",
-    items: [
-      { label: "Why Hydration", href: "#why-hydration" },
-      { label: "Security", href: "#security" },
-      { label: "HDX", href: "#hdx" },
-    ],
-  },
-  {
-    label: "Community & tools",
-    items: [
-      { label: "Community", href: "#community" },
-      { label: "Docs", href: "https://docs.hydration.net", target: "_blank" },
-      {
-        label: "Explorer",
-        href: "https://hydration-explorer.neckwork.net",
-        target: "_blank",
-        showExternalIcon: true,
-      },
-    ],
-  },
+const featureItems: MenuItem[] = [
+  { label: "Productive yield", href: "#productive-yield" },
+  { label: "Strategies", href: "#strategies" },
+  { label: "Why Hydration", href: "#why-hydration" },
+  { label: "Security", href: "#security" },
+  { label: "HDX", href: "#hdx" },
+  { label: "Community", href: "#community" },
 ];
 
-const currentMenuItems = currentMenuGroups.flatMap((group) => group.items);
+const currentMenuItems: MenuItem[] = [
+  { label: "Home", href: "/" },
+  { label: "Juicer", href: "/juicer", isNew: true },
+  { label: "Docs", href: "https://docs.hydration.net", target: "_blank" },
+  {
+    label: "Explorer",
+    href: "https://hydration-explorer.neckwork.net",
+    target: "_blank",
+    showExternalIcon: true,
+  },
+];
 
 const previousMenuItems: MenuItem[] = [
   { label: "Blog", href: "#blog" },
@@ -66,6 +56,17 @@ const previousMenuItems: MenuItem[] = [
 ];
 
 const sectionScrollOffset = -88;
+const desktopLinkClass = "relative inline-flex items-center gap-1 rounded-sm text-sm before:absolute before:-inset-x-3 before:-inset-y-2.5 font-medium font-geist leading-5 text-purple pointer-events-auto transition-colors hover:text-pink focus-visible:text-pink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pink";
+const mobileLinkClass = "flex min-h-11 items-center gap-2 rounded-sm font-geist text-[1.25rem] font-medium leading-tight text-purple transition-colors hover:text-pink focus-visible:text-pink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink";
+const dropdownLinkClass = "block rounded-lg px-3 py-2 font-geist text-sm font-medium text-purple hover:bg-beige focus-visible:outline focus-visible:outline-2 focus-visible:outline-pink";
+
+function NewBadge() {
+  return (
+    <span className="rounded-full bg-[#ffc44c] px-1.5 py-0.5 text-[10px] font-semibold leading-3 text-purple">
+      New
+    </span>
+  );
+}
 
 function HamburgerIcon({ open }: { open: boolean }) {
   const bar =
@@ -111,14 +112,19 @@ function ExternalLinkIcon({ className }: { className?: string }) {
 export type HeaderProps = {
   className?: string;
   version?: "current" | "previous";
+  fullPageNavigation?: boolean;
 };
 
 export default function Header({
   className,
   version = "current",
+  fullPageNavigation = false,
 }: HeaderProps) {
   const lenis = useLenis();
   const reducedMotion = usePrefersReducedMotion();
+  const pathname = usePathname();
+  const NavigationLink = fullPageNavigation ? "a" : Link;
+  const menuHref = (href: string) => href.startsWith("#") && pathname !== "/" ? `/${href}` : href;
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuTopPx, setMenuTopPx] = useState(96);
   const [pastHero, setPastHero] = useState(false);
@@ -126,12 +132,8 @@ export default function Header({
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const panelId = useId();
-  const menuItems =
-    version === "previous" ? previousMenuItems : currentMenuItems;
-  const mobileMenuGroups =
-    version === "previous"
-      ? [{ label: "Explore", items: previousMenuItems }]
-      : currentMenuGroups;
+  const featureCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuItems = version === "previous" ? previousMenuItems : currentMenuItems;
   const scrollOffset = version === "previous" ? 0 : sectionScrollOffset;
 
   useEffect(() => {
@@ -141,7 +143,7 @@ export default function Header({
     }
 
     const hero = document.querySelector<HTMLElement>("[data-homepage-hero]");
-    if (!hero) return;
+    if (!hero) { setPastHero(true); return; }
 
     let frameId = 0;
     const updateHeaderSurface = () => {
@@ -228,19 +230,91 @@ export default function Header({
     };
   }, [lenis, menuOpen]);
 
-  function navigateTo(item: MenuItem) {
-    setMenuOpen(false);
-    if (item.target === "_blank") return;
-    lenis?.start();
-    lenis?.scrollTo(item.href, {
-      offset: scrollOffset,
-      immediate: reducedMotion,
-    });
+  function renderMenuLink(item: MenuItem, mobile: boolean, dropdown = false) {
+    return (
+      <NavigationLink
+        key={item.href}
+        href={menuHref(item.href)}
+        target={item.target}
+        rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
+        className={mobile ? mobileLinkClass : dropdown ? dropdownLinkClass : desktopLinkClass}
+        onClick={(event) => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          if (mobile) setMenuOpen(false);
+          const disclosure = event.currentTarget.closest("details");
+          if (disclosure) {
+            disclosure.querySelector("summary")?.focus({ preventScroll: true });
+            disclosure.open = false;
+          }
+          if (item.target === "_blank" || !item.href.startsWith("#") || pathname !== "/" || !lenis) return;
+          event.preventDefault();
+          lenis.start();
+          lenis.scrollTo(item.href, { offset: scrollOffset, immediate: reducedMotion });
+        }}
+      >
+        {item.label}
+        {item.isNew && <NewBadge />}
+        {item.showExternalIcon && (
+          <ExternalLinkIcon className={mobile ? "h-4 w-4 shrink-0" : "h-3 w-3 shrink-0"} />
+        )}
+      </NavigationLink>
+    );
+  }
+
+  function renderMenu(mobile: boolean) {
+    return menuItems.map((item) => (
+      <Fragment key={item.href}>
+        {renderMenuLink(item, mobile)}
+        {item.href === "/" && (
+          <details
+            className={twMerge("group relative pointer-events-auto", fullPageNavigation && "juicer-features-menu")}
+            onPointerEnter={(event) => {
+              if (featureCloseTimer.current) clearTimeout(featureCloseTimer.current);
+              if (event.pointerType === "mouse" && window.matchMedia("(min-width: 1280px) and (hover: hover)").matches) event.currentTarget.open = true;
+            }}
+            onPointerLeave={(event) => {
+              if (event.pointerType !== "mouse" || !window.matchMedia("(min-width: 1280px) and (hover: hover)").matches) return;
+              const disclosure = event.currentTarget;
+              featureCloseTimer.current = setTimeout(() => {
+                if (!disclosure.contains(document.activeElement)) disclosure.open = false;
+              }, 160);
+            }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== "Escape" || !event.currentTarget.open) return;
+              event.preventDefault();
+              event.stopPropagation();
+              event.currentTarget.querySelector("summary")?.focus({ preventScroll: true });
+              event.currentTarget.open = false;
+            }}
+          >
+            <summary
+              className={twMerge(mobile ? mobileLinkClass : desktopLinkClass, "cursor-pointer list-none [&::-webkit-details-marker]:hidden")}
+              onClick={(event) => {
+                if (mobile || !window.matchMedia("(min-width: 1280px) and (hover: hover)").matches) return;
+                event.preventDefault();
+                (event.currentTarget.parentElement as HTMLDetailsElement).open = true;
+              }}
+            >
+              Features
+              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="h-3 w-3 shrink-0 group-open:rotate-180">
+                <path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </summary>
+            <div className={twMerge(mobile ? "border-l border-purple/15 pl-4" : "absolute left-1/2 top-full z-10 mt-3 w-52 -translate-x-1/2 rounded-xl border border-purple/10 bg-white p-2 shadow-lg", fullPageNavigation && "juicer-features-panel")}>
+              {featureItems.map((feature) => renderMenuLink(feature, mobile, true))}
+            </div>
+          </details>
+        )}
+      </Fragment>
+    ));
   }
 
   return (
     <header
-      className={twMerge("z-40 mx-auto w-full flex justify-center", className)}
+      className={twMerge("z-40 mx-auto w-full flex justify-center", fullPageNavigation && "juicer-preview-header", className)}
     >
       <div
         ref={shellRef}
@@ -250,41 +324,22 @@ export default function Header({
         )}
       >
         <div className="relative z-[60] flex items-center justify-between py-2.5 sm:py-3 xl:max-w-[none] xl:py-0">
-          <button
-            type="button"
-            onClick={() => {
+          <NavigationLink
+            href="/"
+            onClick={(e) => {
+              if (pathname !== "/") return;
+              e.preventDefault();
               lenis?.start();
               lenis?.scrollTo(0, { immediate: reducedMotion });
               setMenuOpen(false);
             }}
-            aria-label="Scroll to top"
+            aria-label="Hydration home"
             className="flex min-h-11 items-center"
           >
             <Logo size="small" />
-          </button>
-          <nav className="hidden xl:flex gap-6 justify-center pointer-events-none">
-            {menuItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                target={item.target}
-                rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
-                className="relative inline-flex items-center gap-1 rounded-sm text-sm before:absolute before:-inset-x-3 before:-inset-y-2.5 font-medium font-geist leading-5 text-purple pointer-events-auto transition-colors hover:text-pink focus-visible:text-pink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pink"
-                onClick={(e) => {
-                  if (item.target === "_blank") return;
-                  e.preventDefault();
-                  lenis?.scrollTo(item.href, {
-                    offset: scrollOffset,
-                    immediate: reducedMotion,
-                  });
-                }}
-              >
-                {item.label}
-                {item.showExternalIcon ? (
-                  <ExternalLinkIcon className="h-3 w-3 shrink-0" />
-                ) : null}
-              </Link>
-            ))}
+          </NavigationLink>
+          <nav aria-label="Site navigation" className="hidden xl:flex gap-6 justify-center pointer-events-none">
+            {renderMenu(false)}
           </nav>
           <div className="flex flex-row-reverse items-center gap-2 sm:gap-2.5 xl:flex-row">
             <button
@@ -318,7 +373,7 @@ export default function Header({
               type="button"
               aria-label="Close menu"
               tabIndex={-1}
-              className="fixed inset-0 z-[45] xl:hidden bg-purple/35 backdrop-blur-[2px]"
+              className="fixed inset-0 z-[45] xl:hidden bg-purple/35 backdrop-blur-[2px] juicer-menu-backdrop"
               onClick={() => setMenuOpen(false)}
             />
             <nav
@@ -330,37 +385,16 @@ export default function Header({
                 top: menuTopPx,
                 maxHeight: `calc(100dvh - ${menuTopPx + 16}px - env(safe-area-inset-bottom, 0px))`,
               }}
-              className="fixed inset-x-4 z-50 flex flex-col gap-6 overflow-y-auto overscroll-contain rounded-[1.35rem] bg-white/95 px-7 py-6 shadow-[0_0_0_1px_rgba(36,14,50,0.08),0_20px_60px_rgba(36,14,50,0.14)] sm:inset-x-auto sm:right-4 sm:w-[min(30rem,calc(100vw-2rem))] xl:hidden backdrop-blur-md"
+              className="fixed inset-x-4 z-50 flex flex-col gap-6 overflow-y-auto overscroll-contain rounded-[1.35rem] bg-white/95 px-7 py-6 shadow-[0_0_0_1px_rgba(36,14,50,0.08),0_20px_60px_rgba(36,14,50,0.14)] sm:inset-x-auto sm:right-4 sm:w-[min(30rem,calc(100vw-2rem))] xl:hidden backdrop-blur-md juicer-mobile-menu-panel"
             >
-              {mobileMenuGroups.map((group) => (
-                <div key={group.label} className="flex flex-col">
+              <div className="flex flex-col">
+                {version === "previous" && (
                   <p className="mb-2 font-geist text-sm font-medium text-purple/55">
-                    {group.label}
+                    Explore
                   </p>
-                  {group.items.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      target={item.target}
-                      rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
-                      className="flex min-h-11 items-center gap-2 rounded-sm font-geist text-[1.25rem] font-medium leading-tight text-purple transition-colors hover:text-pink focus-visible:text-pink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink"
-                      onClick={(e) => {
-                        if (item.target !== "_blank") {
-                          e.preventDefault();
-                          navigateTo(item);
-                        } else {
-                          setMenuOpen(false);
-                        }
-                      }}
-                    >
-                      {item.label}
-                      {item.showExternalIcon ? (
-                        <ExternalLinkIcon className="h-4 w-4 shrink-0" />
-                      ) : null}
-                    </Link>
-                  ))}
-                </div>
-              ))}
+                )}
+                {renderMenu(true)}
+              </div>
             </nav>
           </>
         ) : null}
