@@ -92,7 +92,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
       });
     }, { threshold: 0.08, rootMargin: "0px 0px -8% 0px" });
     sections.forEach((section) => {
-      if (section.getBoundingClientRect().top < window.innerHeight * 0.92) return;
+      if (mobile.matches || section.getBoundingClientRect().top < window.innerHeight * 0.92) return;
       section.classList.add("juicer-reveal-pending");
       observer.observe(section);
     });
@@ -103,7 +103,10 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
     };
     reducedMotion.addEventListener("change", revealAll);
     const clearMobileReveals = () => {
-      if (mobile.matches) return;
+      if (mobile.matches) {
+        sections.forEach((section) => section.classList.remove("juicer-reveal-pending"));
+        return;
+      }
       sections.filter((section) => section.hasAttribute("data-juicer-mobile-reveal"))
         .forEach((section) => section.classList.remove("juicer-reveal-pending"));
     };
@@ -227,17 +230,17 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
     };
     const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
     const syncMotion = () => {
-      section.classList.toggle("yield-reveal-active", !motion.matches);
+      section.classList.toggle("yield-reveal-active", !motion.matches && window.innerWidth > 760);
       schedule();
     };
     syncMotion();
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
+    window.addEventListener("resize", syncMotion);
     motion.addEventListener("change", syncMotion);
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
+      window.removeEventListener("resize", syncMotion);
       motion.removeEventListener("change", syncMotion);
       section.classList.remove("yield-reveal-active");
     };
@@ -659,7 +662,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
             aria-hidden="true"
           >
             <svg
-              className="footer-funnel-art"
+              className="footer-funnel-art footer-funnel-desktop"
               viewBox="0 0 1780 374.467"
               preserveAspectRatio="none"
             >
@@ -671,6 +674,10 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
                 className="footer-funnel-drop"
                 d="M906 279C897 284 899 299 906 302C914 299 915 284 906 279Z"
               />
+            </svg>
+            <svg className="footer-funnel-art footer-funnel-mobile" viewBox="0 0 390 240" preserveAspectRatio="none">
+              <path className="footer-mobile-body" d="M0 0H390C300 6 255 26 235 58C214 90 214 132 195 166C176 132 176 90 155 58C135 26 90 6 0 0Z" />
+              <path className="footer-mobile-drop" d="M195 176C181 193 183 208 195 214C207 208 209 193 195 176Z" />
             </svg>
           </div>
         </section>
