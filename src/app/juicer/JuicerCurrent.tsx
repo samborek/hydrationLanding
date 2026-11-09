@@ -60,8 +60,39 @@ const questions = [
   },
 ];
 
+/* The reservoir has one continuous sweep into a slim liquid neck. Its tip
+   and the moving bulb merge by proximity through the local gooey filter. */
+function FooterLiquid({ mobile = false }: { mobile?: boolean }) {
+  const filterId = mobile ? "footer-liquid-mobile" : "footer-liquid-desktop";
+  const center = mobile ? 195 : 890;
+  const reservoir = mobile
+    ? "M-30 -40H420V0C310 0 260 32 230 60C218 71 203.5 94 202 103C201 109 199 113 195 113C191 113 189 109 188 103C186.5 94 172 71 160 60C130 32 80 0 -30 0Z"
+    : "M-40 -40H1820V0C1440 0 1170 28 1010 86C954 107 907 140 904 152C902 160 898 166 890 166C882 166 878 160 876 152C873 140 826 107 770 86C610 28 340 0 -40 0Z";
+  return (
+    <svg className={`footer-funnel-art footer-funnel-${mobile ? "mobile" : "desktop"}`}
+      viewBox={mobile ? "0 0 390 240" : "0 0 1780 374"} preserveAspectRatio="xMidYMin meet">
+      <defs>
+        <filter id={filterId} filterUnits="userSpaceOnUse" x={center - 170} y="-40" width="340" height="900" colorInterpolationFilters="sRGB">
+          <feGaussianBlur in="SourceAlpha" stdDeviation={mobile ? 6 : 9} result="blur" />
+          <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 28 -13" result="merged" />
+          <feFlood floodColor="#FFCA48" />
+          <feComposite in2="merged" operator="in" />
+        </filter>
+      </defs>
+      <path className="footer-liquid-reservoir" d={reservoir} fill="currentColor" />
+      <g className="footer-liquid" filter={`url(#${filterId})`} fill="currentColor">
+        <path className="footer-liquid-reservoir" d={reservoir} />
+        <g transform={`translate(${center} ${mobile ? 127 : 192}) scale(${mobile ? 0.74 : 1})`}>
+          <g className="footer-liquid-motion">
+            <path className="footer-liquid-drop" d="M0 -39C12 -39 21 -34 28 -27C35 -20 39 -11 39 0C39 22 22 39 0 39C-22 39 -39 22 -39 0C-39 -11 -35 -20 -28 -27C-21 -34 -12 -39 0 -39Z" />
+          </g>
+        </g>
+      </g>
+    </svg>
+  );
+}
+
 export default function JuicerCurrent({ enableYieldReveal = false }: { enableYieldReveal?: boolean }) {
-  const footerReleaseDistance = 240;
   const [parity, setParity] = useState(false);
   useEffect(() => { setParity(new URLSearchParams(location.search).get("figma") === "1"); }, []);
   const [showYieldExample, setShowYieldExample] = useState(false);
@@ -72,7 +103,6 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
   const vaultToggleRef = useRef<HTMLButtonElement>(null);
   const vaultTargetRef = useRef(false);
   const vaultAnimationRef = useRef<Animation | null>(null);
-  const vaultFadeRef = useRef<Animation | null>(null);
   const vaultFrameRef = useRef<number | null>(null);
   const vaultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -94,7 +124,6 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
     if (vaultFrameRef.current !== null) cancelAnimationFrame(vaultFrameRef.current);
     if (vaultTimerRef.current !== null) clearTimeout(vaultTimerRef.current);
     vaultAnimationRef.current?.cancel();
-    vaultFadeRef.current?.cancel();
     if (card) { card.style.height = `${from}px`; card.style.overflow = "hidden"; }
     setVaultDetailsOpen(next);
     if (next) setVaultDetailsRendered(true);
@@ -115,7 +144,6 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
       card.style.height = `${from}px`;
       const animation = card.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 300, easing: "cubic-bezier(.2,.7,.2,1)" });
       vaultAnimationRef.current = animation;
-      vaultFadeRef.current = panel.animate([{ opacity: next ? 0 : 1 }, { opacity: next ? 1 : 0 }], { duration: 240, easing: "ease-out" });
       const complete = () => {
         if (vaultAnimationRef.current !== animation) return;
         vaultAnimationRef.current = null;
@@ -139,7 +167,6 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
   }
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [footerDripping, setFooterDripping] = useState(false);
   const [ethCapacity, setEthCapacity] = useState<number | null | undefined>(undefined);
   const footerFunnelRef = useRef<HTMLDivElement>(null);
   const heroVideoRef = useRef<HTMLVideoElement>(null);
@@ -377,99 +404,56 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
   }, []);
 
   useEffect(() => {
-    let overscrollDistance = 0;
-    let lastTouchY: number | null = null;
-    let animationTimer: number | undefined;
-    let cooldownTimer: number | undefined;
-    let gestureEndTimer: number | undefined;
-    let coolingDown = false;
     const funnel = footerFunnelRef.current;
-
-    const isFunnelVisible = () => {
-      const bounds = funnel?.getBoundingClientRect();
-      return bounds !== undefined && bounds.top < window.innerHeight && bounds.bottom > 0;
+    if (!funnel) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mobileLayout = window.matchMedia("(max-width: 760px)");
+    const flightArea = funnel.querySelector<HTMLElement>("[data-liquid-flight]") ?? funnel;
+    const footerHeading = document.querySelector<HTMLElement>(".juicer-v2-page > footer h2, footer h2");
+    const layoutTop = (element: HTMLElement) => {
+      let top = 0;
+      for (let node: HTMLElement | null = element; node; node = node.offsetParent as HTMLElement | null) top += node.offsetTop;
+      return top;
     };
-
-    const renderPull = (progress: number) => {
-      funnel?.classList.toggle("is-pulling", progress > 0);
-      funnel?.style.setProperty(
-        "--footer-pull-scale",
-        String(1 + Math.min(Math.max(progress, 0), 1) * 0.3),
-      );
+    const measureFlight = () => {
+      if (!footerHeading) return;
+      const mobile = mobileLayout.matches;
+      const svg = funnel.querySelector<SVGSVGElement>(mobile ? ".footer-funnel-mobile" : ".footer-funnel-desktop");
+      const scale = svg?.getScreenCTM()?.d;
+      if (!svg || !scale) return;
+      const target = layoutTop(footerHeading) - layoutTop(funnel) - 20;
+      const origin = mobile ? 127 : 192;
+      const localScale = mobile ? 0.74 : 1;
+      const distance = Math.max(mobile ? 105 : 142, (target / scale - origin) / localScale - 42);
+      funnel.style.setProperty(mobile ? "--liquid-fall-mobile" : "--liquid-fall-desktop", `${distance}px`);
+      funnel.style.setProperty("--liquid-fall-entry", String(Math.min(0.5, Math.max(0.03, 33.15 / (distance - 36)))));
+      funnel.style.setProperty("--liquid-extent", `${Math.max(funnel.offsetHeight, target + 20)}px`);
+      svg.querySelector("filter")?.setAttribute("height", String(Math.ceil(target / scale + 180)));
     };
-
-    const releaseDrop = () => {
-      if (coolingDown) return;
-      coolingDown = true;
-      if (gestureEndTimer) window.clearTimeout(gestureEndTimer);
-      overscrollDistance = 0;
-      funnel?.classList.add("is-dripping");
-      renderPull(0);
-      setFooterDripping(true);
-      animationTimer = window.setTimeout(() => setFooterDripping(false), 1650);
-      cooldownTimer = window.setTimeout(() => {
-        coolingDown = false;
-      }, 1900);
+    const resizeObserver = new ResizeObserver(measureFlight);
+    resizeObserver.observe(funnel);
+    if (footerHeading) resizeObserver.observe(footerHeading);
+    if (funnel.parentElement) resizeObserver.observe(funnel.parentElement);
+    window.addEventListener("resize", measureFlight);
+    measureFlight();
+    let inView = false;
+    const syncPlayback = () => {
+      funnel.classList.toggle("is-flowing", inView && !document.hidden && !reducedMotion.matches);
     };
-
-    const resetPull = () => {
-      overscrollDistance = 0;
-      renderPull(0);
-    };
-
-    const finishPull = () => {
-      if (overscrollDistance >= footerReleaseDistance) {
-        releaseDrop();
-      } else {
-        resetPull();
-      }
-    };
-
-    const collectOverscroll = (distance: number) => {
-      if (coolingDown) return;
-      if (!isFunnelVisible() || distance <= 0) {
-        resetPull();
-        return;
-      }
-      overscrollDistance += distance;
-      renderPull(overscrollDistance / footerReleaseDistance);
-    };
-
-    const onWheel = (event: WheelEvent) => {
-      collectOverscroll(event.deltaY);
-      if (gestureEndTimer) window.clearTimeout(gestureEndTimer);
-      if (!coolingDown && event.deltaY > 0 && isFunnelVisible()) {
-        gestureEndTimer = window.setTimeout(finishPull, 110);
-      }
-    };
-    const onTouchStart = (event: TouchEvent) => {
-      lastTouchY = event.touches[0]?.clientY ?? null;
-    };
-    const onTouchMove = (event: TouchEvent) => {
-      const currentY = event.touches[0]?.clientY;
-      if (currentY == null || lastTouchY == null) return;
-      collectOverscroll(lastTouchY - currentY);
-      lastTouchY = currentY;
-    };
-    const onTouchEnd = () => {
-      lastTouchY = null;
-      if (!coolingDown) finishPull();
-    };
-
-    window.addEventListener("wheel", onWheel, { passive: true });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting && entry.intersectionRatio >= 0.12;
+      syncPlayback();
+    }, { threshold: [0, 0.12] });
+    observer.observe(flightArea);
+    document.addEventListener("visibilitychange", syncPlayback);
+    reducedMotion.addEventListener("change", syncPlayback);
     return () => {
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-      if (animationTimer) window.clearTimeout(animationTimer);
-      if (cooldownTimer) window.clearTimeout(cooldownTimer);
-      if (gestureEndTimer) window.clearTimeout(gestureEndTimer);
-      funnel?.classList.remove("is-pulling");
-      funnel?.style.removeProperty("--footer-pull-scale");
+      observer.disconnect();
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", measureFlight);
+      document.removeEventListener("visibilitychange", syncPlayback);
+      reducedMotion.removeEventListener("change", syncPlayback);
+      funnel.classList.remove("is-flowing");
     };
   }, []);
 
@@ -773,27 +757,12 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
           </section>
           <div
             ref={footerFunnelRef}
-            className={`juice-funnel ${footerDripping ? "is-dripping" : ""}`}
+            className="juice-funnel"
             aria-hidden="true"
           >
-            <svg
-              className="footer-funnel-art footer-funnel-desktop"
-              viewBox="0 0 1780 374.467"
-              preserveAspectRatio="none"
-            >
-              <path
-                className="footer-funnel-body"
-                d="M0 0H1780C1470 3 1253 20 1088 63C1061 70 969 99 937 150C908 195 925 264 906 280C887 270 889 198 867 158C845 119 725 67 628 52C531 37 278 5 0 0Z"
-              />
-              <path
-                className="footer-funnel-drop"
-                d="M906 279C897 284 899 299 906 302C914 299 915 284 906 279Z"
-              />
-            </svg>
-            <svg className="footer-funnel-art footer-funnel-mobile" viewBox="0 0 390 240" preserveAspectRatio="none">
-              <path className="footer-mobile-body" d="M0 0H390C300 6 255 26 235 58C214 90 214 132 195 166C176 132 176 90 155 58C135 26 90 6 0 0Z" />
-              <path className="footer-mobile-drop" d="M195 176C181 193 183 208 195 214C207 208 209 193 195 176Z" />
-            </svg>
+            <span className="footer-liquid-flight" data-liquid-flight />
+            <FooterLiquid />
+            <FooterLiquid mobile />
           </div>
         </section>
       </main>

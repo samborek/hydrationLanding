@@ -140,7 +140,7 @@ h1,h2 { font-weight:500; }
 .closing-section .juice-funnel {color:var(--closing-yellow);}
 @media(max-width:900px){.vault-card-eth .vault-details{top:0;height:auto;margin:0 -28px -28px;padding:32px 28px 48px}.vault-card-eth .vault-details-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}.vault-details-steps li::after{display:none}.vault-details-note{margin-top:40px}}
 @media(max-width:600px){.vault-card-eth .vault-details-steps{grid-template-columns:1fr}.vault-details-note{flex-direction:column;gap:10px}}
-.closing-section {--closing-yellow:#ffc44c;}
+.closing-section {--closing-yellow:#ffca48;}
 .closing-section .closing-inner {height:600px;padding:0;display:flex;align-items:center;position:relative;isolation:isolate;overflow:hidden;background:#e6e2f3;}
 .closing-section .closing-inner::before {content:"";position:absolute;inset:-48px 0;z-index:-1;background:url('/assets/juicer/current/cta-pool-long-wall-figma.webp') center/cover no-repeat;transform:translate3d(0,var(--cta-parallax-y,0px),0);will-change:transform;pointer-events:none;}
 .closing-section .current-cta-copy {position:relative;z-index:1;}
@@ -154,34 +154,61 @@ h1,h2 { font-weight:500; }
 .faq-item button {font-size:18px;line-height:27px;}
 .faq-item .faq-answer {font-size:16px;line-height:28.8px;}
 .juice-funnel {height:374px;}
-.juice-funnel .footer-funnel-body {animation:juicer-liquid-contour 4.4s ease-in-out infinite;}
-.juice-funnel .footer-funnel-drop {animation:juicer-liquid-drop 4.4s ease-in-out infinite;}
-@keyframes juicer-liquid-contour {
- 0%,100% {d:path('M0 0H1780C1470 3 1253 20 1088 63C1061 70 969 99 937 150C908 195 925 264 906 280C887 270 889 198 867 158C845 119 725 67 628 52C531 37 278 5 0 0Z');}
- 24% {d:path('M0 0H1780C1475 4 1251 23 1088 65C1055 73 971 103 940 154C911 200 920 278 906 303C890 276 885 202 864 161C839 116 730 70 626 54C522 39 272 7 0 0Z');}
- 42% {d:path('M0 0H1780C1466 2 1255 18 1088 61C1064 69 967 97 935 148C909 192 917 283 906 318C895 283 895 195 869 155C850 122 721 65 630 51C539 36 283 4 0 0Z');}
- 52% {d:path('M0 0H1780C1473 3 1252 21 1088 64C1057 71 970 101 938 151C910 195 919 263 906 275C893 263 891 199 866 158C843 118 727 68 627 53C527 38 276 5 0 0Z');}
- 78% {d:path('M0 0H1780C1468 4 1254 22 1088 62C1060 72 968 100 937 150C907 194 925 265 906 283C887 269 890 199 867 158C846 119 723 67 629 52C535 38 280 6 0 0Z');}
+/* Metaballs: the filter unites moving round volumes into one liquid surface. */
+.closing-section .juice-funnel .footer-funnel-art {width:100%;height:100%;overflow:visible;transform:none!important;animation:none!important;will-change:auto;}
+.closing-section .footer-funnel-desktop {display:block;}
+.closing-section .juice-funnel {overflow:visible;pointer-events:none;}
+.footer-liquid-flight {position:absolute;left:0;top:0;width:100%;height:var(--liquid-extent,100%);pointer-events:none;}
+.footer-liquid {--liquid-fall:var(--liquid-fall-desktop,142px);}
+.footer-liquid,.footer-liquid-reservoir,.footer-liquid-motion,.footer-liquid-drop {transform-box:fill-box;transform-origin:center;animation-duration:3800ms;animation-timing-function:linear;animation-iteration-count:infinite;animation-play-state:paused;}
+.footer-funnel-desktop .footer-liquid-reservoir {animation-name:liquid-reservoir-desktop;}
+.footer-funnel-mobile .footer-liquid-reservoir {animation-name:liquid-reservoir-mobile;}
+.footer-liquid {animation-name:liquid-flight-fade;}
+.footer-liquid-motion {animation-name:liquid-drop-travel;}
+.footer-liquid-drop {animation-name:liquid-drop-form;}
+.is-flowing .footer-liquid,.is-flowing .footer-liquid-reservoir,.is-flowing .footer-liquid-motion,.is-flowing .footer-liquid-drop {animation-play-state:running;}
+@keyframes liquid-reservoir-desktop {
+ 0%,28%,100% {d:path('M-40 -40H1820V0C1440 0 1170 28 1010 86C954 107 907 140 904 152C902 160 898 166 890 166C882 166 878 160 876 152C873 140 826 107 770 86C610 28 340 0 -40 0Z');}
+ 38% {d:path('M-40 -40H1820V0C1440 0 1170 28 1010 86C954 107 902 157 899 169C897 177 898 183 890 183C882 183 883 177 881 169C878 157 826 107 770 86C610 28 340 0 -40 0Z');}
+ 44% {d:path('M-40 -40H1820V0C1440 0 1170 28 1010 86C954 107 905 122 902 134C900 142 898 148 890 148C882 148 880 142 878 134C875 122 826 107 770 86C610 28 340 0 -40 0Z');animation-timing-function:cubic-bezier(.16,1,.3,1);}
+ 56%,72% {d:path('M-40 -40H1820V0C1440 0 1170 28 1010 86C954 107 938 108 920 110C902 112 898 116 890 116C882 116 878 112 860 110C842 108 826 107 770 86C610 28 340 0 -40 0Z');}
+ 82% {d:path('M-40 -40H1820V0C1440 0 1170 28 1010 86C954 107 907 120 904 132C902 140 898 146 890 146C882 146 878 140 876 132C873 120 826 107 770 86C610 28 340 0 -40 0Z');}
 }
-@keyframes juicer-liquid-drop {
- 0%,19%,100% {d:path('M906 279C897 284 899 299 906 302C914 299 915 284 906 279Z');opacity:1;}
- 42% {d:path('M906 311C891 328 895 348 906 355C919 347 922 328 906 311Z');opacity:1;}
- 67% {d:path('M906 350C896 357 898 369 906 373C916 369 919 357 906 350Z');opacity:1;}
- 74% {d:path('M906 366C901 369 902 374 906 377C911 374 911 369 906 366Z');opacity:0;}
- 75% {d:path('M906 279C903 281 903 287 906 289C910 287 910 281 906 279Z');opacity:1;}
+@keyframes liquid-reservoir-mobile {
+ 0%,28%,100% {d:path('M-30 -40H420V0C310 0 260 32 230 60C218 71 203.5 94 202 103C201 109 199 113 195 113C191 113 189 109 188 103C186.5 94 172 71 160 60C130 32 80 0 -30 0Z');}
+ 38% {d:path('M-30 -40H420V0C310 0 260 32 230 60C218 71 201 105 199.5 114C198.5 120 199 124 195 124C191 124 191.5 120 190.5 114C189 105 172 71 160 60C130 32 80 0 -30 0Z');}
+ 44% {d:path('M-30 -40H420V0C310 0 260 32 230 60C218 71 202.5 82 201 91C200 97 199 101 195 101C191 101 190 97 189 91C187.5 82 172 71 160 60C130 32 80 0 -30 0Z');animation-timing-function:cubic-bezier(.16,1,.3,1);}
+ 56%,72% {d:path('M-30 -40H420V0C310 0 260 32 230 60C218 71 216 72 210 74C204 76 199 78 195 78C191 78 186 76 180 74C174 72 172 71 160 60C130 32 80 0 -30 0Z');}
+ 82% {d:path('M-30 -40H420V0C310 0 260 32 230 60C218 71 203.5 80 202 89C201 95 199 99 195 99C191 99 189 95 188 89C186.5 80 172 71 160 60C130 32 80 0 -30 0Z');}
 }
-/* Keep the neck and drop joined while the wheel pull and release take over. */
-.juice-funnel.is-pulling .footer-funnel-body,
-.juice-funnel.is-dripping .footer-funnel-body {
- animation:none;
- d:path('M0 0H1780C1470 3 1253 20 1088 63C1061 70 969 99 937 150C908 195 925 264 906 280C887 270 889 198 867 158C845 119 725 67 628 52C531 37 278 5 0 0Z');
+/* One uninterrupted acceleration through release; form and position have
+   separate timelines so a morph cannot stop the fall at each shape key. */
+@keyframes liquid-drop-travel {
+ 0%,16% {transform:translateY(0);animation-timing-function:cubic-bezier(.42,0,.75,.35);}
+ 40% {transform:translateY(36px);animation-timing-function:cubic-bezier(.25,var(--liquid-fall-entry,.2),.65,.45);}
+ 74% {transform:translateY(var(--liquid-fall));}
+ 75%,80% {transform:translateY(-70px);}
+ 100% {transform:translateY(0);}
 }
-.juice-funnel.is-pulling .footer-funnel-drop,
-.juice-funnel.is-dripping .footer-funnel-drop {
- d:path('M906 279C897 284 899 299 906 302C914 299 915 284 906 279Z');
+/* Fade the filtered result, not its input alpha: the drop retains its full
+   silhouette while fading and the unfiltered reservoir remains solid. */
+@keyframes liquid-flight-fade {
+ 0%,64%,100% {opacity:1;}
+ 74% {opacity:0;}
+ 75% {opacity:1;}
 }
-.juice-funnel.is-pulling .footer-funnel-drop {animation:none;opacity:1;}
-@media (prefers-reduced-motion: reduce) {.juice-funnel .footer-funnel-body,.juice-funnel .footer-funnel-drop {animation:none;}}
+@keyframes liquid-drop-form {
+ 0%,16%,100% {opacity:1;transform:scale(1);d:path('M0 -39C12 -39 21 -34 28 -27C35 -20 39 -11 39 0C39 22 22 39 0 39C-22 39 -39 22 -39 0C-39 -11 -35 -20 -28 -27C-21 -34 -12 -39 0 -39Z');}
+ 35% {opacity:1;transform:scale(1);d:path('M0 -56C5 -56 9 -44 17 -31C28 -17 36 -6 36 7C36 29 21 42 0 42C-21 42 -36 29 -36 7C-36 -6 -28 -17 -17 -31C-9 -44 -5 -56 0 -56Z');}
+ 47%,64% {opacity:1;transform:scale(1);d:path('M0 -72C3 -72 3 -63 6 -56C15 -36 35 -15 35 5C35 27 20 42 0 42C-20 42 -35 27 -35 5C-35 -15 -15 -36 -6 -56C-3 -63 -3 -72 0 -72Z');}
+ 74% {opacity:1;transform:scale(1);d:path('M0 -72C3 -72 3 -63 6 -56C15 -36 35 -15 35 5C35 27 20 42 0 42C-20 42 -35 27 -35 5C-35 -15 -15 -36 -6 -56C-3 -63 -3 -72 0 -72Z');}
+ 75%,80% {opacity:0;transform:scale(.05);d:path('M0 -39C12 -39 21 -34 28 -27C35 -20 39 -11 39 0C39 22 22 39 0 39C-22 39 -39 22 -39 0C-39 -11 -35 -20 -28 -27C-21 -34 -12 -39 0 -39Z');}
+ 87% {opacity:1;transform:scale(.4);d:path('M0 -39C12 -39 21 -34 28 -27C35 -20 39 -11 39 0C39 22 22 39 0 39C-22 39 -39 22 -39 0C-39 -11 -35 -20 -28 -27C-21 -34 -12 -39 0 -39Z');}
+ 94% {opacity:1;transform:scale(.8);d:path('M0 -39C12 -39 21 -34 28 -27C35 -20 39 -11 39 0C39 22 22 39 0 39C-22 39 -39 22 -39 0C-39 -11 -35 -20 -28 -27C-21 -34 -12 -39 0 -39Z');}
+}
+@media (prefers-reduced-motion:reduce) {
+ .closing-section .footer-liquid,.closing-section .footer-liquid-reservoir,.closing-section .footer-liquid-motion,.closing-section .footer-liquid-drop {animation:none!important;transform:none!important;will-change:auto;}
+}
 @media(max-width:1500px){
  .current-process{padding-inline:56px;gap:56px;grid-template-columns:minmax(0,44fr) minmax(0,56fr);}
  .current-process-copy{height:auto;}
@@ -352,34 +379,15 @@ h1,h2 { font-weight:500; }
  .closing-section .closing-inner::before{transform:none;will-change:auto;}
 }
 
-/* Preserve a readable droplet silhouette on narrow screens. */
+/* The same merged round volumes on mobile, with a smaller travel distance. */
 .footer-funnel-mobile {display:none;}
 @media(max-width:760px) {
  [data-juicer-reveal],[data-juicer-mobile-reveal],
  [data-juicer-reveal].juicer-reveal-pending,[data-juicer-mobile-reveal].juicer-reveal-pending {opacity:1;transform:none;transition:none;}
  .juice-funnel {height:240px;overflow:hidden;}
  .juice-funnel .footer-funnel-desktop {display:none;}
- .juice-funnel .footer-funnel-mobile {display:block;transform:none;will-change:auto;}
- .footer-mobile-body,.footer-mobile-drop {fill:currentColor;}
-}
-
-/* Ambient mobile drip: the neck stretches, a drop forms and falls, the tip recoils. */
-@media(max-width:760px) and (prefers-reduced-motion:no-preference) {
- .juice-funnel .footer-mobile-body {animation:juicer-mobile-drip-body 4.2s ease-in-out infinite;}
- .juice-funnel .footer-mobile-drop {animation:juicer-mobile-drip-drop 4.2s ease-in infinite;}
-}
-@keyframes juicer-mobile-drip-body {
- 0%,100% {d:path('M0 0H390C300 6 255 26 235 58C214 90 214 132 195 166C176 132 176 90 155 58C135 26 90 6 0 0Z');}
- 44% {d:path('M0 0H390C299 7 254 28 236 60C215 94 212 146 195 182C178 146 175 94 154 60C136 28 91 7 0 0Z');}
- 54% {d:path('M0 0H390C301 5 256 25 234 57C213 88 216 126 195 158C174 126 177 88 156 57C134 25 89 5 0 0Z');}
- 70% {d:path('M0 0H390C300 6 255 27 235 58C214 91 213 135 195 169C177 135 176 91 155 58C135 27 90 6 0 0Z');}
-}
-@keyframes juicer-mobile-drip-drop {
- 0%,16% {d:path('M195 166C191 170 191 176 195 179C199 176 199 170 195 166Z');opacity:0;}
- 24% {d:path('M195 167C190 173 190 180 195 184C200 180 200 173 195 167Z');opacity:1;}
- 44% {d:path('M195 180C182 196 184 211 195 217C206 211 208 196 195 180Z');opacity:1;}
- 62% {d:path('M195 204C184 218 186 230 195 235C204 230 206 218 195 204Z');opacity:1;}
- 70%,100% {d:path('M195 226C190 232 191 237 195 240C199 237 200 232 195 226Z');opacity:0;}
+ .juice-funnel .footer-funnel-mobile {display:block;}
+ .footer-funnel-mobile .footer-liquid {--liquid-fall:var(--liquid-fall-mobile,105px);}
 }
 
 /* Process photo: keep the arch at its designed 560x940 proportions on desktop and
