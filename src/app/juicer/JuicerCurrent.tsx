@@ -154,7 +154,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
     const update = () => {
       frame = 0;
       if (reducedMotion.matches) {
-        photo.style.setProperty("--process-parallax-y", "0px");
+        photo.style.setProperty("--process-parallax-scale", "1");
         return;
       }
       const rect = photo.getBoundingClientRect();
@@ -162,8 +162,8 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
       const progress = Math.max(-1, Math.min(1,
         (window.innerHeight / 2 - rect.top - rect.height / 2) / ((window.innerHeight + rect.height) / 2),
       ));
-      const travel = window.innerWidth <= 760 ? 24 : 50;
-      photo.style.setProperty("--process-parallax-y", `${(progress * travel).toFixed(1)}px`);
+      const drift = window.innerWidth <= 760 ? 0.02 : 0.03;
+      photo.style.setProperty("--process-parallax-scale", (1 + drift + progress * drift).toFixed(4));
     };
     const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
     schedule();

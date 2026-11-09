@@ -41,9 +41,9 @@ h1,h2 { font-weight:500; }
 .selected-icon img {width:99px;height:99px;display:block;object-fit:contain;}
 .current-process {display:grid;grid-template-columns:minmax(0,660fr) minmax(0,876fr);gap:100px;padding:0 80px;max-width:1796px;margin:41.7px auto 38.2px;min-height:1139px;align-items:center;}
 .current-process-photo {height:940px;border-radius:330px 330px 16px 16px;overflow:hidden;background:#d7e6e9;}
-.current-process-photo img {position:relative;left:-13.42%;width:151.28%;max-width:none;height:100%;object-fit:fill;}
-.current-process-photo img {transform:translate3d(0,calc(var(--process-parallax-y,0px) + 14px),0) scale(1);opacity:.72;transition:transform 650ms cubic-bezier(.2,.7,.2,1),opacity 750ms ease;will-change:transform;}
-.current-process-photo.is-visible img {transform:translate3d(0,var(--process-parallax-y,0px),0) scale(1);opacity:1;}
+.current-process-photo img {position:relative;left:0;width:100%;max-width:none;height:100%;object-fit:cover;object-position:36% 50%;}
+.current-process-photo img {transform:scale(calc(var(--process-parallax-scale,1.03) + .03));opacity:.72;transition:transform 650ms cubic-bezier(.2,.7,.2,1),opacity 750ms ease;will-change:transform;}
+.current-process-photo.is-visible img {transform:scale(var(--process-parallax-scale,1.03));opacity:1;}
 .juicer-preview-header nav a,.juicer-preview-header nav summary {transition:color .22s ease,background-color .22s ease,transform .22s ease;}
 .juicer-preview-header nav a:hover,.juicer-preview-header nav summary:hover {transform:translateY(-1px);}
 .juicer-preview-header .juicer-features-menu[open] .juicer-features-panel {animation:juicer-submenu-enter .28s cubic-bezier(.2,.75,.2,1) both;transform-origin:top center;}
@@ -369,4 +369,8 @@ h1,h2 { font-weight:500; }
  44% {d:path('M195 180C182 196 184 211 195 217C206 211 208 196 195 180Z');opacity:1;}
  62% {d:path('M195 204C184 218 186 230 195 235C204 230 206 218 195 204Z');opacity:1;}
  70%,100% {d:path('M195 226C190 232 191 237 195 240C199 237 200 232 195 226Z');opacity:0;}
+}
+
+@media(min-width:761px){
+ .current-process-photo{height:auto;max-height:940px;aspect-ratio:560/940;}
 }
