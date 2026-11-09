@@ -383,14 +383,16 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
     let cooldownTimer: number | undefined;
     let gestureEndTimer: number | undefined;
     let coolingDown = false;
+    const funnel = footerFunnelRef.current;
 
-    const isAtPageEnd = () => {
-      const bottom = footerFunnelRef.current?.getBoundingClientRect().bottom;
-      return bottom !== undefined && bottom > 0 && bottom <= window.innerHeight + 3;
+    const isFunnelVisible = () => {
+      const bounds = funnel?.getBoundingClientRect();
+      return bounds !== undefined && bounds.top < window.innerHeight && bounds.bottom > 0;
     };
 
     const renderPull = (progress: number) => {
-      footerFunnelRef.current?.style.setProperty(
+      funnel?.classList.toggle("is-pulling", progress > 0);
+      funnel?.style.setProperty(
         "--footer-pull-scale",
         String(1 + Math.min(Math.max(progress, 0), 1) * 0.3),
       );
@@ -401,6 +403,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
       coolingDown = true;
       if (gestureEndTimer) window.clearTimeout(gestureEndTimer);
       overscrollDistance = 0;
+      funnel?.classList.add("is-dripping");
       renderPull(0);
       setFooterDripping(true);
       animationTimer = window.setTimeout(() => setFooterDripping(false), 1650);
@@ -424,7 +427,7 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
 
     const collectOverscroll = (distance: number) => {
       if (coolingDown) return;
-      if (!isAtPageEnd() || distance <= 0) {
+      if (!isFunnelVisible() || distance <= 0) {
         resetPull();
         return;
       }
@@ -435,8 +438,8 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
     const onWheel = (event: WheelEvent) => {
       collectOverscroll(event.deltaY);
       if (gestureEndTimer) window.clearTimeout(gestureEndTimer);
-      if (!coolingDown && event.deltaY > 0 && isAtPageEnd()) {
-        gestureEndTimer = window.setTimeout(finishPull, 32);
+      if (!coolingDown && event.deltaY > 0 && isFunnelVisible()) {
+        gestureEndTimer = window.setTimeout(finishPull, 110);
       }
     };
     const onTouchStart = (event: TouchEvent) => {
@@ -465,6 +468,8 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
       if (animationTimer) window.clearTimeout(animationTimer);
       if (cooldownTimer) window.clearTimeout(cooldownTimer);
       if (gestureEndTimer) window.clearTimeout(gestureEndTimer);
+      funnel?.classList.remove("is-pulling");
+      funnel?.style.removeProperty("--footer-pull-scale");
     };
   }, []);
 
@@ -677,7 +682,10 @@ export default function JuicerCurrent({ enableYieldReveal = false }: { enableYie
                   aria-controls="eth-vault-details"
                   onClick={() => toggleVaultDetails()}
                 >
-                  {vaultDetailsOpen ? "Hide vault details ↑" : "How this vault works?"}
+                  <span>How it works?</span>
+                  <span className="vault-details-arrow" aria-hidden="true">
+                    <ArrowDown01Icon size={16} />
+                  </span>
                 </button>
               </footer>
               <div className="vault-details" id="eth-vault-details" ref={vaultDetailsRef} hidden={!vaultDetailsRendered} aria-hidden={!vaultDetailsRendered}>
